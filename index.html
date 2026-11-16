@@ -1113,71 +1113,134 @@ render();
 <!-- Sign-in and cloud saving (Firebase). Added for the GitHub Pages copy. -->
 <style>
 #gate{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
-#gate[hidden],#klass[hidden],#acct[hidden]{display:none}
+#gate[hidden],#klass[hidden],#acct[hidden],#g-userwrap[hidden]{display:none}
 #gate form{width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
-#gate input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px 12px;min-height:44px;width:100%}
+#gate input,#klass input,#klass select{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px 12px;min-height:44px;width:100%;max-width:100%}
 #acct{position:fixed;top:8px;right:12px;z-index:6;display:flex;gap:8px;align-items:center;font-size:.85rem;color:var(--muted)}
 #acct .btn{min-height:34px;padding:4px 10px;font-size:.85rem}
 #klass{position:fixed;inset:0;z-index:40;background:var(--bg);overflow:auto;padding:20px clamp(16px,4vw,40px) 60px}
 #klass .in{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 #klass details summary{cursor:pointer;font-weight:600}
-main{padding-top:56px}
 #klass pre{white-space:pre-wrap;font-family:var(--read);font-size:1.05rem;margin:6px 0 12px}
+#klass .addgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;align-items:end}
+#klass .srow{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+#klass .srow select{width:auto;min-height:38px;padding:4px 8px}
+#klass .ok{color:var(--good);font-weight:600;font-size:.9rem}
+main{padding-top:56px}
+.credit{font-size:.8rem;color:var(--muted)}
+main>.credit{margin-top:32px}
+body.onelevel .fl[aria-label="Filter by CEFR level"]{display:none}
 </style>
 <div id="gate"><form id="gate-form" class="card" novalidate>
   <h1>Sign in</h1>
-  <p class="sub">Use the username and password your teacher gave you.</p>
-  <div class="field"><label for="g-user">Username</label><input id="g-user" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
+  <div class="seg sm" role="group" aria-label="Who is signing in"><button class="chip" type="button" id="g-st" aria-pressed="true">Student</button><button class="chip" type="button" id="g-te" aria-pressed="false">Teacher</button></div>
+  <p class="sub" id="g-hint">Use the username and password your teacher gave you.</p>
+  <div class="field" id="g-userwrap"><label for="g-user">Username</label><input id="g-user" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
   <div class="field"><label for="g-pass">Password</label><input id="g-pass" type="password" autocomplete="current-password"></div>
   <p id="g-err" class="err" role="alert"></p>
   <button class="btn primary" id="g-btn" type="submit">Sign in</button>
+  <p class="credit">Created by Teacher Dario</p>
 </form></div>
-<div id="acct" hidden><span id="acct-name"></span><button class="btn" id="acct-class" type="button" hidden>Class</button><button class="btn" id="acct-out" type="button">Sign out</button></div>
-<div id="klass" hidden><div class="in"><div class="head"><h1>Class</h1><button class="btn" id="klass-close" type="button">Close</button></div><div id="klass-body"></div></div></div>
+<div id="acct" hidden><span id="acct-name"></span><button class="btn" id="acct-class" type="button" hidden>Administration</button><button class="btn" id="acct-out" type="button">Sign out</button></div>
+<div id="klass" hidden><div class="in">
+  <div class="head"><div><h1>Teacher administration</h1><p class="credit">Created by Teacher Dario</p></div><button class="btn" id="klass-close" type="button">Close</button></div>
+  <form class="card" id="add-form" novalidate><h2 style="margin-bottom:10px">Add a student</h2>
+    <div class="addgrid">
+      <div class="field"><label for="a-user">Username</label><input id="a-user" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="maria"></div>
+      <div class="field"><label for="a-pass">Password</label><input id="a-pass" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="6 characters or more"></div>
+      <div class="field"><label for="a-level">Level</label><select id="a-level"><option value="">All levels</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option></select></div>
+      <button class="btn primary" id="a-btn" type="submit">Add student</button>
+    </div>
+    <p id="a-msg" role="status" style="margin-top:10px"></p>
+    <p class="tip">Write the password down before you add the student. It is not shown again, and it can only be changed in the Firebase console.</p>
+  </form>
+  <h2>Students</h2>
+  <div id="klass-body"></div>
+</div></div>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc,collection,getDocs} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc,deleteDoc,collection,getDocs} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const cfg={apiKey:"AIzaSyC3BO7LU1bVlQrGuKla_hB3jI7Ur8_20SE",authDomain:"teacher-dario.firebaseapp.com",projectId:"teacher-dario",storageBucket:"teacher-dario.firebasestorage.app",messagingSenderId:"736407157022",appId:"1:736407157022:web:e5cde493e544d8ce2db10f"};
-const DOMAIN="@students.peldano.app",TEACHER="teacher"+DOMAIN;
-const auth=getAuth(initializeApp(cfg)),db=getFirestore();
+const DOMAIN="@students.peldano.app",TEACHER="teacher"+DOMAIN,LV=["A1","A2","B1","B2","C1","C2"];
+const app=initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
+let adminApp=null;const adminAuth=()=>{adminApp=adminApp||initializeApp(cfg,"admin");return getAuth(adminApp);};
 const $id=x=>document.getElementById(x);
-let uid=null,ready=false,timer=null;
+let uid=null,ready=false,timer=null,asTeacher=false;
+const ALL=LESSONS.slice();
+function setLevel(lv){const keep=lv&&LV.includes(lv)?ALL.filter(l=>l.level===lv):ALL;LESSONS.splice(0,LESSONS.length,...keep);TOPICS.splice(0,TOPICS.length,...new Set(keep.map(l=>l.topic)));document.body.classList.toggle("onelevel",keep.length!==ALL.length);}
 const blank=()=>{const s=seed();s.p={};s.subs={};s.ex={};s.drafts={};s.cur="l1";s.wcur="l1";return s;};
+if(!document.querySelector("main>.credit")){const f=document.createElement("footer");f.className="credit";f.textContent="Created by Teacher Dario";document.querySelector("main").appendChild(f);}
+if(!document.querySelector(".rail .credit")){const c=document.createElement("div");c.className="credit";c.style.padding="0 10px";c.textContent="Created by Teacher Dario";const b=document.querySelector(".rail .brand");if(b)b.after(c);}
 const localSave=window.save;
 async function push(){if(!uid||!ready)return;try{await setDoc(doc(db,"students",uid),{name:auth.currentUser.email.split("@")[0],updated:Date.now(),state:JSON.stringify(S)});}catch(e){console.warn("Could not save to the cloud",e);}}
 window.save=function(){localSave();if(!uid||!ready)return;clearTimeout(timer);timer=setTimeout(push,1500);};
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){clearTimeout(timer);push();}});
+function who(t){asTeacher=t;$id("g-st").setAttribute("aria-pressed",String(!t));$id("g-te").setAttribute("aria-pressed",String(t));$id("g-userwrap").hidden=t;$id("g-hint").textContent=t?"Teacher Dario: type your teacher password.":"Use the username and password your teacher gave you.";$id("g-err").textContent="";}
+$id("g-st").addEventListener("click",()=>who(false));$id("g-te").addEventListener("click",()=>who(true));
 $id("gate-form").addEventListener("submit",async e=>{
   e.preventDefault();e.stopPropagation();
-  const name=$id("g-user").value.trim().toLowerCase(),pass=$id("g-pass").value;
-  if(!name||!pass){$id("g-err").textContent="Type your username and your password.";return;}
+  const name=asTeacher?"teacher":$id("g-user").value.trim().toLowerCase(),pass=$id("g-pass").value;
+  if(!name||!pass){$id("g-err").textContent=asTeacher?"Type your password.":"Type your username and your password.";return;}
   $id("g-btn").disabled=true;$id("g-err").textContent="";
   try{await signInWithEmailAndPassword(auth,name.includes("@")?name:name+DOMAIN,pass);$id("g-pass").value="";}
-  catch(err){const c=err&&err.code||"";$id("g-err").textContent=c.includes("network")?"No connection. Check your internet and try again.":c.includes("too-many")?"Too many tries. Wait a few minutes and try again.":"That username or password is not correct.";}
+  catch(err){const c=err&&err.code||"";$id("g-err").textContent=c.includes("network")?"No connection. Check your internet and try again.":c.includes("too-many")?"Too many tries. Wait a few minutes and try again.":asTeacher?"That password is not correct.":"That username or password is not correct.";}
   $id("g-btn").disabled=false;
 });
 $id("acct-out").addEventListener("click",async()=>{clearTimeout(timer);await push();ready=false;uid=null;try{localStorage.removeItem(KEY);}catch(e){}await signOut(auth);});
 onAuthStateChanged(auth,async u=>{
-  if(!u){uid=null;ready=false;$id("acct").hidden=true;$id("klass").hidden=true;$id("gate").hidden=false;return;}
+  if(!u){uid=null;ready=false;setLevel(null);$id("acct").hidden=true;$id("klass").hidden=true;$id("gate").hidden=false;return;}
+  const isT=u.email===TEACHER;let level=null;
+  if(!isT){
+    let entry=null,failed=false;
+    try{const r=await getDoc(doc(db,"roster",u.uid));if(r.exists())entry=r.data();}catch(e){failed=true;}
+    if(!entry){await signOut(auth);$id("g-err").textContent=failed?"Could not check the class list. Try again in a moment.":"This account is not on the class list. Ask your teacher.";return;}
+    level=entry.level||null;
+  }
   uid=u.uid;let next=blank();
   try{const snap=await getDoc(doc(db,"students",uid));if(snap.exists())next=Object.assign(blank(),JSON.parse(snap.data().state));}catch(e){console.warn("Could not load saved work",e);}
-  S=next;ready=true;localSave();render();
-  const nm=u.email.split("@")[0];$id("acct-name").textContent=nm;$id("acct").hidden=false;$id("acct-class").hidden=u.email!==TEACHER;
-  const who=document.querySelector(".rail .who");if(who)who.innerHTML="<b></b>Signed in",who.firstChild.textContent=nm;
+  setLevel(level);S=next;S.f=Object.assign({level:"",topic:"",q:""},S.f,{level:""});if(!TOPICS.includes(S.f.topic))S.f.topic="";
+  ready=true;localSave();render();
+  const nm=isT?"Teacher Dario":u.email.split("@")[0];$id("acct-name").textContent=nm+(level?" · "+level:"");$id("acct").hidden=false;$id("acct-class").hidden=!isT;
+  const w=document.querySelector(".rail .who");if(w){w.innerHTML="<b></b><span></span>";w.firstChild.textContent=nm;w.lastChild.textContent=isT?"Teacher":level?"Level "+level:"All levels";}
   $id("gate").hidden=true;
 });
 $id("klass-close").addEventListener("click",()=>{$id("klass").hidden=true;});
-$id("acct-class").addEventListener("click",async()=>{
-  $id("klass").hidden=false;const body=$id("klass-body");body.textContent="Loading…";
-  try{const snaps=await getDocs(collection(db,"students"));const rows=[];
-    snaps.forEach(d=>{const v=d.data();let s={};try{s=JSON.parse(v.state);}catch(e){}rows.push({name:v.name||d.id,updated:v.updated,s});});
+async function loadClass(){
+  const body=$id("klass-body");body.textContent="Loading…";
+  try{
+    const [ros,sts]=await Promise.all([getDocs(collection(db,"roster")),getDocs(collection(db,"students"))]);
+    const work={};sts.forEach(d=>{const v=d.data();let s={};try{s=JSON.parse(v.state);}catch(e){}work[d.id]={updated:v.updated,s};});
+    const rows=[];ros.forEach(d=>{const v=d.data();rows.push({id:d.id,name:v.name||d.id,level:v.level||"",w:work[d.id]||{s:{}}});});
     rows.sort((a,b)=>a.name.localeCompare(b.name));
-    body.innerHTML=rows.length?rows.map(r=>{const p=r.s.p||{},subs=r.s.subs||{};
-      const done=LESSONS.filter(l=>{const x=p[l.id]||{};return x.read&&x.listen&&x.practice&&x.write;}).length;
-      const started=LESSONS.filter(l=>p[l.id]&&Object.keys(p[l.id]).length).length;
-      const list=LESSONS.filter(l=>subs[l.id]).map(l=>`<details><summary><span class="lvl ${l.level}">${l.level}</span> ${esc(l.title)} · ${words(subs[l.id].text)} words · ${new Date(subs[l.id].at).toLocaleDateString()}</summary><pre>${esc(subs[l.id].text)}</pre></details>`).join("");
-      return`<div class="card"><div class="row" style="justify-content:space-between"><h2>${esc(r.name)}</h2><span class="sub">${done} completed · ${started} started · last active ${r.updated?new Date(r.updated).toLocaleDateString():"never"}</span></div><div style="margin-top:8px">${list||'<p class="sub">No writing submitted yet.</p>'}</div></div>`;}).join(""):'<p class="sub">No student has signed in yet.</p>';
+    body.innerHTML=rows.length?rows.map(r=>{const p=r.w.s.p||{},subs=r.w.s.subs||{};
+      const done=ALL.filter(l=>{const x=p[l.id]||{};return x.read&&x.listen&&x.practice&&x.write;}).length;
+      const started=ALL.filter(l=>p[l.id]&&Object.keys(p[l.id]).length).length;
+      const list=ALL.filter(l=>subs[l.id]).map(l=>`<details><summary><span class="lvl ${l.level}">${l.level}</span> ${esc(l.title)} · ${words(subs[l.id].text)} words · ${new Date(subs[l.id].at).toLocaleDateString()}</summary><pre>${esc(subs[l.id].text)}</pre></details>`).join("");
+      return`<div class="card"><div class="srow"><h2>${esc(r.name)}</h2>
+        <span class="row"><label class="sub" for="lv-${r.id}">Level</label><select id="lv-${r.id}" data-lv="${r.id}"><option value="">All levels</option>${LV.map(x=>`<option ${x===r.level?"selected":""}>${x}</option>`).join("")}</select>
+        <button class="btn" type="button" data-rm="${r.id}" data-name="${esc(r.name)}">Remove</button></span></div>
+        <p class="sub" style="margin-top:6px">${done} completed · ${started} started · last active ${r.w.updated?new Date(r.w.updated).toLocaleDateString():"never"}</p>
+        <div style="margin-top:8px">${list||'<p class="sub">No writing submitted yet.</p>'}</div></div>`;}).join(""):'<p class="sub">No students yet. Add the first one with the form.</p>';
   }catch(e){body.textContent="Could not load the class. Only the teacher account can open this list.";}
+}
+$id("acct-class").addEventListener("click",()=>{$id("klass").hidden=false;$id("a-msg").textContent="";loadClass();});
+$id("klass-body").addEventListener("change",async e=>{const id=e.target.dataset&&e.target.dataset.lv;if(!id)return;try{await setDoc(doc(db,"roster",id),{level:e.target.value},{merge:true});}catch(err){e.target.insertAdjacentHTML("afterend",'<span class="err">Not saved</span>');}});
+$id("klass-body").addEventListener("click",async e=>{const b=e.target.closest("[data-rm]");if(!b)return;
+  if(!b.dataset.sure){b.dataset.sure="1";b.textContent="Tap again to remove "+b.dataset.name;return;}
+  b.disabled=true;try{await deleteDoc(doc(db,"roster",b.dataset.rm));loadClass();}catch(err){b.disabled=false;b.textContent="Could not remove";}});
+$id("add-form").addEventListener("submit",async e=>{
+  e.preventDefault();e.stopPropagation();const msg=$id("a-msg");msg.className="err";
+  const name=$id("a-user").value.trim().toLowerCase(),pass=$id("a-pass").value,level=$id("a-level").value;
+  if(!/^[a-z0-9._-]{2,30}$/.test(name)){msg.textContent="Use 2 to 30 letters, numbers, dots or dashes for the username, with no spaces.";return;}
+  if(name==="teacher"){msg.textContent="That username is reserved for you.";return;}
+  if(pass.length<6){msg.textContent="The password needs at least 6 characters.";return;}
+  $id("a-btn").disabled=true;msg.textContent="";
+  try{const a=adminAuth();const cred=await createUserWithEmailAndPassword(a,name+DOMAIN,pass);
+    await setDoc(doc(db,"roster",cred.user.uid),{name,level,created:Date.now()});await signOut(a);
+    msg.className="ok";msg.textContent="Added "+name+(level?" at level "+level:" with all levels")+". Give them the username and the password you typed.";
+    $id("a-user").value="";$id("a-pass").value="";loadClass();
+  }catch(err){const c=err&&err.code||"";msg.textContent=c.includes("already-in-use")?"That username is already taken. Choose another.":c.includes("weak-password")?"The password needs at least 6 characters.":c.includes("network")?"No connection. Check your internet and try again.":"Could not add the student. Try again.";}
+  $id("a-btn").disabled=false;
 });
 </script>
