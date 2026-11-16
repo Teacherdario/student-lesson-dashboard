@@ -1109,3 +1109,75 @@ render();
 </script>
 </body>
 </html>
+
+<!-- Sign-in and cloud saving (Firebase). Added for the GitHub Pages copy. -->
+<style>
+#gate{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+#gate[hidden],#klass[hidden],#acct[hidden]{display:none}
+#gate form{width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
+#gate input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px 12px;min-height:44px;width:100%}
+#acct{position:fixed;top:8px;right:12px;z-index:6;display:flex;gap:8px;align-items:center;font-size:.85rem;color:var(--muted)}
+#acct .btn{min-height:34px;padding:4px 10px;font-size:.85rem}
+#klass{position:fixed;inset:0;z-index:40;background:var(--bg);overflow:auto;padding:20px clamp(16px,4vw,40px) 60px}
+#klass .in{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+#klass details summary{cursor:pointer;font-weight:600}
+main{padding-top:56px}
+#klass pre{white-space:pre-wrap;font-family:var(--read);font-size:1.05rem;margin:6px 0 12px}
+</style>
+<div id="gate"><form id="gate-form" class="card" novalidate>
+  <h1>Sign in</h1>
+  <p class="sub">Use the username and password your teacher gave you.</p>
+  <div class="field"><label for="g-user">Username</label><input id="g-user" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
+  <div class="field"><label for="g-pass">Password</label><input id="g-pass" type="password" autocomplete="current-password"></div>
+  <p id="g-err" class="err" role="alert"></p>
+  <button class="btn primary" id="g-btn" type="submit">Sign in</button>
+</form></div>
+<div id="acct" hidden><span id="acct-name"></span><button class="btn" id="acct-class" type="button" hidden>Class</button><button class="btn" id="acct-out" type="button">Sign out</button></div>
+<div id="klass" hidden><div class="in"><div class="head"><h1>Class</h1><button class="btn" id="klass-close" type="button">Close</button></div><div id="klass-body"></div></div></div>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc,collection,getDocs} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const cfg={apiKey:"AIzaSyC3BO7LU1bVlQrGuKla_hB3jI7Ur8_20SE",authDomain:"teacher-dario.firebaseapp.com",projectId:"teacher-dario",storageBucket:"teacher-dario.firebasestorage.app",messagingSenderId:"736407157022",appId:"1:736407157022:web:e5cde493e544d8ce2db10f"};
+const DOMAIN="@students.peldano.app",TEACHER="teacher"+DOMAIN;
+const auth=getAuth(initializeApp(cfg)),db=getFirestore();
+const $id=x=>document.getElementById(x);
+let uid=null,ready=false,timer=null;
+const blank=()=>{const s=seed();s.p={};s.subs={};s.ex={};s.drafts={};s.cur="l1";s.wcur="l1";return s;};
+const localSave=window.save;
+async function push(){if(!uid||!ready)return;try{await setDoc(doc(db,"students",uid),{name:auth.currentUser.email.split("@")[0],updated:Date.now(),state:JSON.stringify(S)});}catch(e){console.warn("Could not save to the cloud",e);}}
+window.save=function(){localSave();if(!uid||!ready)return;clearTimeout(timer);timer=setTimeout(push,1500);};
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){clearTimeout(timer);push();}});
+$id("gate-form").addEventListener("submit",async e=>{
+  e.preventDefault();e.stopPropagation();
+  const name=$id("g-user").value.trim().toLowerCase(),pass=$id("g-pass").value;
+  if(!name||!pass){$id("g-err").textContent="Type your username and your password.";return;}
+  $id("g-btn").disabled=true;$id("g-err").textContent="";
+  try{await signInWithEmailAndPassword(auth,name.includes("@")?name:name+DOMAIN,pass);$id("g-pass").value="";}
+  catch(err){const c=err&&err.code||"";$id("g-err").textContent=c.includes("network")?"No connection. Check your internet and try again.":c.includes("too-many")?"Too many tries. Wait a few minutes and try again.":"That username or password is not correct.";}
+  $id("g-btn").disabled=false;
+});
+$id("acct-out").addEventListener("click",async()=>{clearTimeout(timer);await push();ready=false;uid=null;try{localStorage.removeItem(KEY);}catch(e){}await signOut(auth);});
+onAuthStateChanged(auth,async u=>{
+  if(!u){uid=null;ready=false;$id("acct").hidden=true;$id("klass").hidden=true;$id("gate").hidden=false;return;}
+  uid=u.uid;let next=blank();
+  try{const snap=await getDoc(doc(db,"students",uid));if(snap.exists())next=Object.assign(blank(),JSON.parse(snap.data().state));}catch(e){console.warn("Could not load saved work",e);}
+  S=next;ready=true;localSave();render();
+  const nm=u.email.split("@")[0];$id("acct-name").textContent=nm;$id("acct").hidden=false;$id("acct-class").hidden=u.email!==TEACHER;
+  const who=document.querySelector(".rail .who");if(who)who.innerHTML="<b></b>Signed in",who.firstChild.textContent=nm;
+  $id("gate").hidden=true;
+});
+$id("klass-close").addEventListener("click",()=>{$id("klass").hidden=true;});
+$id("acct-class").addEventListener("click",async()=>{
+  $id("klass").hidden=false;const body=$id("klass-body");body.textContent="Loading…";
+  try{const snaps=await getDocs(collection(db,"students"));const rows=[];
+    snaps.forEach(d=>{const v=d.data();let s={};try{s=JSON.parse(v.state);}catch(e){}rows.push({name:v.name||d.id,updated:v.updated,s});});
+    rows.sort((a,b)=>a.name.localeCompare(b.name));
+    body.innerHTML=rows.length?rows.map(r=>{const p=r.s.p||{},subs=r.s.subs||{};
+      const done=LESSONS.filter(l=>{const x=p[l.id]||{};return x.read&&x.listen&&x.practice&&x.write;}).length;
+      const started=LESSONS.filter(l=>p[l.id]&&Object.keys(p[l.id]).length).length;
+      const list=LESSONS.filter(l=>subs[l.id]).map(l=>`<details><summary><span class="lvl ${l.level}">${l.level}</span> ${esc(l.title)} · ${words(subs[l.id].text)} words · ${new Date(subs[l.id].at).toLocaleDateString()}</summary><pre>${esc(subs[l.id].text)}</pre></details>`).join("");
+      return`<div class="card"><div class="row" style="justify-content:space-between"><h2>${esc(r.name)}</h2><span class="sub">${done} completed · ${started} started · last active ${r.updated?new Date(r.updated).toLocaleDateString():"never"}</span></div><div style="margin-top:8px">${list||'<p class="sub">No writing submitted yet.</p>'}</div></div>`;}).join(""):'<p class="sub">No student has signed in yet.</p>';
+  }catch(e){body.textContent="Could not load the class. Only the teacher account can open this list.";}
+});
+</script>
