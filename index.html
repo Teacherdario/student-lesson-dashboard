@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Lesson Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a quiet rail of four sections beside one working pane; the CEFR ladder (A1 to C2) is the only colour scale and marks every lesson. */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --sunken:#e9edf3; --line:#d5dbe5;
+  --ink:#131a2b; --muted:#5a6479; --accent:#2747d9; --accent-ink:#ffffff; --accent-soft:#e3e8fd;
+  --good:#17804f; --good-soft:#dcf3e6; --warn:#9a6200; --warn-soft:#fdeed0; --idle:#5a6479; --idle-soft:#e9edf3;
+  --bad:#b3261e; --mark:#fff1a8;
+  --a1:#f4c430; --a2:#f08a3c; --b1:#e0527a; --b2:#9457e0; --c1:#3767e0; --c2:#168a78;
+  --display:"Bricolage Grotesque","Trebuchet MS",sans-serif;
+  --body:"Figtree","Segoe UI",system-ui,sans-serif;
+  --read:"Newsreader",Georgia,serif;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0f131c; --surface:#181e2b; --sunken:#212839; --line:#2f384d;
+    --ink:#eef1f8; --muted:#9aa5bd; --accent:#8ea2ff; --accent-ink:#0f131c; --accent-soft:#232d55;
+    --good:#5fd39a; --good-soft:#143524; --warn:#f0b955; --warn-soft:#3b2c0e; --idle:#9aa5bd; --idle-soft:#212839;
+    --bad:#ff8a80; --mark:#5a4a00;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0f131c; --surface:#181e2b; --sunken:#212839; --line:#2f384d;
+  --ink:#eef1f8; --muted:#9aa5bd; --accent:#8ea2ff; --accent-ink:#0f131c; --accent-soft:#232d55;
+  --good:#5fd39a; --good-soft:#143524; --warn:#f0b955; --warn-soft:#3b2c0e; --idle:#9aa5bd; --idle-soft:#212839;
+  --bad:#ff8a80; --mark:#5a4a00;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:1.75rem;font-weight:700}
+h2{font-size:1.2rem;font-weight:700}
+h3{font-size:1.05rem;font-weight:500}
+p{margin:0}
+.app{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:100vh}
+.rail{background:var(--surface);border-right:1px solid var(--line);padding:24px 14px;display:flex;flex-direction:column;gap:24px;position:sticky;top:0;height:100vh}
+.brand{font-family:var(--display);font-weight:700;font-size:1.25rem;padding:0 10px;display:flex;align-items:center;gap:8px}
+.ladder{display:flex;gap:2px;align-items:flex-end}
+.ladder i{width:4px;border-radius:1px;display:block}
+.nav{display:flex;flex-direction:column;gap:4px}
+.nav a{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;color:var(--muted);text-decoration:none;font-weight:600}
+.nav a svg{width:20px;height:20px;flex:none}
+.nav a:hover{background:var(--sunken);color:var(--ink)}
+.nav a[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+.rail .who{margin-top:auto;padding:10px;font-size:.85rem;color:var(--muted)}
+.rail .who b{display:block;color:var(--ink);font-size:.95rem}
+main{padding:28px clamp(16px,4vw,40px) 60px;min-width:0}
+.view{display:none;flex-direction:column;gap:20px;max-width:1040px}
+.view.on{display:flex}
+.head{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between}
+.sub{color:var(--muted);font-size:.95rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;font-weight:600;min-height:40px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.ghost{border-color:transparent;color:var(--accent);padding-inline:8px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.lvl{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:24px;padding:0 6px;border-radius:5px;font-weight:700;font-size:.8rem;color:#fff;font-variant-numeric:tabular-nums}
+.lvl.A1{background:var(--a1);color:#231b00}.lvl.A2{background:var(--a2);color:#2a1300}.lvl.B1{background:var(--b1)}.lvl.B2{background:var(--b2)}.lvl.C1{background:var(--c1)}.lvl.C2{background:var(--c2)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:.8rem;font-weight:600;white-space:nowrap}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.pill.done{background:var(--good-soft);color:var(--good)}
+.pill.doing{background:var(--warn-soft);color:var(--warn)}
+.pill.doing::before{border-radius:2px}
+.pill.todo{background:var(--idle-soft);color:var(--idle)}
+.pill.todo::before{background:none;border:2px solid currentColor;width:6px;height:6px}
+
+/* Library */
+.next{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;border-left:4px solid var(--accent)}
+.next .t{font-family:var(--display);font-weight:700;font-size:1.1rem}
+.filters{display:flex;flex-direction:column;gap:12px}
+.fl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.fl .lab{font-size:.8rem;font-weight:700;color:var(--muted);width:52px;text-transform:uppercase;letter-spacing:.04em}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-weight:600;font-size:.9rem;min-height:36px;display:inline-flex;align-items:center;gap:6px}
+.chip .dot{width:10px;height:10px;border-radius:3px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.search{flex:1 1 200px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 12px;min-height:40px;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.lesson{display:flex;flex-direction:column;gap:10px}
+.lesson .top{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.lesson .meta{color:var(--muted);font-size:.85rem}
+.lesson .blurb{color:var(--muted);font-size:.92rem;flex:1}
+.steps{display:flex;gap:10px;font-size:.8rem;color:var(--muted)}
+.steps span{display:inline-flex;align-items:center;gap:4px}
+.steps span::before{content:"";width:10px;height:10px;border-radius:50%;border:2px solid var(--line)}
+.steps span.y{color:var(--good)}
+.steps span.y::before{background:var(--good);border-color:var(--good)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+
+/* Reader */
+.player{display:flex;flex-direction:column;gap:10px;position:sticky;top:8px;z-index:2}
+.player .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.icon{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;justify-content:center}
+.icon.big{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);width:52px;height:52px}
+.icon svg{width:20px;height:20px}
+.bar{height:6px;background:var(--sunken);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .2s}
+.player select{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;min-height:40px}
+.count{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.9rem;margin-left:auto}
+.text{font-family:var(--read);font-size:1.3rem;line-height:1.7;max-width:65ch}
+.text .s{cursor:pointer;border-radius:4px;padding:1px 0}
+.text .s:hover{background:var(--sunken)}
+.text .s.now{background:var(--mark)}
+.text .w{font:inherit;background:none;border:0;border-bottom:2px dotted var(--accent);padding:0;color:inherit}
+.note{background:var(--accent-soft);border-radius:8px;padding:10px 14px;max-width:65ch}
+.note b{font-family:var(--read);font-size:1.1rem}
+.tip{color:var(--muted);font-size:.88rem}
+
+.gv{font-size:.85rem;color:var(--muted)}
+.gv b{color:var(--ink);font-weight:600}
+.guide{display:flex;flex-direction:column;gap:8px}
+.guide summary{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;cursor:pointer;list-style:none}
+.guide summary::-webkit-details-marker{display:none}
+.guide summary .gs{flex:1 1 200px;font-weight:600}
+.guide details[open] summary{margin-bottom:14px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.two ul,.inl{margin:6px 0 0;padding-left:18px}
+.two li,.inl li{margin:2px 0}
+.inl a{color:var(--accent);font-weight:600}
+.ex{font-family:var(--read);font-size:1.1rem}
+.ex li{margin:6px 0}
+.voc{margin:8px 0 0;display:flex;flex-direction:column;gap:10px}
+.voc div{display:flex;flex-direction:column}
+.voc dt{font-family:var(--read);font-size:1.15rem;font-weight:500;display:flex;align-items:center;gap:6px}
+.voc dd{margin:0;color:var(--muted);font-size:.92rem}
+.say{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;padding:0}
+.say svg{width:12px;height:12px}
+
+#exbox{display:flex;flex-direction:column;gap:18px}
+.exsec{display:flex;flex-direction:column;gap:12px}
+.q{border:0;padding:0;margin:0;min-width:0}
+.q legend{padding:0;font-weight:600;margin-bottom:8px;max-width:65ch}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;min-height:42px;text-align:left}
+.opt:hover:not([disabled]){border-color:var(--accent)}
+.opt.ok{background:var(--good-soft);border-color:var(--good);color:var(--good);font-weight:700}
+.opt.no{background:var(--sunken);border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.opt[disabled]{opacity:.5;cursor:default}
+.fb{font-size:.9rem;font-weight:600;margin-top:6px}
+.fb.ok{color:var(--good)}.fb.no{color:var(--bad)}
+.steps,.tog{flex-wrap:wrap}
+
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg .chip{min-height:44px;padding:8px 14px;border-radius:10px}
+.seg .n{font-size:.78rem;font-weight:600;opacity:.7;font-variant-numeric:tabular-nums}
+
+.seg.sm .chip{min-height:38px;padding:6px 12px}
+.learn{display:flex;flex-direction:column;gap:16px}
+.learn h3{font-family:var(--body);font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:4px}
+.learn p{max-width:65ch}
+.form{margin:0;padding-left:18px;max-width:65ch}
+.form li{margin:4px 0}
+.watch{background:var(--warn-soft);border-radius:8px;padding:10px 14px}
+.watch h3{color:var(--warn)}
+.voc .inx{font-family:var(--read);font-size:1rem;color:var(--ink);border-left:3px solid var(--line);padding-left:10px;margin-top:4px}
+.lvh{display:flex;align-items:center;gap:10px;font-family:var(--body);font-size:.9rem;font-weight:600;color:var(--muted);padding:18px 0 6px}
+.lvh:first-child{padding-top:4px}
+.lvh+.trow{border-top:0}
+
+#lib-grid{display:flex;flex-direction:column;gap:32px}
+.lvg{display:flex;flex-direction:column;gap:14px}
+.lvg>h2{display:flex;align-items:center;gap:10px;font-size:1.35rem}
+.syl summary{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;cursor:pointer;list-style:none}
+.syl summary::-webkit-details-marker{display:none}
+.syl summary::after{content:"Show";margin-left:auto;color:var(--accent);font-weight:600;font-size:.9rem}
+.syl[open] summary::after{content:"Hide"}
+.syl summary .gs{font-family:var(--display);font-weight:700;font-size:1.1rem}
+.syl .can{margin:12px 0 4px;max-width:65ch}
+.sylist{margin:8px 0 0;padding:0;list-style:none;counter-reset:t}
+.sylist li{counter-increment:t;position:relative;padding:12px 0 12px 34px;border-top:1px solid var(--line)}
+.sylist li::before{content:counter(t);position:absolute;left:0;top:12px;width:24px;height:24px;border-radius:50%;background:var(--sunken);font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.st{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.st a{color:var(--ink);font-weight:700;text-decoration:none}
+.st a:hover{text-decoration:underline}
+.st .pill{margin-left:auto}
+.sg{font-size:.9rem;color:var(--muted);margin-top:3px}
+.sg b{color:var(--ink);font-weight:600;display:inline-block;min-width:84px}
+
+.warm{display:flex;flex-direction:column;gap:14px}
+.warm figure{margin:0}
+.warm img{display:block;width:100%;max-width:640px;aspect-ratio:3/2;object-fit:cover;border-radius:8px;background:var(--sunken)}
+.warm figcaption{font-size:.78rem;color:var(--muted);margin-top:4px}
+.wq{margin:0;padding-left:20px;max-width:65ch;display:flex;flex-direction:column;gap:6px}
+.wchip{background:var(--sunken);border-radius:999px;padding:4px 12px;font-family:var(--read);font-size:1rem}
+
+.lesson .thumb{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:var(--sunken);height:auto}
+.warm img{height:auto}
+.warm figcaption a{color:inherit}
+
+/* Writing */
+.field{display:flex;flex-direction:column;gap:6px}
+.field label,.flabel{font-weight:700;font-size:.9rem}
+.sel{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;min-height:44px;max-width:100%}
+textarea{width:100%;min-height:220px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:12px;resize:vertical;line-height:1.6}
+.wc{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;font-size:.88rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.wc .ok{color:var(--good);font-weight:600}
+.drop{border:2px dashed var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;background:var(--sunken)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop input{max-width:100%}
+.file{display:flex;flex-wrap:wrap;gap:10px;align-items:center;width:100%}
+.file audio{flex:1 1 220px;min-width:0;max-width:100%;height:40px}
+.err{color:var(--bad);font-weight:600;font-size:.9rem}
+.sent{border-left:4px solid var(--good)}
+.sent pre{white-space:pre-wrap;font-family:var(--read);font-size:1.1rem;margin:8px 0 0;line-height:1.6}
+
+/* Progress */
+.sum{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center}
+.ring{position:relative;width:132px;height:132px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .n{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:1.9rem;line-height:1}
+.ring .n small{font-family:var(--body);font-weight:500;font-size:.75rem;color:var(--muted);margin-top:4px}
+.tally{display:flex;flex-wrap:wrap;gap:8px 20px}
+.tally div{display:flex;flex-direction:column}
+.tally b{font-family:var(--display);font-size:1.5rem;font-variant-numeric:tabular-nums}
+.lv{display:flex;flex-direction:column;gap:10px}
+.lvrow{display:grid;grid-template-columns:40px 1fr 44px;gap:10px;align-items:center;font-variant-numeric:tabular-nums;font-size:.9rem}
+.lvrow .bar{height:10px;border-radius:5px}
+.track{display:flex;flex-direction:column}
+.trow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px 16px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.trow:first-child{border-top:0}
+.trow .nm{display:flex;gap:10px;align-items:center;min-width:0}
+.trow .nm a{color:inherit;font-weight:600;text-decoration:none}
+.trow .nm a:hover{text-decoration:underline}
+.tog{display:flex;gap:6px}
+.tog label{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:.85rem;font-weight:600;min-height:36px;cursor:pointer}
+.tog input{accent-color:var(--good);width:16px;height:16px;margin:0}
+.tog label:has(input:checked){background:var(--good-soft);border-color:var(--good);color:var(--good)}
+
+.tabs{display:none}
+@media (max-width:820px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .rail{display:none}
+  main{padding-top:20px;padding-bottom:96px}
+  .tabs{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);z-index:5}
+  .tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 10px;font-size:.72rem;font-weight:600;color:var(--muted);text-decoration:none}
+  .tabs a svg{width:22px;height:22px}
+  .tabs a[aria-current="page"]{color:var(--accent)}
+  h1{font-size:1.45rem}
+  .text{font-size:1.18rem}
+  .sum{grid-template-columns:1fr;justify-items:start}
+  .trow{grid-template-columns:minmax(0,1fr) auto}
+  .trow .tog{grid-column:1/-1}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="rail">
+    <div class="brand"><span class="ladder" aria-hidden="true"><i style="height:8px;background:var(--a1)"></i><i style="height:11px;background:var(--a2)"></i><i style="height:14px;background:var(--b1)"></i><i style="height:17px;background:var(--b2)"></i><i style="height:20px;background:var(--c1)"></i><i style="height:23px;background:var(--c2)"></i></span>Peldaño</div>
+    <nav class="nav" id="nav" aria-label="Sections"></nav>
+    <div class="who"><b>Sample student</b>English · working at A2</div>
+  </aside>
+  <main>
+    <section class="view" id="v-library" aria-label="Lesson library"></section>
+    <section class="view" id="v-reader" aria-label="Reader"></section>
+    <section class="view" id="v-writing" aria-label="Writing assignment"></section>
+    <section class="view" id="v-progress" aria-label="Progress"></section>
+  </main>
+</div>
+<nav class="tabs" id="tabs" aria-label="Sections"></nav>
+
+<script>
+"use strict";
+const LEVELS=["A1","A2","B1","B2","C1","C2"];
+const LESSONS=[
+ {id:"l1",level:"A1",topic:"Daily life",title:"A Morning Routine",mins:3,blurb:"Simple present verbs for the things you do every day.",
+  s:["Ana wakes up at six o'clock every day.","She drinks a glass of water and opens the window.","Then she makes coffee and eats bread with jam.","At seven, she walks to the bus stop with her brother.","The bus is always full, but Ana likes to look at the street.","She arrives at school at half past seven."],
+  g:{"wakes up":"stops sleeping","jam":"sweet food made from fruit and sugar","half past seven":"7:30","bus stop":"the place where you wait for a bus","arrives":"gets to a place"},
+  gq:[{"q": "Ana ___ coffee every morning.", "o": ["make", "makes", "making"], "a": 1}, {"q": "She ___ to the bus stop with her brother.", "o": ["walks", "walk", "walking"], "a": 0}, {"q": "The bus ___ at half past seven.", "o": ["arrive", "arriving", "arrives"], "a": 2}, {"q": "Ana ___ a glass of water.", "o": ["drink", "drinks", "drinking"], "a": 1}, {"q": "Her brother ___ to school by bus.", "o": ["go", "going", "goes"], "a": 2}, {"q": "Ana and her brother ___ home at seven.", "o": ["leave", "leaves", "leaving"], "a": 0}, {"q": "She ___ the window every morning.", "o": ["opens", "open", "opening"], "a": 0}, {"q": "Ana ___ like a full bus.", "o": ["don't", "doesn't", "isn't"], "a": 1}, {"q": "___ Ana eat bread with jam?", "o": ["Do", "Is", "Does"], "a": 2}, {"q": "I ___ up at six o'clock.", "o": ["wakes", "wake", "waking"], "a": 1}],
+  vq:[["She ___ at six but stays in bed until seven.", "wakes up"], ["I like toast with strawberry ___.", "jam"], ["The lesson starts at ___, so be here by 7:25.", "half past seven"], ["We wait at the ___ every morning.", "bus stop"], ["The train ___ at ten o'clock.", "arrives"]],
+  gr:{f:"I / you / we / they work · he / she / it works. Negative: doesn't + verb. Question: Does she + verb?",tip:"After does and doesn't the verb has no -s: She doesn't like, not She doesn't likes.",t:"Present simple with he, she, it",r:"Add -s or -es to the verb after he, she or it. Use this tense for habits and routines.",ex:["Ana wakes up at six o'clock every day.","She drinks a glass of water."]},
+  prompt:"Describe your own morning. What do you do first, and what time do you leave home?",min:40,max:80},
+ {id:"l2",level:"A1",topic:"Food",title:"At the Market",mins:3,blurb:"Numbers, prices and asking for what you want.",
+  s:["On Saturday, Luis goes to the market with his mother.","They buy tomatoes, onions and a big bag of oranges.","The tomatoes cost twenty pesos a kilo.","Luis asks the seller, \"Do you have fresh cheese today?\"","The seller smiles and gives him a small piece to try.","It is very good, so they buy half a kilo."],
+  g:{"seller":"a person who sells things","fresh":"new, made or picked a short time ago","a kilo":"one thousand grams","market":"a place where people buy and sell food","piece":"a small part of something"},
+  gq:[{"q": "___ you have fresh cheese today?", "o": ["Do", "Does", "Are"], "a": 0}, {"q": "The oranges ___ thirty pesos a bag.", "o": ["cost", "costs", "costing"], "a": 0}, {"q": "The cheese ___ sixty pesos a kilo.", "o": ["cost", "costs", "are cost"], "a": 1}, {"q": "___ the seller have oranges?", "o": ["Do", "Does", "Is"], "a": 1}, {"q": "How much ___ the tomatoes cost?", "o": ["do", "does", "is"], "a": 0}, {"q": "How much ___ this cheese cost?", "o": ["do", "does", "are"], "a": 1}, {"q": "We ___ have any onions today.", "o": ["aren't", "doesn't", "don't"], "a": 2}, {"q": "A bag of oranges ___ forty pesos.", "o": ["costing", "cost", "costs"], "a": 2}, {"q": "Do you have ___ fresh bread?", "o": ["any", "a", "an"], "a": 0}, {"q": "\"Do you have tomatoes?\" \"Yes, I ___.\"", "o": ["have", "do", "am"], "a": 1}],
+  vq:[["The ___ gives me my change.", "seller"], ["This bread is ___; it is still warm.", "fresh"], ["I need ___ of sugar for the cake.", "a kilo"], ["We buy fruit at the ___ on Saturdays.", "market"], ["Would you like a ___ of cake?", "piece"]],
+  gr:{f:"Do you have + noun? Yes, I do. / No, I don't. · It costs + price · They cost + price.",tip:"One thing costs; two or more things cost.",t:"Do you have…? and prices with cost",r:"Ask for things with Do you have + noun. Say prices with cost: it costs, they cost.",ex:["Do you have fresh cheese today?","The tomatoes cost twenty pesos a kilo."]},
+  prompt:"Write a short shopping list and say where you buy each thing.",min:40,max:80},
+ {id:"l3",level:"A2",topic:"Travel",title:"A Weekend Trip by Train",mins:4,blurb:"Past simple for telling a short story.",
+  s:["Last weekend, Marta and her friend took the train to the coast.","They left early because the journey was almost four hours.","During the trip they played cards and shared sandwiches.","When they arrived, the sky was grey and it started to rain.","They did not go to the beach, so they visited a small museum instead.","In the end, it was the best part of the trip."],
+  g:{"coast":"the land next to the sea","journey":"the time you spend travelling from one place to another","instead":"in place of something else","shared":"gave part of something to another person","museum":"a building where you can see old or interesting objects"},
+  gq:[{"q": "They ___ the train to the coast.", "o": ["taked", "took", "take"], "a": 1}, {"q": "They ___ go to the beach.", "o": ["did not", "was not", "not did"], "a": 0}, {"q": "During the trip they ___ cards.", "o": ["play", "playing", "played"], "a": 2}, {"q": "The journey ___ almost four hours.", "o": ["was", "were", "is"], "a": 0}, {"q": "They ___ a small museum.", "o": ["visit", "visited", "visiting"], "a": 1}, {"q": "It ___ to rain when they arrived.", "o": ["start", "starts", "started"], "a": 2}, {"q": "___ they go to the beach?", "o": ["Did", "Do", "Were"], "a": 0}, {"q": "Marta ___ sandwiches with her friend.", "o": ["shared", "share", "sharing"], "a": 0}, {"q": "They ___ early in the morning.", "o": ["leaved", "left", "leave"], "a": 1}, {"q": "We did not ___ the museum last year.", "o": ["visited", "visit", "visits"], "a": 1}],
+  vq:[["The ___ from Mexico City to Puebla takes two hours.", "journey"], ["There are beautiful beaches on the ___.", "coast"], ["We had no coffee, so we drank tea ___.", "instead"], ["The children ___ a pizza.", "shared"], ["We saw old paintings in the ___.", "museum"]],
+  gr:{f:"Regular verbs: + -ed. Irregular verbs: learn each form. Negative: did not + base verb. Question: Did they + base verb?",tip:"After did and did not use the base verb: They did not go, not They did not went.",t:"Past simple, regular and irregular",r:"Add -ed to regular verbs (played, visited). Irregular verbs change form (take, took; leave, left). For negatives use did not + base verb.",ex:["They left early because the journey was almost four hours.","They did not go to the beach."]},
+  prompt:"Tell the story of a trip you took. Where did you go, and what did not go to plan?",min:70,max:120},
+ {id:"l4",level:"A2",topic:"Work",title:"My First Day at the Office",mins:4,blurb:"Meeting people and describing a workplace.",
+  s:["Daniel started his new job on Monday morning.","His manager showed him the office and introduced him to the team.","Everyone was friendly, but he forgot most of their names.","At lunch, a colleague invited him to eat in the kitchen.","In the afternoon he had a meeting and wrote his first email.","He went home tired but happy."],
+  g:{"manager":"the person who leads a team at work","introduced":"told people each other's names for the first time","colleague":"a person you work with","friendly":"kind and pleasant to other people","meeting":"a time when people come together to talk about work"},
+  gq:[{"q": "Daniel started his new job ___ Monday morning.", "o": ["in", "on", "at"], "a": 1}, {"q": "___ lunch, a colleague invited him to the kitchen.", "o": ["At", "On", "In"], "a": 0}, {"q": "He had a meeting ___ the afternoon.", "o": ["at", "on", "in"], "a": 2}, {"q": "The meeting started ___ nine o'clock.", "o": ["in", "on", "at"], "a": 2}, {"q": "He wrote his first email ___ the afternoon.", "o": ["in", "on", "at"], "a": 0}, {"q": "Daniel went home ___ six.", "o": ["at", "in", "on"], "a": 0}, {"q": "He started the job ___ March.", "o": ["on", "in", "at"], "a": 1}, {"q": "She had a meeting ___ Friday.", "o": ["on", "in", "at"], "a": 0}, {"q": "They ate in the kitchen ___ lunchtime.", "o": ["in", "at", "on"], "a": 1}, {"q": "He arrived early ___ the morning.", "o": ["at", "on", "in"], "a": 2}],
+  vq:[["My ___ decides who works on each project.", "manager"], ["She ___ me to her sister at the party.", "introduced"], ["I eat lunch with a ___ who does the same job as me.", "colleague"], ["The new neighbours are very ___; they always say hello.", "friendly"], ["We have a ___ at ten to talk about the plan.", "meeting"]],
+  gr:{f:"on + days (on Monday) · at + clock times and meals (at nine, at lunch) · in + parts of the day, months and years (in the afternoon, in March).",tip:"Say at night, but in the morning, in the afternoon and in the evening.",t:"Past simple with time expressions",r:"Say when something happened with on Monday, at lunch, in the afternoon. Put the time expression at the start or the end of the sentence.",ex:["At lunch, a colleague invited him to eat in the kitchen.","In the afternoon he had a meeting."]},
+  prompt:"Write about a first day: at a job, a school or a club. How did you feel?",min:70,max:120},
+ {id:"l5",level:"B1",topic:"Culture",title:"Why Families Build an Ofrenda",mins:5,blurb:"Explaining a tradition and giving reasons.",
+  s:["At the start of November, many Mexican families build an ofrenda at home.","It is a table decorated with marigolds, candles and photographs of relatives who have died.","People also leave the food and drinks that those relatives used to enjoy.","The idea is not to mourn, but to welcome them back for one night.","Although the tradition is centuries old, each family adapts it in its own way.","For many children, it is how they first hear stories about their great-grandparents."],
+  g:{"marigolds":"bright orange flowers, called cempasúchil in Mexico","mourn":"to feel and show sadness because someone has died","adapts":"changes something so that it fits a new situation","relatives":"members of your family","candles":"sticks of wax that you burn for light"},
+  gq:[{"q": "They display photographs of relatives ___ have died.", "o": ["which", "who", "what"], "a": 1}, {"q": "People leave the food ___ their relatives enjoyed.", "o": ["who", "that", "where"], "a": 1}, {"q": "My grandmother ___ make bread every Sunday, but she stopped.", "o": ["used to", "use to", "was used"], "a": 0}, {"q": "An ofrenda is a table ___ is decorated with flowers.", "o": ["who", "that", "where"], "a": 1}, {"q": "Children hear stories about people ___ lived long ago.", "o": ["who", "which", "whose"], "a": 0}, {"q": "My grandfather ___ tell us stories every night.", "o": ["use to", "used to", "is used to"], "a": 1}, {"q": "Did your family ___ build an ofrenda?", "o": ["use to", "used to", "using to"], "a": 0}, {"q": "These are the candles ___ we light in November.", "o": ["who", "that", "when"], "a": 1}, {"q": "She is the aunt ___ taught me to cook.", "o": ["which", "who", "what"], "a": 1}, {"q": "We ___ live in a small town, but now we live in the city.", "o": ["used to", "use to", "are used"], "a": 0}],
+  vq:[["Bright orange ___ grow in the garden.", "marigolds"], ["The whole town came to ___ the old teacher.", "mourn"], ["She ___ the recipe when she has no eggs.", "adapts"], ["Many of my ___ live in another city.", "relatives"], ["We lit ___ when the electricity went out.", "candles"]],
+  gr:{f:"noun + who / that + clause · used to + base verb. Negative: didn't use to. Question: Did you use to…?",tip:"used to has no present form. For present habits say usually.",t:"Relative clauses and used to",r:"Add information with who for people and that for things. Use used to + verb for past habits that have ended.",ex:["photographs of relatives who have died","the food and drinks that those relatives used to enjoy"]},
+  prompt:"Explain a tradition from your family or town to someone who has never seen it. Why does it matter to you?",min:100,max:160},
+ {id:"l6",level:"B1",topic:"Science",title:"How Bees Find Their Way Home",mins:5,blurb:"Describing a process step by step.",
+  s:["A honeybee can fly several kilometres from its hive and still return without getting lost.","Scientists believe it uses the position of the sun as a compass.","It also remembers landmarks such as trees, rivers and buildings.","When a bee discovers good flowers, it performs a dance for the others.","The direction and length of the dance tell them where to go.","In this way, a whole colony can share one bee's discovery."],
+  g:{"hive":"the place where bees live","landmarks":"objects that are easy to see and help you know where you are","colony":"a large group of the same animal living together","compass":"a tool that shows direction","performs":"does an action, often for others to watch"},
+  gq:[{"q": "When a bee ___ good flowers, it dances for the others.", "o": ["discover", "discovering", "discovers"], "a": 2}, {"q": "A honeybee ___ the sun as a compass.", "o": ["uses", "is use", "using"], "a": 0}, {"q": "___, the whole colony learns where to go.", "o": ["In this way", "When", "Also it"], "a": 0}, {"q": "The bee ___ landmarks such as trees.", "o": ["remember", "remembers", "remembering"], "a": 1}, {"q": "The dance ___ the others where to go.", "o": ["tell", "telling", "tells"], "a": 2}, {"q": "___ the bee returns, it shares the news.", "o": ["When", "Also", "In this way"], "a": 0}, {"q": "Bees ___ several kilometres from the hive.", "o": ["flies", "fly", "flying"], "a": 1}, {"q": "It ___ remembers rivers and buildings.", "o": ["also", "when", "and too"], "a": 0}, {"q": "When the sun ___, bees find their way more easily.", "o": ["shine", "shines", "shining"], "a": 1}, {"q": "Scientists ___ that bees use the sun.", "o": ["believes", "believing", "believe"], "a": 2}],
+  vq:[["The beekeeper opened the wooden ___ to collect honey.", "hive"], ["The tower and the bridge are useful ___ for visitors.", "landmarks"], ["A ___ of ants can move a large insect together.", "colony"], ["The needle of a ___ points north.", "compass"], ["The band ___ in the square every Friday.", "performs"]],
+  gr:{f:"When + present simple, present simple. Add -s after it: it uses, it remembers, it performs.",tip:"No will after when: When a bee finds flowers, not When a bee will find flowers.",t:"Present simple for processes, with when",r:"Use the present simple to describe how something always works. Link the steps with when, also and in this way.",ex:["When a bee discovers good flowers, it performs a dance for the others.","It also remembers landmarks."]},
+  prompt:"Describe how you find your way in a place you do not know well. Which tools or habits do you rely on?",min:100,max:160},
+ {id:"l7",level:"B2",topic:"Work",title:"The Four-Day Week Experiment",mins:6,blurb:"Weighing evidence and expressing a balanced opinion.",
+  s:["Several companies have tested a four-day working week without reducing salaries.","Supporters argue that well-rested employees achieve the same results in less time.","Critics point out that the model suits office work far better than hospitals or factories.","Early trials reported lower stress, yet some staff felt pressure to squeeze five days into four.","Whether the gains last once the novelty wears off remains an open question.","What seems clear is that hours alone are a poor measure of productivity."],
+  g:{"squeeze":"to fit something into a space or time that is too small","novelty":"the quality of being new and unusual","wears off":"gradually disappears","trials":"tests to see if something works","productivity":"how much work is done in a given time"},
+  gq:[{"q": "Supporters ___ that rested employees work better.", "o": ["argue", "tell", "say to"], "a": 0}, {"q": "Stress fell, ___ some staff felt more pressure.", "o": ["so", "yet", "because"], "a": 1}, {"q": "Critics ___ that the model does not suit hospitals.", "o": ["point out", "point", "point at"], "a": 0}, {"q": "Researchers ___ that stress levels fell.", "o": ["reported", "told", "spoke"], "a": 0}, {"q": "The idea is popular, ___ it does not suit every job.", "o": ["because", "but", "so"], "a": 1}, {"q": "It is unclear ___ the gains will last.", "o": ["whether", "yet", "but"], "a": 0}, {"q": "Managers ___ that hours are a poor measure.", "o": ["claim", "tell", "talk"], "a": 0}, {"q": "___ the trial was short, the results were clear.", "o": ["Whether", "Although", "Yet"], "a": 1}, {"q": "Staff were happier, ___ they did the same amount of work.", "o": ["yet", "whether", "that"], "a": 0}, {"q": "Critics ___ that factories cannot close on Fridays.", "o": ["say to", "argue", "tell"], "a": 1}],
+  vq:[["I tried to ___ one more meeting into a busy day.", "squeeze"], ["At first the game was fun, but the ___ soon disappeared.", "novelty"], ["The effect of the coffee ___ after a few hours.", "wears off"], ["The new medicine passed its first ___.", "trials"], ["Better tools increased the team's ___.", "productivity"]],
+  gr:{f:"subject + argue / claim / point out / report + that + clause · clause, yet / but + clause · whether + clause.",tip:"tell needs a person: She told us that… Use say or argue without one.",t:"Reporting verbs and contrast linkers",r:"Report views with argue that and point out that. Set ideas against each other with yet, but and whether.",ex:["Supporters argue that well-rested employees achieve the same results in less time.","Early trials reported lower stress, yet some staff felt pressure."]},
+  prompt:"Would a four-day week work in your job or studies? Give arguments on both sides before stating your view.",min:150,max:220},
+ {id:"l8",level:"C1",topic:"Science",title:"What Sleep Does for Memory",mins:7,blurb:"Hedging, nominalisation and academic register.",
+  s:["Far from being idle, the sleeping brain appears to rehearse the events of the day.","Recordings suggest that patterns of activity seen during learning are replayed, often at greater speed, during deep sleep.","This replay is thought to consolidate fragile memories by transferring them to more durable networks.","Sleep deprivation, by contrast, impairs not only recall but the capacity to form new memories at all.","Researchers caution, however, that much of the evidence remains correlational.","Even so, few would now dispute that a night's rest is an integral part of learning rather than an interruption of it."],
+  g:{"rehearse":"to practise something in order to prepare for it","consolidate":"to make something stronger and more stable","correlational":"showing that two things happen together, without proving that one causes the other","deprivation":"the state of not having something you need","integral":"necessary as part of a whole"},
+  gq:[{"q": "The brain ___ rehearse the events of the day.", "o": ["appears to", "appears", "is appearing"], "a": 0}, {"q": "Replay ___ to consolidate memories.", "o": ["thinks", "is thought", "has thought"], "a": 1}, {"q": "Which sentence hedges its claim?", "o": ["Sleep improves memory.", "Sleep may improve memory.", "Sleep always improves memory."], "a": 1}, {"q": "Memories ___ to move to more durable networks.", "o": ["are believed", "believe", "are believing"], "a": 0}, {"q": "The results ___ that sleep helps learning.", "o": ["suggest", "are suggested", "suggesting"], "a": 0}, {"q": "It ___ that replay happens during deep sleep.", "o": ["seem", "seems", "is seem"], "a": 1}, {"q": "Sleep ___ play a role in creativity too.", "o": ["is", "may", "has"], "a": 1}, {"q": "Much of the evidence ___ to be correlational.", "o": ["said", "is said", "says"], "a": 1}, {"q": "This ___ explain why tired students forget more.", "o": ["could", "is", "does to"], "a": 0}, {"q": "Which sentence is the most cautious?", "o": ["Sleep deprivation destroys memory.", "Sleep deprivation tends to impair memory.", "Sleep deprivation impairs memory."], "a": 1}],
+  vq:[["The actors ___ every scene before opening night.", "rehearse"], ["The two small firms merged to ___ their position in the market.", "consolidate"], ["The study was only ___, so it could not prove a cause.", "correlational"], ["Months of sleep ___ left him exhausted.", "deprivation"], ["Practice is an ___ part of learning an instrument.", "integral"]],
+  gr:{f:"appear / seem + to + verb · suggest / indicate + that · is thought / believed / said + to + verb · may, might, could.",tip:"One hedge per claim is enough. 'It may possibly perhaps suggest' sounds evasive.",t:"Hedging and passive reporting",r:"Soften claims with appears to, suggest and is thought to. This signals that the evidence is not final.",ex:["The sleeping brain appears to rehearse the events of the day.","This replay is thought to consolidate fragile memories."]},
+  prompt:"Summarise the argument in your own words, then evaluate how convincing the evidence sounds. Use at least three hedging expressions.",min:180,max:260},
+ {"id": "l9", "level": "C2", "topic": "Culture", "title": "The Untranslatable Word", "mins": 8, "blurb": "Ellipsis, substitution and a sceptical argument.", "s": ["Every language is said to possess words that defy translation, and collectors of such curiosities are seldom short of examples.", "The Portuguese have saudade, the Germans Fernweh, and the Japanese komorebi, sunlight filtering through leaves.", "Yet the claim that these words cannot be translated rarely survives scrutiny, for each has just been glossed in a handful of words.", "What resists translation is not the meaning but the economy with which one language packages it and another does not.", "To treat such words as windows onto a national soul is tempting, and many writers do so without hesitation.", "A more sober view holds that vocabularies differ less in what they can say than in what they make effortless."], "g": {"defy": "to resist something, or make it impossible", "scrutiny": "careful and critical examination", "glossed": "explained briefly, as in a short note", "economy": "the use of no more words than are needed", "sober": "calm, serious and not exaggerated"}, "gq": [{"q": "Many writers treat these words as mysteries, and many readers ___ too.", "o": ["do", "are", "have"], "a": 0}, {"q": "Which version is correct in formal writing? \"The Portuguese have saudade, ___.\"", "o": ["the Germans Fernweh", "the Germans has Fernweh", "the Germans having Fernweh"], "a": 0}, {"q": "Some claims survive scrutiny; this one does ___.", "o": ["no", "not", "none"], "a": 1}, {"q": "She asked me to translate the word, but I could not ___.", "o": ["so do", "do so", "do such"], "a": 1}, {"q": "One language packages the idea neatly; another ___ not.", "o": ["is", "does", "has"], "a": 1}, {"q": "\"Is the word untranslatable?\" \"I suspect ___.\"", "o": ["no", "it not", "not"], "a": 2}, {"q": "He prefers the literal translation; I prefer the freer ___.", "o": ["one", "it", "such"], "a": 0}, {"q": "They could have glossed the term, and they should ___.", "o": ["be", "have", "had"], "a": 1}, {"q": "\"Will the meaning survive?\" \"I hope ___.\"", "o": ["so", "it", "that so"], "a": 0}, {"q": "Few words resist translation, and those that ___ are rare.", "o": ["are", "have", "do"], "a": 2}], "vq": [["Some feelings ___ description.", "defy"], ["The minister's figures did not stand up to ___.", "scrutiny"], ["The editor ___ each dialect word in a footnote.", "glossed"], ["Her prose is admired for its ___: not a word is wasted.", "economy"], ["After the excitement, the report offered a ___ assessment.", "sober"]], "gr": {"f": "Leave out a repeated verb after a comma · do so = repeat a verb phrase · one = a countable noun · so / not after hope, think and suspect.", "tip": "Say I hope so and I hope not. I don't hope so is not used.", "t": "Ellipsis and substitution", "r": "Leave out words the reader can recover, or replace them with do so, one, so and not. This avoids repetition in formal writing.", "ex": ["The Portuguese have saudade, the Germans Fernweh.", "Many writers do so without hesitation."]}, "prompt": "Choose a word from your first language that is hard to put into English. Explain what makes it difficult, and whether the difficulty lies in the meaning or in the economy.", "min": 220, "max": 320}
+];
+const DEF={A1:[3,40,80],A2:[4,70,120],B1:[5,100,160],B2:[6,150,220],C1:[7,180,260],C2:[8,220,320]};
+function L(level,topic,title,blurb,s,g,gr,gq,vq,prompt){
+  const n=LESSONS.filter(x=>x.level===level).length+1,d=DEF[level];
+  LESSONS.push({id:level.toLowerCase()+"-"+n,level,topic,title,mins:d[0],blurb,s,g,gq:gq.map(x=>({q:x[0],o:x[1].split("|"),a:x[2]})),vq,gr:{t:gr[0],r:gr[1],f:gr[2],tip:gr[3],ex:gr.slice(4)},prompt,min:d[1],max:d[2]});
+}
+/*EXTRA-START*/
+L("A1","People","My Family","Say who people are with am, is and are.",
+["My name is Sofia and I am ten years old.","My father is a doctor and my mother is a teacher.","I have two brothers; they are twins.","Our grandmother is seventy and she is very kind.","We are a happy family."],
+{"father":"a male parent","twins":"two children born to the same mother at the same time","grandmother":"the mother of your father or mother","kind":"friendly and good to other people","happy":"feeling good and pleased"},
+["The verb be: am, is, are","Use be to say who or what someone is, how old they are and how they feel.","I am · he / she / it is · you / we / they are. Negative: am not, isn't, aren't. Question: Are you…? Is she…?","Use be for age, not have: I am ten, not I have ten years.","My father is a doctor.","They are twins."],
+[["I ___ ten years old.","is|am|are",1],["My mother ___ a teacher.","is|am|are",0],["They ___ twins.","is|am|are",2],["We ___ a happy family.","are|is|am",0],["My brother ___ not tall.","are|am|is",2],["___ you a student?","Is|Are|Am",1],["She ___ very kind.","am|is|are",1],["My brothers ___ at school.","is|am|are",2],["___ your father a doctor?","Is|Are|Am",0],["I ___ not a teacher.","is|are|am",2]],
+[["My ___ drives me to school; he is my dad.","father"],["The two sisters are ___; they have the same birthday.","twins"],["My ___ is my mother's mother.","grandmother"],["The nurse is very ___ to the children.","kind"],["I am ___ because today is my birthday.","happy"]],
+"Write about your family. Who are they, how old are they and what are they like?");
+
+L("A1","Daily life","My Home","Describe rooms and furniture with there is and there are.",
+["I live in a small flat with my parents.","There is a kitchen, a bathroom and a living room.","There are two bedrooms, and my bedroom has a big window.","There is a sofa in the living room, but there is not a garden.","There are many plants on the balcony."],
+{"flat":"a home on one floor of a building","kitchen":"the room where you cook","bedroom":"the room where you sleep","sofa":"a long soft seat for two or more people","balcony":"a small outside area on the wall of a building"},
+["There is and there are","Use there is and there are to say that something exists in a place.","There is + one thing · There are + two or more things. Negative: there isn't, there aren't. Question: Is there…? Are there…?","Look at the noun: There are two bedrooms, not There is two bedrooms.","There is a sofa in the living room.","There are many plants on the balcony."],
+[["There ___ a sofa in the living room.","is|are|be",0],["There ___ two bedrooms.","is|are|am",1],["There ___ many plants on the balcony.","is|are|has",1],["There ___ a big window in my bedroom.","are|is|have",1],["___ there a garden?","Are|Is|Has",1],["___ there any chairs in the kitchen?","Is|Are|Do",1],["There ___ not a garden.","is|are|do",0],["There are ___ plants.","a|many|an",1],["Is there a bathroom? Yes, there ___.","is|are|has",0],["There ___ three people in my family.","are|is|am",0]],
+[["We live in a ___ on the third floor.","flat"],["My father cooks dinner in the ___.","kitchen"],["I sleep in my ___.","bedroom"],["We sit on the ___ and watch television.","sofa"],["She stands on the ___ and looks down at the street.","balcony"]],
+"Describe your home. Which rooms are there, and what is in your favourite room?");
+
+L("A1","People","What Can You Do?","Talk about abilities with can and cannot.",
+["Leo can play the guitar, but he cannot sing.","His sister Emma can swim very fast.","She can also ride a bicycle without hands.","Their dog can catch a ball in the air.","Can you do something special?"],
+{"guitar":"a musical instrument with six strings","swim":"to move through water with your arms and legs","ride":"to sit on a bicycle or horse and make it move","catch":"to take something in your hands when it is moving through the air","special":"different from normal, in a good way"},
+["can and cannot","Use can to say what a person or animal is able to do.","can + base verb, the same for every person. Negative: cannot or can't. Question: Can you…? Yes, I can. / No, I can't.","No -s and no to after can: She can swim, not She cans swim or She can to swim.","Leo can play the guitar.","He cannot sing."],
+[["Leo ___ play the guitar.","can|cans|is can",0],["Emma can ___ very fast.","swims|swim|to swim",1],["He ___ sing. His voice is terrible.","can|can't|doesn't can",1],["___ you ride a bicycle?","Do|Are|Can",2],["Can you swim? Yes, I ___.","can|do|am",0],["The dog can ___ a ball.","catching|catches|catch",2],["My baby brother is one. He ___ read.","can|cannot|not can",1],["Can she ___ the piano?","plays|to play|play",2],["We ___ speak English and Spanish.","can|cans|are can",0],["Can they drive? No, they ___.","can't|don't can|aren't",0]],
+[["He plays the ___ in a band.","guitar"],["In summer we ___ in the sea.","swim"],["I ___ my bicycle to school.","ride"],["Throw the ball and I will ___ it.","catch"],["Today is a ___ day: it is my birthday.","special"]],
+"Write about three things you can do and two things you cannot do.");
+
+L("A1","Daily life","In the Classroom","Point to things with this, that, these and those.",
+["This is my classroom and that is my desk near the window.","These are my books and this is my pencil case.","Those posters on the wall are from our art lesson.","That woman at the door is our teacher.","She writes on the board with a blue pen."],
+{"desk":"a table where you work or study","pencil case":"a small bag for pens and pencils","posters":"large pictures that you put on a wall","wall":"one of the sides of a room","board":"a flat surface on the wall that a teacher writes on"},
+["this, that, these, those","Use this and these for things near you. Use that and those for things far from you.","this / that + one thing · these / those + two or more things.","Match the word to the noun: this book or these books, not these book.","This is my pencil case.","Those posters are from our art lesson."],
+[["___ is my pencil. It is in my hand.","This|That|These",0],["___ are my books here on the desk.","This|These|Those",1],["Look at ___ bird in the tree over there.","this|those|that",2],["___ posters on the far wall are new.","That|Those|This",1],["Is ___ your bag here?","these|this|those",1],["___ shoes I am wearing are too small.","These|That|This",0],["Who is ___ man across the street?","this|these|that",2],["Are ___ your keys on the table over there?","that|those|this",1],["___ is my friend Ana, next to me.","These|Those|This",2],["I like ___ apples here in my bag.","these|that|this",0]],
+[["I sit at my ___ and do my homework.","desk"],["My pens are in my ___.","pencil case"],["I have film ___ in my bedroom.","posters"],["The picture hangs on the ___ above my bed.","wall"],["The teacher writes the date on the ___.","board"]],
+"Describe your classroom or your desk. Use this, that, these and those.");
+
+L("A1","Travel","My Town","Say where places are with next to, between, opposite and behind.",
+["My town is small, but it has a big square.","The bank is next to the post office.","The café is between the cinema and the bakery.","The park is opposite the school.","There is a bus station behind the supermarket."],
+{"square":"an open place in a town with buildings around it","post office":"a place where you send letters and parcels","bakery":"a shop that sells bread and cakes","cinema":"a place where you watch films","supermarket":"a big shop that sells food and things for the home"},
+["Prepositions of place","Use prepositions of place to say where something is.","be + next to / opposite / behind / in front of + place · between + place + and + place.","Do not forget to: next to the bank, not next the bank.","The bank is next to the post office.","The café is between the cinema and the bakery."],
+[["The bank is next ___ the post office.","to|of|at",0],["The café is ___ the cinema and the bakery.","next|between|opposite",1],["The park is ___ the school, on the other side of the street.","behind|opposite|between",1],["The bus station is ___ the supermarket. You cannot see it from the street.","behind|in front|between",0],["The car is in front ___ the house.","to|of|at",1],["The cinema is ___ to the café.","between|opposite|next",2],["My house is between the park ___ the school.","to|and|of",1],["There is a garden ___ the house, at the back.","in front of|behind|between",1],["The teacher stands in ___ of the class.","front|next|opposite",0],["The bakery is ___ the square.","in|between|next",0]],
+[["People sit in the ___ in the centre of town.","square"],["I send a letter at the ___.","post office"],["We buy bread at the ___.","bakery"],["We watch a film at the ___.","cinema"],["My mother buys food for the week at the ___.","supermarket"]],
+"Describe your town or your street. Where are the shops, the school and the park?");
+
+L("A1","People","My Best Friend","Say who things belong to with my, your, his, her, our and their.",
+["My best friend is Carlos and his house is near my school.","His sister is Julia and her hair is very long.","Their parents have a restaurant, and its name is La Luna.","Our favourite game is football.","Carlos is funny and his jokes are great."],
+{"best friend":"the friend you like most","hair":"what grows on your head","restaurant":"a place where you buy and eat a meal","favourite":"the one you like more than all the others","jokes":"things you say to make people laugh"},
+["Possessive adjectives","Use my, your, his, her, its, our and their to say who something belongs to.","I → my · you → your · he → his · she → her · it → its · we → our · they → their. Put them before a noun.","Choose his or her by the owner, not by the thing: Julia and her brother, not Julia and his brother.","His house is near my school.","Their parents have a restaurant."],
+[["I have a bicycle. ___ colour is red.","Its|His|Her",0],["Carlos has a sister. ___ sister is Julia.","Her|His|Their",1],["Julia has long hair. ___ hair is brown.","His|Her|Its",1],["We have a teacher. ___ teacher is Mr Lee.","Our|Their|Your",0],["Carlos and Julia have a cat. ___ cat is black.","His|Our|Their",2],["I am Sofia and this is ___ book.","my|me|I",0],["What is ___ name? Are you Tom?","his|your|their",1],["My father loves ___ car.","her|its|his",2],["My mother is with ___ friends.","his|her|your",1],["You and Ana are late. Where are ___ bags?","your|their|our",0]],
+[["Ana is my ___; we do everything together.","best friend"],["She washes her ___ every day.","hair"],["We eat dinner at a ___ on Fridays.","restaurant"],["Blue is my ___ colour.","favourite"],["He tells ___ and everybody laughs.","jokes"]],
+"Write about your best friend and his or her family.");
+
+L("A1","Daily life","What Are They Wearing?","Describe what is happening now with am, is, are + -ing.",
+["It is cold today, so everybody is wearing a coat.","Tom is wearing a green scarf and black boots.","His little sister is carrying a red umbrella.","They are waiting for the bus in the rain.","Their mother is talking on the phone."],
+{"coat":"a long warm piece of clothing that you wear over other clothes","scarf":"a long piece of cloth that you wear around your neck","boots":"strong shoes that cover your foot and part of your leg","umbrella":"a thing that you hold over your head in the rain","waiting":"staying in a place until something happens"},
+["Present continuous","Use the present continuous for things that are happening now.","am / is / are + verb-ing. Negative: isn't / aren't + verb-ing. Question: Is she waiting? What are you doing?","Do not forget be: He is wearing a coat, not He wearing a coat.","Tom is wearing a green scarf.","They are waiting for the bus."],
+[["Tom ___ wearing a scarf.","is|are|am",0],["They ___ waiting for the bus.","is|are|am",1],["I ___ reading a book now.","is|are|am",2],["She is ___ an umbrella.","carry|carries|carrying",2],["What ___ you doing?","is|are|do",1],["He ___ not wearing a coat.","is|are|do",0],["Look! It ___ raining.","are|is|does",1],["We are ___ lunch at the moment.","have|has|having",2],["___ she talking on the phone?","Is|Does|Are",0],["The children ___ playing in the park now.","is|are|am",1]],
+[["It is cold. Put on your ___ over your sweater.","coat"],["She has a warm ___ around her neck.","scarf"],["I wear ___ when I walk in the snow.","boots"],["It is raining. Take an ___.","umbrella"],["We are ___ for our friends at the station.","waiting"]],
+"Look around you. What are people wearing and doing right now?");
+
+L("A1","Food","Breakfast at the Café","Order food with a, an and some.",
+["Every Sunday we have breakfast at a café.","I have an egg, some bread and a glass of juice.","My father has some coffee and a sandwich.","My mother wants an orange and some yoghurt.","After breakfast we pay the bill and go home."],
+{"breakfast":"the first meal of the day","juice":"a drink made from fruit","sandwich":"two pieces of bread with food between them","yoghurt":"a thick white food made from milk","bill":"the paper that shows how much you must pay"},
+["a, an and some","Use a or an for one thing. Use some for more than one thing, or for food and drink you cannot count.","a + consonant sound (a sandwich) · an + vowel sound (an egg) · some + plural or uncountable noun (some bread).","Bread, milk and sugar have no a: some bread, not a bread.","I have an egg and some bread.","My father has a sandwich."],
+[["I have ___ egg.","a|an|some",1],["She wants ___ sandwich.","a|an|some",0],["We need ___ bread.","a|an|some",2],["He eats ___ orange every day.","a|an|some",1],["There is ___ milk in the fridge.","a|an|some",2],["Can I have ___ glass of water?","a|an|some",0],["I would like ___ apple, please.","a|an|some",1],["They buy ___ bananas.","a|an|some",2],["It is ___ small café.","a|an|some",0],["There is ___ sugar on the table.","some|a|an",0]],
+[["I eat ___ at seven in the morning.","breakfast"],["Orange ___ is my favourite drink.","juice"],["I take a cheese ___ to school for lunch.","sandwich"],["This strawberry ___ is thick and creamy.","yoghurt"],["The waiter brings the ___ and we pay.","bill"]],
+"What do you eat and drink for breakfast? Use a, an and some.");
+
+L("A2","Daily life","City or Village?","Compare two places with -er and more.",
+["My cousin lives in a village, and I live in the city.","The city is bigger and noisier than the village.","Flats here are more expensive, but the shops are better.","The village is quieter and the air is cleaner because there is less traffic.","My cousin says life there is more relaxed than in the city."],
+{"cousin":"the child of your aunt or uncle","village":"a very small town in the country","expensive":"costing a lot of money","traffic":"the cars and buses moving on the roads","relaxed":"calm and not worried"},
+["Comparative adjectives","Use a comparative to say how two things are different.","Short adjectives: + -er (quieter, bigger) · ending in -y: -ier (noisier) · long adjectives: more + adjective · good → better, bad → worse. Add than.","Use one form only: bigger, not more bigger.","The city is bigger than the village.","Flats here are more expensive."],
+[["The city is ___ than the village.","big|bigger|more big",1],["Flats are ___ expensive in the city.","more|most|much",0],["The village is quieter ___ the city.","that|than|then",1],["The shops in the city are ___ than the shops in the village.","gooder|more good|better",2],["My street is ___ than yours.","noisyer|noisier|more noisy",1],["This book is ___ interesting than the film.","more|most|very",0],["The traffic is ___ today than yesterday.","badder|worse|more bad",1],["A village is ___ than a city.","smaller|more small|smallest",0],["Life in the country is ___ relaxed.","much|more|most",1],["Trains are ___ than buses.","fast|more fast|faster",2]],
+[["My ___ is the son of my aunt.","cousin"],["Only two hundred people live in the ___.","village"],["I cannot buy that phone; it is too ___.","expensive"],["There is a lot of ___ on the roads at eight o'clock.","traffic"],["On holiday I feel calm and ___.","relaxed"]],
+"Compare two places you know well. Which is bigger, quieter, cheaper or more interesting?");
+
+L("A2","Nature","Records of the Natural World","Describe the biggest and the best with superlatives.",
+["The cheetah is the fastest animal on land.","The blue whale is the largest animal in the world.","The giraffe is the tallest, and its neck can be two metres long.","Many people think the mosquito is the most dangerous animal because it carries diseases.","The Sahara is the largest hot desert, but it is not the driest place on Earth."],
+{"land":"the dry part of the Earth, not the sea","whale":"a very large animal that lives in the sea","neck":"the part of the body between the head and the shoulders","dangerous":"able to hurt or kill you","desert":"a large, very dry area with few plants"},
+["Superlative adjectives","Use a superlative to compare one thing with all the others in a group.","the + adjective + -est (the fastest) · the most + long adjective (the most dangerous) · good → the best, bad → the worst.","Keep the, and use in for places: the tallest in the world, not tallest of the world.","The cheetah is the fastest animal on land.","The mosquito is the most dangerous animal."],
+[["The cheetah is the ___ animal on land.","faster|fastest|most fast",1],["The blue whale is ___ largest animal.","a|the|most",1],["It is the ___ dangerous animal.","most|more|much",0],["This is the ___ film of the year. I love it.","better|goodest|best",2],["The giraffe is the tallest animal ___ the world.","in|of|on",0],["Monday is the ___ day of my week. I hate it.","worse|worst|baddest",1],["Which is the ___ river in the world?","longest|longer|most long",0],["She is the ___ intelligent student in the class.","more|most|very",1],["January is the ___ month of the year here.","colder|most cold|coldest",2],["That was the ___ exam of all.","easyest|most easy|easiest",2]],
+[["Frogs live in water and on ___.","land"],["A ___ is much bigger than a dolphin.","whale"],["She wears a gold chain around her ___.","neck"],["Do not swim here; the river is ___.","dangerous"],["It almost never rains in the ___.","desert"]],
+"Write about the best, the worst and the most interesting places in your country.");
+
+L("A2","Travel","Plans for the Holidays","Talk about plans with going to.",
+["Next month my family is going to visit Oaxaca.","We are going to stay in a small hotel near the centre.","My mother is going to book the tickets tonight.","I am going to take a lot of photos with my new camera.","We are not going to rent a car, because the city is easy to walk around."],
+{"stay":"to live in a place for a short time as a visitor","book":"to arrange to have a seat, room or ticket before you need it","tickets":"pieces of paper that show you have paid for a journey or an event","camera":"a machine for taking photos","rent":"to pay to use something for a short time"},
+["going to for plans","Use going to for plans and intentions you already have.","am / is / are + going to + base verb. Negative: isn't / aren't going to. Question: Are you going to…?","Do not forget be: I am going to visit, not I going to visit.","We are going to stay in a small hotel.","We are not going to rent a car."],
+[["We ___ going to visit Oaxaca.","is|are|am",1],["She is going ___ book the tickets.","to|for|at",0],["I ___ going to take photos.","is|are|am",2],["They are going to ___ in a hotel.","staying|stay|stays",1],["___ you going to rent a car?","Do|Are|Is",1],["He ___ not going to come with us.","is|are|does",0],["What are you going to ___ tomorrow?","doing|does|do",2],["My parents ___ going to buy a new car.","is|am|are",2],["Is she going to ___ her friends?","visit|visits|visiting",0],["We are not ___ to travel by plane.","go|going|goes",1]],
+[["We always ___ with my aunt when we visit Puebla.","stay"],["You can ___ a table at the restaurant by phone.","book"],["We bought two ___ for the concert.","tickets"],["This ___ takes very good pictures.","camera"],["On holiday we ___ bicycles and ride around the island.","rent"]],
+"Write about your plans for your next holiday or weekend. What are you going to do?");
+
+L("A2","Nature","Tomorrow's Weather","Make predictions with will and won't.",
+["Here is the weather forecast for tomorrow.","In the north it will be cloudy, and it will probably rain in the afternoon.","The south will be sunny and warm all day.","There will be a strong wind on the coast, so the sea will not be calm.","Take a jacket: the temperature will fall at night."],
+{"forecast":"a statement about what the weather will probably be","cloudy":"with a lot of clouds in the sky","probably":"almost certainly, but not completely sure","wind":"air that moves fast","temperature":"how hot or cold something is"},
+["will for predictions","Use will to say what you think or know is going to happen.","will + base verb, the same for every person. Negative: will not or won't. Question: Will it rain?","No to after will: It will rain, not It will to rain.","It will probably rain in the afternoon.","The sea will not be calm."],
+[["Tomorrow it ___ be sunny.","will|is|going",0],["It will ___ in the afternoon.","rains|rain|raining",1],["The sea ___ be calm. It will be rough.","will|won't|isn't",1],["___ it be cold tonight?","Does|Is|Will",2],["I think she ___ pass the exam.","will|wills|is will",0],["They will ___ late, I am sure.","are|be|being",1],["There ___ be a strong wind.","will|is|are going",0],["Don't worry, you ___ lose your way.","will|won't|don't",1],["Will it snow? No, it ___.","won't|isn't|doesn't",0],["He will probably ___ tomorrow.","calls|to call|call",2]],
+[["The weather ___ says it will snow.","forecast"],["It is ___ today; we cannot see the sun.","cloudy"],["She is not here. She is ___ at work.","probably"],["The ___ blew my hat off.","wind"],["The ___ is thirty degrees today.","temperature"]],
+"What will the weather be like tomorrow and at the weekend where you live?");
+
+L("A2","Health","How Often Do You Exercise?","Say how often with always, usually, sometimes and never.",
+["Paula always walks to work because she wants to stay healthy.","She usually goes to the gym twice a week.","She sometimes runs in the park with her neighbour.","She hardly ever eats fast food, and she never smokes.","She is often tired on Fridays, so she goes to bed early."],
+{"healthy":"well and not ill","gym":"a place where you do exercise","twice":"two times","neighbour":"a person who lives near you","tired":"needing to rest or sleep"},
+["Adverbs of frequency","Use adverbs of frequency to say how often something happens.","always → usually → often → sometimes → hardly ever → never. Put the adverb before the main verb, but after be.","Watch the position: She always walks, not She walks always. She is often tired, not She often is tired.","Paula always walks to work.","She is often tired on Fridays."],
+[["She ___ walks to work. She does it every day.","never|always|sometimes",1],["Which sentence is correct?","She goes usually to the gym.|She usually goes to the gym.|Usually she goes the gym.",1],["He is ___ late. He arrives on time every day.","never|always|often",0],["Which sentence is correct?","She is often tired.|She often is tired.|She is tired often on.",0],["I ___ eat fast food, only once or twice a year.","usually|hardly ever|always",1],["We ___ go to the cinema, about once a month.","sometimes|always|never",0],["How ___ do you exercise?","many|much|often",2],["They go to the gym ___ a week, on Mondays and Thursdays.","two|twice|second",1],["Which sentence is correct?","I never am hungry in the morning.|I am never hungry in the morning.|Never I am hungry in the morning.",1],["She ___ smokes. She hates cigarettes.","often|never|usually",1]],
+[["Eat fruit and vegetables to stay ___.","healthy"],["He lifts weights at the ___.","gym"],["I brush my teeth ___ a day, morning and night.","twice"],["Our ___ lives in the flat next door.","neighbour"],["I am ___ after the long walk; I need to sit down.","tired"]],
+"How do you stay healthy? Say what you always, sometimes and never do.");
+
+L("A2","Food","Cooking for Friends","Ask about quantity with how much and how many.",
+["Tonight I am cooking dinner for six friends.","How much rice do I need, and how many tomatoes?","The recipe says I need a lot of onions but not much oil.","There are not many eggs in the fridge, so I will buy some more.","I have a little cheese and a few lemons for the salad."],
+{"recipe":"instructions for cooking a dish","oil":"a thick liquid used for cooking","fridge":"a machine that keeps food cold","lemons":"yellow fruit with a sour taste","salad":"a cold dish of raw vegetables"},
+["much, many and a lot of","Use these words to talk about quantity.","many + things you can count (eggs, tomatoes) · much + things you cannot count (rice, oil), mostly in questions and negatives · a lot of + both · a few + countable · a little + uncountable.","Count the noun first: How many eggs, not How much eggs.","How much rice do I need?","There are not many eggs in the fridge."],
+[["How ___ tomatoes do we need?","much|many|a lot",1],["How ___ rice is there?","much|many|few",0],["There is not ___ oil.","many|much|a few",1],["We have ___ of onions.","many|much|a lot",2],["There are not ___ eggs.","much|many|a little",1],["I have a ___ lemons.","little|few|much",1],["Add a ___ salt.","few|many|little",2],["How ___ people are coming?","many|much|a lot",0],["She drinks ___ water every day.","a lot of|many|a few",0],["How ___ money do you have?","many|few|much",2]],
+[["Follow the ___ and the cake will be perfect.","recipe"],["Fry the onions in a little ___.","oil"],["Put the milk in the ___.","fridge"],["I put the juice of two ___ in my tea.","lemons"],["We ate a green ___ with tomatoes.","salad"]],
+"Describe a dish you can cook. What do you need, and how much or how many?");
+
+L("A2","Technology","A Call from the Office","Choose between the present simple and the present continuous.",
+["Marco works for a software company and usually starts at nine.","Today he is working from home because his laptop is at the office.","Right now he is talking to a customer on a video call.","He normally writes reports in the morning, but this week he is training a new employee.","His boss is waiting for his answer at the moment."],
+{"software":"the programs that a computer uses","laptop":"a small computer that you can carry","customer":"a person who buys something from a company","reports":"written documents that give information about something","employee":"a person who works for a company"},
+["Present simple or present continuous","Use the present simple for habits and facts. Use the present continuous for now and for temporary situations.","usually, normally, every day → present simple · now, today, at the moment, this week → am / is / are + verb-ing.","For habits use the simple form: I work here every day, not I am working here every day.","Marco usually starts at nine.","Today he is working from home."],
+[["Marco usually ___ at nine.","starts|is starting|start",0],["Today he ___ from home.","works|is working|work",1],["Right now he ___ to a customer.","talks|talk|is talking",2],["He ___ reports every morning.","is writing|writes|write",1],["This week he ___ a new employee.","trains|train|is training",2],["She ___ coffee every day.","drinks|is drinking|drink",0],["Listen! The phone ___.","rings|is ringing|ring",1],["We ___ in an office in the centre. It is our permanent job.","work|are working|works",0],["What ___ you doing at the moment?","do|are|does",1],["___ he usually work on Saturdays?","Is|Do|Does",2]],
+[["This ___ helps me edit photos on my computer.","software"],["I take my ___ to the café and work there.","laptop"],["The ___ was not happy with the product and asked for her money back.","customer"],["The manager reads the sales ___ every Monday.","reports"],["The company has one new ___ this month.","employee"]],
+"Describe your normal working or school day, then say what is different this week.");
+
+L("A2","Health","At the Doctor's","Give advice with should and shouldn't.",
+["Elena has a bad cough and a sore throat.","The doctor says she should rest and drink a lot of water.","She should take this medicine three times a day.","She should not go to work this week.","If she still has a fever on Friday, she should come back."],
+{"cough":"when air comes out of your throat with a sudden loud noise","sore":"painful","rest":"to relax and not work","medicine":"something you take to make an illness better","fever":"a body temperature that is higher than normal"},
+["should and shouldn't","Use should to give advice and to say what is a good idea.","should + base verb, the same for every person. Negative: should not or shouldn't. Question: Should I…?","No to after should: You should rest, not You should to rest.","She should rest and drink a lot of water.","She should not go to work this week."],
+[["You ___ rest. You look ill.","should|shouldn't|are",0],["She should ___ a lot of water.","drinks|drink|to drink",1],["You ___ go to work with a fever.","should|shouldn't|don't should",1],["___ I take this medicine?","Do|Am|Should",2],["He should ___ a doctor.","see|sees|to see",0],["They ___ eat so much sugar. It is bad for them.","should|shouldn't|aren't",1],["What ___ I do?","should|am|have",0],["You should not ___ late tonight.","to stay up|staying up|stay up",2],["She ___ come back on Friday if she is still ill.","should|shoulds|is should",0],["We ___ wash our hands before we eat.","shouldn't|should|should to",1]],
+[["He has a bad ___ and makes a lot of noise at night.","cough"],["My feet are ___ after the long walk.","sore"],["You are tired. Sit down and ___.","rest"],["Take this ___ twice a day.","medicine"],["The baby is very hot; she has a ___.","fever"]],
+"A friend has a cold and feels stressed. What should and shouldn't your friend do?");
+
+L("B1","People","A Life Abroad","Choose between the present perfect and the past simple.",
+["Kenji has lived in three countries, but he has never forgotten his hometown.","He moved to Canada in 2015 and worked there as a chef.","Since then he has opened two restaurants of his own.","He has already won a national award, and last year he published a cookbook.","He has not decided yet where he will settle."],
+{"hometown":"the town where you were born or grew up","chef":"a professional cook","award":"a prize for doing something well","published":"made a book or story available for people to read","settle":"to make a place your permanent home"},
+["Present perfect or past simple","Use the present perfect for experiences and results when the time is not stated. Use the past simple when you say when something happened.","have / has + past participle, with ever, never, already, yet · past simple with in 2015, last year, yesterday, ago.","A finished time needs the past simple: I saw him yesterday, not I have seen him yesterday.","Kenji has lived in three countries.","He moved to Canada in 2015."],
+[["Kenji ___ in three countries.","has lived|have lived|living",0],["He ___ to Canada in 2015.","has moved|moved|have moved",1],["Have you ever ___ Japanese food?","eat|ate|eaten",2],["Last year he ___ a cookbook.","published|has published|publish",0],["She has ___ finished the report. Here it is.","yet|already|ago",1],["I ___ him yesterday.","have seen|saw|seen",1],["They have not arrived ___.","already|ever|yet",2],["We ___ to Paris twice. We love it.","have been|has been|are been",0],["When ___ you start this job?","have|did|has",1],["He has never ___ his hometown.","forgot|forget|forgotten",2]],
+[["I go back to my ___ every Christmas to see my parents.","hometown"],["The ___ cooks for two hundred guests every night.","chef"],["She received an ___ for her first film.","award"],["The newspaper ___ the story on its front page.","published"],["After years of travelling, they want to ___ in one place.","settle"]],
+"Write about someone you know who has lived or travelled abroad. What have they done, and when?");
+
+L("B1","Daily life","If It Rains on Saturday","Talk about real future possibilities with the first conditional.",
+["We are planning a picnic by the lake on Saturday.","If the weather is good, we will take the boat out.","If it rains, we will move everything to the shelter near the car park.","We will need more blankets if it gets cold in the evening.","Unless someone forgets the matches, we will light a fire."],
+{"picnic":"a meal that you eat outdoors","lake":"a large area of water with land around it","shelter":"a place that protects you from bad weather","blankets":"thick covers that keep you warm","matches":"small sticks used to light a fire"},
+["First conditional","Use the first conditional for things that may really happen in the future.","If + present simple, will + base verb. The if clause can come first or second. unless = if not.","No will in the if clause: If it rains, not If it will rain.","If it rains, we will move everything to the shelter.","We will need more blankets if it gets cold."],
+[["If it ___, we will stay at home.","rains|will rain|rained",0],["If the weather is good, we ___ the boat out.","take|will take|took",1],["We will be cold if we ___ blankets.","won't bring|don't bring|didn't bring",1],["___ you call me if you are late?","Do|Are|Will",2],["If she ___ hard, she will pass.","studies|will study|study",0],["Unless he ___, he will miss the bus.","hurry|hurries|will hurry",1],["I ___ you if I need help.","will tell|tell|told",0],["If they ___ come, we will start without them.","won't|don't|aren't",1],["What will you do if it ___ cold?","will get|got|gets",2],["We will light a fire ___ someone forgets the matches.","unless|if|when",0]],
+[["We took sandwiches and had a ___ in the park.","picnic"],["They swam in the ___ behind the hotel.","lake"],["When the storm began, the walkers found ___ in a hut.","shelter"],["It was freezing, so we slept under three ___.","blankets"],["He struck one of the ___ to light the candle.","matches"]],
+"Describe your plans for next weekend. What will you do if the weather changes or something goes wrong?");
+
+L("B1","People","If I Won the Lottery","Imagine unreal situations with the second conditional.",
+["People often imagine what they would do if they won the lottery.","If I had a million dollars, I would not quit my job immediately.","I would pay my debts and buy a modest house for my parents.","If I were braver, I would start my own business.","My sister says she would donate half of the money if she were rich."],
+{"lottery":"a game in which people buy numbered tickets to win money","quit":"to leave a job","debts":"money that you owe","modest":"not large or expensive","donate":"to give money to help people"},
+["Second conditional","Use the second conditional for unreal or unlikely situations in the present or future.","If + past simple, would + base verb. In careful English use were for every person: If I were you…","No would in the if clause: If I had time, not If I would have time.","If I had a million dollars, I would not quit my job.","If I were braver, I would start my own business."],
+[["If I ___ a million dollars, I would travel.","have|had|would have",1],["If she were rich, she ___ half of it.","would donate|donates|will donate",0],["What would you do if you ___ the lottery?","win|would win|won",2],["If I ___ you, I would accept the job.","am|were|would be",1],["He ___ buy a house if he had the money.","will|would|did",1],["If we lived by the sea, we ___ every day.","swim|will swim|would swim",2],["I would not quit my job if I ___ rich.","were|am|would be",0],["If they ___ more time, they would learn Chinese.","have|had|would have",1],["___ you move abroad if you could?","Will|Do|Would",2],["If he knew the answer, he ___ us.","would tell|tells|told",0]],
+[["She bought a ticket for the ___ but did not win.","lottery"],["He decided to ___ and look for a better job.","quit"],["It took her five years to pay all her ___.","debts"],["They live in a ___ flat with two small rooms.","modest"],["Many people ___ to charity at Christmas.","donate"]],
+"What would you do if you won a large amount of money? Explain what you would and would not change.");
+
+L("B1","Travel","Rules at the Hostel","Explain rules with must, have to and don't have to.",
+["Welcome to the hostel; please read these rules before you check in.","Guests must show a passport at reception.","You have to leave your room before eleven on the day you depart.","You do not have to pay for breakfast, because it is included.","You must not smoke inside the building, and you should keep valuables in a locker."],
+{"hostel":"a cheap place where travellers can stay","reception":"the desk where guests arrive in a hotel","depart":"to leave","included":"already part of the price","valuables":"small things that are worth a lot of money"},
+["Modals of obligation","Use must and have to for rules, must not for things that are forbidden, and don't have to for things that are not necessary.","must / must not + base verb · have to / has to + base verb · don't / doesn't have to + base verb. Past: had to.","must not and don't have to are different: You must not pay means it is forbidden. You don't have to pay means it is free.","Guests must show a passport.","You do not have to pay for breakfast."],
+[["Guests ___ show a passport. It is the rule.","must|mustn't|don't have to",0],["Breakfast is free. You ___ pay for it.","mustn't|don't have to|must",1],["You ___ smoke inside. It is forbidden.","don't have to|have to|must not",2],["She ___ to leave before eleven.","must|has|have",1],["Do we ___ to book in advance?","must|has|have",2],["Tomorrow is Sunday, so I ___ get up early.","don't have to|mustn't|must",0],["You ___ touch that wire. It is dangerous.","don't have to|mustn't|have to",1],["He ___ wear a uniform at work. It is compulsory.","has to|doesn't have to|mustn't",0],["Yesterday we ___ wait for two hours.","must|had to|have to",1],["You must ___ quiet after ten.","to be|being|be",2]],
+[["We stayed in a cheap ___ and shared a room with four other travellers.","hostel"],["Ask at ___ if you need another key.","reception"],["The trains ___ from platform two every hour.","depart"],["Is service ___ in the bill?","included"],["Do not leave ___ in your car.","valuables"]],
+"Write the rules for a place you know well: a school, a workplace, a gym or a shared flat.");
+
+L("B1","Daily life","The Night the Lights Went Out","Tell a story with the past continuous and the past simple.",
+["I was cooking dinner when the lights suddenly went out.","My brother was watching a film, and my mother was working on her computer.","While we were looking for candles, someone knocked at the door.","It was our neighbour, who was carrying a torch and a box of matches.","We were all laughing by the time the electricity came back."],
+{"suddenly":"quickly and when you do not expect it","knocked":"hit a door with the hand to get attention","torch":"a small electric light that you carry","laughing":"making the sound you make when something is funny","electricity":"the power that makes lights and machines work"},
+["Past continuous and past simple","Use the past continuous for an action in progress in the past, and the past simple for a shorter action that interrupts it.","was / were + verb-ing · when + past simple · while + past continuous.","Show which action was in progress: I was cooking when the lights went out, not I cooked when the lights went out.","I was cooking dinner when the lights went out.","While we were looking for candles, someone knocked."],
+[["I ___ dinner when the lights went out.","cooked|was cooking|am cooking",1],["While we ___ for candles, someone knocked.","were looking|looked|are looking",0],["She was reading when the phone ___.","was ringing|rings|rang",2],["They ___ watching a film at nine o'clock.","was|were|did",1],["What ___ you doing when I called?","were|did|was",0],["He ___ his leg while he was playing football.","was breaking|broke|breaks",1],["It ___ raining when we left the house.","were|did|was",2],["___ I was walking home, I met an old friend.","While|During|Until",0],["We were having dinner when they ___.","were arriving|arrive|arrived",2],["She ___ not listening when the teacher explained.","was|were|did",0]],
+[["The car stopped ___ and we nearly hit it.","suddenly"],["I ___ three times, but nobody opened the door.","knocked"],["Take a ___; the path is dark at night.","torch"],["The joke was so good that everyone was ___.","laughing"],["The storm cut off the ___ for two days.","electricity"]],
+"Tell the story of something unexpected that happened to you. What were you doing when it happened?");
+
+L("B1","Work","Ten Years in the Same Team","Say how long with the present perfect, for and since.",
+["Lucia has worked for the same company since 2015.","She has been a project leader for three years.","Her team has grown a lot since she joined.","She has known most of her colleagues for a decade.","She has not taken a long holiday since her promotion."],
+{"project":"a planned piece of work","leader":"the person who directs a group","grown":"become bigger","decade":"a period of ten years","promotion":"a move to a more important job"},
+["Present perfect with for and since","Use the present perfect for something that started in the past and continues now.","have / has + past participle + for + a period (for three years) · since + a starting point (since 2015). Question: How long have you…?","Use the present perfect, not the present simple: I have worked here since 2015, not I work here since 2015.","Lucia has worked for the same company since 2015.","She has been a project leader for three years."],
+[["She has worked here ___ 2015.","for|since|from",1],["He has been a leader ___ three years.","for|since|during",0],["How long ___ you known her?","do|did|have",2],["I have lived here ___ I was a child.","for|since|when",1],["They have been married ___ a decade.","since|for|ago",1],["We ___ each other since school.","know|have known|are knowing",1],["She has not had a holiday ___ last summer.","since|for|in",0],["He has had that car ___ ages.","since|for|from",1],["I ___ here for two hours. Where were you?","am|have been|be",1],["It has not rained ___ three weeks.","for|since|ago",0]],
+[["The ___ will take six months to finish.","project"],["Every team needs a good ___.","leader"],["The city has ___ a lot in ten years.","grown"],["The 1990s were an interesting ___.","decade"],["After her ___, she became head of the department.","promotion"]],
+"Write about your job, studies or a hobby. How long have you done it, and what has changed since you started?");
+
+L("B1","Food","How Chocolate Is Made","Describe a process with the passive.",
+["Chocolate is made from the seeds of the cacao tree.","The seeds are harvested by hand and left to dry in the sun.","Then they are roasted and ground into a thick paste.","Sugar and milk are added before the mixture is poured into moulds.","Cacao was first cultivated in Mesoamerica thousands of years ago."],
+{"seeds":"the small hard parts of a plant from which new plants grow","harvested":"collected from the plants when ready","roasted":"cooked with dry heat","mixture":"a combination of different things","cultivated":"grown as a crop"},
+["The passive: present and past simple","Use the passive when the action matters more than the person who does it.","am / is / are + past participle (present) · was / were + past participle (past). Add by + person only if it is important.","Use the past participle after be: Chocolate is made, not Chocolate is make.","The seeds are harvested by hand.","Cacao was first cultivated in Mesoamerica."],
+[["Chocolate ___ made from cacao seeds.","is|are|be",0],["The seeds ___ harvested by hand.","is|are|was",1],["Sugar is ___ to the mixture.","add|adding|added",2],["Cacao ___ first cultivated thousands of years ago.","is|was|were",1],["This cake was made ___ my grandmother.","by|from|of",0],["These cars ___ made in Japan.","is|are|be",1],["The letter ___ sent yesterday.","is|were|was",2],["Coffee ___ grown in Chiapas.","is|are|were",0],["The windows were ___ last week.","clean|cleaned|cleaning",1],["English ___ spoken in many countries.","are|is|be",1]],
+[["Plant the ___ in spring and water them every day.","seeds"],["The grapes are ___ in September.","harvested"],["We ___ a chicken for Sunday lunch.","roasted"],["Stir the ___ until it is smooth.","mixture"],["Rice is ___ in many parts of Asia.","cultivated"]],
+"Describe how a food or product from your region is made, step by step.");
+
+L("B1","Health","Learning to Swim at Thirty","Use verbs followed by to or by -ing.",
+["Omar decided to learn to swim when he turned thirty.","He had always avoided going near deep water.","At first he was afraid of putting his head under the surface.","His instructor encouraged him to practise breathing slowly.","Now he enjoys swimming and hopes to compete next year."],
+{"avoided":"stayed away from something","surface":"the top of an area of water","instructor":"a person who teaches a skill","encouraged":"gave someone hope and confidence to do something","compete":"to take part in a race or contest"},
+["Gerunds and infinitives","Some verbs are followed by to + verb, others by verb-ing. After a preposition, always use verb-ing.","decide, hope, want, learn + to + verb · enjoy, avoid, finish + verb-ing · afraid of, interested in, thank you for + verb-ing.","enjoy takes -ing: He enjoys swimming, not He enjoys to swim.","Omar decided to learn to swim.","He had always avoided going near deep water."],
+[["He decided ___ to swim.","learning|to learn|learn",1],["She enjoys ___.","to swim|swim|swimming",2],["He avoided ___ near deep water.","going|to go|go",0],["I hope ___ you soon.","seeing|to see|see",1],["She is afraid of ___.","to fly|fly|flying",2],["We want ___ a new car.","buying|to buy|buy",1],["He finished ___ the report at six.","writing|to write|write",0],["Thank you for ___ me.","to help|help|helping",2],["They learned ___ in a week.","ski|to ski|to skiing",1],["I am interested in ___ Japanese.","learn|to learn|learning",2]],
+[["She ___ the city centre because of the traffic.","avoided"],["A leaf was floating on the ___ of the pond.","surface"],["My driving ___ is very patient.","instructor"],["My parents ___ me to study music.","encouraged"],["Twenty teams will ___ in the tournament.","compete"]],
+"Write about a skill you learned as an adult, or one you would like to learn. What do you enjoy and what do you avoid?");
+
+L("B2","Travel","The Train I Missed","Imagine a different past with the third conditional.",
+["If I had left the house five minutes earlier, I would have caught the train.","Instead I stood on the platform and watched it pull away.","I would not have missed the interview if the taxi had arrived on time.","Had I checked the timetable the night before, none of this would have happened.","Still, if I had got that job, I might never have met my future business partner."],
+{"platform":"the raised area where you get on a train","pull away":"to start moving, when a vehicle leaves","interview":"a formal meeting to decide whether someone gets a job","timetable":"a list of the times of trains or buses","partner":"a person you own a business with"},
+["Third conditional","Use the third conditional to imagine a past that did not happen, and its imagined result.","If + past perfect, would / might / could have + past participle. Formal: Had I known, I would have…","No would in the if clause: If I had left, not If I would have left.","If I had left earlier, I would have caught the train.","I would not have missed the interview if the taxi had arrived on time."],
+[["If I ___ earlier, I would have caught the train.","left|had left|would have left",1],["She ___ have missed the interview if the taxi had come.","wouldn't|won't|didn't",0],["If they had checked the timetable, they ___ late.","wouldn't be been|wouldn't have been|weren't",1],["What would you have done if you ___ the job?","got|would get|had got",2],["If it had not rained, we ___ gone out.","would|would have|had",1],["He might ___ passed if he had studied.","have|had|has",0],["If I had known, I ___ you.","would tell|told|would have told",2],["___ I checked the timetable, I would have known.","Had|If|Would",0],["We would have won if our best player ___ injured.","wasn't been|hadn't been|wouldn't be",1],["If she had taken the map, she ___ lost.","wouldn't get|didn't get|wouldn't have got",2]],
+[["The passengers waited on the ___ for an hour.","platform"],["I waved as the bus began to ___ from the stop.","pull away"],["She wore a suit to the ___ and got the job.","interview"],["According to the ___, the next bus leaves at noon.","timetable"],["He runs the shop with his business ___.","partner"]],
+"Describe a moment when something went wrong for you. What would have happened if you had acted differently?");
+
+L("B2","Work","What the Manager Said","Report what people said with reported speech.",
+["At the meeting, the manager announced that the company was opening a new branch.","She said that sales had risen sharply during the previous quarter.","She told us that everyone would receive a bonus in December.","When I asked whether the deadline could be extended, she said she would consider it.","She warned us not to share the figures with anyone outside the firm."],
+{"branch":"a local office or shop of a large company","sharply":"suddenly and by a large amount","quarter":"a period of three months","bonus":"extra money added to your pay","deadline":"the time by which work must be finished"},
+["Reported speech","Use reported speech to say what someone said without quoting them.","The tense moves one step back: is → was, have risen → had risen, will → would, can → could · say (that) · tell + person (that) · ask if / whether · tell + person + not to + verb.","tell needs a person and say does not: She told me, not She said me.","She said that sales had risen sharply.","She warned us not to share the figures."],
+[["'I am tired.' She said that she ___ tired.","is|was|has been",1],["'We will help.' They said they ___ help.","would|will|had",0],["He ___ me that he was busy.","told|said|spoke",0],["'Sales have risen.' She said sales ___ risen.","have|has|had",2],["I asked ___ the deadline could be extended.","whether|that|what",0],["'Don't share the figures.' She told us ___ the figures.","not to share|to not sharing|don't share",0],["She ___ that the company was growing.","told|said|asked",1],["'I can come.' He said he ___ come.","can|will|could",2],["'Where do you live?' She asked me where I ___.","live do|did live|lived",2],["'I saw him yesterday.' She said she had seen him ___.","yesterday|the day before|tomorrow",1]],
+[["The bank is opening a new ___ in our town.","branch"],["Prices rose ___ after the storm.","sharply"],["Profits fell in the first ___ of the year.","quarter"],["Every worker got a Christmas ___.","bonus"],["We worked all night to meet the ___.","deadline"]],
+"Report a conversation or meeting you took part in recently. What did each person say, ask and promise?");
+
+L("B2","Technology","A City Under Construction","Use the passive in continuous, perfect and future forms.",
+["A new metro line is being built beneath the city centre.","Two tunnels have already been completed, and a third is being drilled.","Thousands of residents have been asked to use alternative routes.","The project will be financed partly by the government.","It is expected that the first trains will be running within three years."],
+{"tunnels":"long passages under the ground","drilled":"cut through using a machine","residents":"people who live in a place","alternative":"different, and possible to use instead","financed":"paid for"},
+["The passive in other tenses","The passive works in every tense. Choose the form of be that matches the time.","is / are being + past participle (now) · has / have been + past participle (up to now) · will be + past participle (future).","Keep being for an action in progress: The line is being built, not The line is building.","A new metro line is being built.","Two tunnels have already been completed."],
+[["A new line ___ built at the moment.","is being|is been|has being",0],["Two tunnels have ___ completed.","being|be|been",2],["The project will ___ financed by the government.","being|be|been",1],["The road ___ repaired right now, so it is closed.","has been|is being|will be",1],["Residents ___ been asked to use other routes.","are|have|is",1],["The bridge ___ finished next year.","will be|is being|has been",0],["The results have not ___ published yet.","been|being|be",0],["Our office is ___ painted this week.","been|be|being",2],["A decision ___ made tomorrow.","has been|will be|is being",1],["Three people ___ been arrested so far.","has|have|are",1]],
+[["The train passes through several ___ under the mountains.","tunnels"],["They ___ a hole in the wall for the cable.","drilled"],["Local ___ complained about the noise.","residents"],["The road is closed, so we need an ___ route.","alternative"],["The film was ___ by a private company.","financed"]],
+"Describe a building or transport project in your city. What has been done, what is being done and what will be done?");
+
+L("B2","People","Things I Wish I Had Known","Express regrets and wishes with wish and if only.",
+["I wish I had known at twenty how quickly time passes.","If only I had kept in touch with my friends from university.","I wish I spoke another language fluently; it would open so many doors.","My father wishes he had not turned down a scholarship abroad.","I wish people would stop telling me that regret is pointless."],
+{"kept in touch":"continued to write or speak to someone","fluently":"easily and without mistakes","turned down":"refused an offer","scholarship":"money given to a student to pay for their studies","regret":"sadness about something you did or did not do"},
+["wish and if only","Use wish and if only to say that you want a situation to be different.","wish + past simple (the present) · wish + past perfect (a past regret) · wish + would + verb (a habit that annoys you). if only is stronger.","For past regrets use the past perfect: I wish I had known, not I wish I would have known.","I wish I had known how quickly time passes.","I wish I spoke another language fluently."],
+[["I wish I ___ another language. I only speak one.","speak|spoke|have spoken",1],["I wish I ___ harder at school.","had studied|have studied|study",0],["If only I ___ so much last night. I feel terrible.","didn't eat|hadn't eaten|wouldn't eat",1],["I wish you ___ stop interrupting me.","will|did|would",2],["She wishes she ___ taller.","is|were|would be",1],["He wishes he ___ the scholarship. Now it is too late.","had accepted|accepts|would accept",0],["If only it ___ raining. We could go out.","stops|would stop|has stopped",1],["I wish I ___ where my keys are.","knew|know|had know",0],["They wish they ___ that house years ago.","bought|buy|had bought",2],["I wish I ___ go, but I have to work.","can|could|will",1]],
+[["We ___ by email after she moved abroad.","kept in touch"],["She speaks three languages ___.","fluently"],["He ___ the offer because the salary was too low.","turned down"],["She won a ___ to study in Canada.","scholarship"],["His biggest ___ is not travelling when he was young.","regret"]],
+"Write about three things you wish were different now, and one decision in the past you wish you had made differently.");
+
+L("B2","Culture","The Library That Lends Tools","Add extra information with non-defining relative clauses.",
+["Our neighbourhood library, which opened in 1962, now lends far more than books.","Members can borrow drills, ladders and even sewing machines, which saves them a great deal of money.","The scheme was started by Rosa Vidal, whose father was a carpenter.","Volunteers, many of whom are retired, repair the tools every week.","The library, where I spent my childhood, has become the heart of the community."],
+{"lends":"gives something to someone for a short time","borrow":"to take something and promise to return it","scheme":"an organised plan","carpenter":"a person who makes things from wood","volunteers":"people who work without being paid"},
+["Non-defining relative clauses","Use a non-defining relative clause to add extra information about a person, thing or whole idea.","noun + comma + which / who / whose / where + clause + comma. which can also refer to the whole clause before it.","Never use that after a comma: The library, which opened in 1962, not The library, that opened in 1962.","Our library, which opened in 1962, now lends more than books.","The scheme was started by Rosa Vidal, whose father was a carpenter."],
+[["The library, ___ opened in 1962, is popular.","that|which|what",1],["Rosa, ___ father was a carpenter, started it.","who|which|whose",2],["My brother, ___ lives in Madrid, is a nurse.","who|that|which",0],["Members borrow tools, ___ saves them money.","what|which|that",1],["The town, ___ I grew up, has changed.","which|where|that",1],["The volunteers, many of ___ are retired, meet weekly.","who|which|whom",2],["Her car, ___ she bought last year, has broken down.","which|that|who",0],["Mr Lee, ___ you met yesterday, is our director.","whom|which|whose",0],["He passed the exam, ___ surprised everyone.","what|that|which",2],["The author, ___ books I love, is visiting.","who|whose|which",1]],
+[["The bank ___ money to small businesses.","lends"],["Can I ___ your pen for a moment?","borrow"],["The city has a new ___ to reduce traffic.","scheme"],["The ___ built us a wooden table.","carpenter"],["The festival depends on ___ who give their time for free.","volunteers"]],
+"Describe a place or organisation that matters to your community. Add extra details with which, who, whose and where.");
+
+L("B2","Culture","The Missing Painting","Make deductions about the past with must have, can't have and might have.",
+["When the gallery opened on Monday, a valuable portrait had vanished.","The thief must have entered through the roof, because the doors were still locked.","He cannot have worked alone, since the frame weighs forty kilos.","The alarm might have been switched off by someone on the staff.","Detectives believe the painting may have left the country already."],
+{"gallery":"a building where people look at art","portrait":"a painting of a person","vanished":"disappeared suddenly","thief":"a person who steals","frame":"the border around a picture"},
+["Modals of deduction about the past","Use these forms to say how sure you are about what happened.","must have + past participle (I am sure it happened) · can't have + past participle (I am sure it did not) · might / may / could have + past participle (it is possible).","Use have, never had: He must have left, not He must had left.","The thief must have entered through the roof.","He cannot have worked alone."],
+[["The doors were locked. He ___ have come through the roof.","must|can't|should",0],["The frame is too heavy. He ___ have worked alone.","must|can't|might",1],["I am not sure, but someone ___ have switched off the alarm.","can't|must|might",2],["She must have ___ the keys at home.","leave|left|leaving",1],["The lights are off. They must ___ gone out.","have|had|has",0],["He ___ have seen me. He looked straight at me.","can't|must|might not",1],["She ___ have passed. She did not study at all.","can't|must|may",0],["They may ___ missed the train.","had|having|have",2],["It ___ have rained. The streets are wet.","can't|must|couldn't",1],["Where is Tom? He ___ have got lost; it is possible.","must|can't|could",2]],
+[["The ___ shows paintings by local artists.","gallery"],["The ___ of the queen hangs in the hall.","portrait"],["My wallet has ___; it was here a minute ago.","vanished"],["The ___ took her bag and ran.","thief"],["The photo looks better in a wooden ___.","frame"]],
+"Describe a mystery, real or invented. What must have happened, what might have happened and what can't have happened?");
+
+L("B2","Science","By 2050","Look ahead with the future perfect and the future continuous.",
+["By 2050, the world's population will have reached almost ten billion.","Most of us will be living in cities, and many will be commuting in driverless vehicles.","Scientists predict that sea levels will have risen by several centimetres.","Some coastal communities will have relocated by then.","We will still be debating how to share resources fairly."],
+{"population":"the number of people who live in a place","commuting":"travelling regularly between home and work","predict":"to say what you think will happen","relocated":"moved to a new place","resources":"things such as water, land and energy that people can use"},
+["Future perfect and future continuous","Use the future perfect for something finished before a time in the future. Use the future continuous for something in progress at that time.","will have + past participle, with by 2050, by then, by Friday · will be + verb-ing, with this time next week, at nine tomorrow.","by + time usually needs the future perfect: By Friday I will have finished, not By Friday I will finish.","The population will have reached almost ten billion.","Most of us will be living in cities."],
+[["By 2050 the population ___ ten billion.","will have reached|will be reaching|reaches",0],["This time next week I ___ on a beach.","will have lain|will be lying|lie",1],["By Friday she ___ the report.","will be finishing|finishes|will have finished",2],["At nine tomorrow we ___ the exam.","will be taking|will have taken|took",0],["By the time you arrive, the film ___.","will be starting|will have started|starts",1],["In ten years most people ___ electric cars.","will have driven|drive|will be driving",2],["He will have ___ here for a decade by June.","working|work|worked",2],["Don't call at eight. I will ___ dinner.","be having|have had|having",0],["By next year they ___ married for fifty years.","will be being|will have been|are",1],["Will you ___ using the car tonight?","have|be|been",1]],
+[["The ___ of Mexico City is over twenty million.","population"],["She spends two hours a day ___ by train.","commuting"],["Experts ___ a cold winter.","predict"],["The company ___ to a bigger office last year.","relocated"],["Water and oil are valuable natural ___.","resources"]],
+"Describe your city or your own life in twenty years. What will have changed, and what will people be doing?");
+
+L("B2","Daily life","Getting Things Done","Say that someone does a job for you with have and get.",
+["Last month we had the kitchen renovated by a local firm.","We also got the roof inspected, because it had been leaking.","My wife has her car serviced every six months.","I usually get my shirts ironed at the laundry on the corner.","Next week we are having a new boiler installed."],
+{"renovated":"repaired and improved, of a building","inspected":"examined carefully","leaking":"letting water through a hole","serviced":"checked and repaired, of a machine","installed":"put in place and made ready to use"},
+["have something done","Use have or get + object + past participle when you arrange for another person to do something for you.","have / get + thing + past participle, in any tense: I had my hair cut. We are having a boiler installed.","The order changes the meaning: I had my phone repaired (someone did it for me). I had repaired my phone (I did it myself, earlier).","We had the kitchen renovated.","My wife has her car serviced every six months."],
+[["We had the kitchen ___.","renovate|renovated|renovating",1],["She gets her car ___ twice a year.","serviced|service|to service",0],["I need to ___ my hair cut.","do|make|have",2],["They are having a new boiler ___ next week.","install|installed|installing",1],["Which sentence means someone else did it?","I repaired my phone.|I had my phone repaired.|I have repaired my phone.",1],["He ___ his eyes tested last month.","had|made|did",0],["Where do you get your shirts ___?","iron|to iron|ironed",2],["We must get the roof ___ before winter.","fixed|fix|fixing",0],["She is ___ her portrait painted.","have|having|had to",1],["Did you have the windows ___?","clean|cleaning|cleaned",2]],
+[["The old hotel was ___ and now looks modern.","renovated"],["An engineer ___ the bridge for damage.","inspected"],["The tap is ___; there is water on the floor.","leaking"],["The lift is ___ once a year by a technician.","serviced"],["They ___ solar panels on the roof.","installed"]],
+"Which jobs do you do yourself, and which do you have done for you? Describe some recent examples.");
+
+L("B2","Health","Getting Used to the Night Shift","Distinguish used to, be used to and get used to.",
+["When Irene became a nurse, she was not used to working at night.","She used to fall asleep at ten and wake at dawn.","It took months to get used to sleeping during the day.","Now she is used to the routine, although her appetite still suffers.","She says nobody ever fully gets used to missing family dinners."],
+{"dawn":"the time when the sun rises","routine":"the usual order in which you do things","appetite":"the feeling of wanting to eat","suffers":"is badly affected","fully":"completely"},
+["used to, be used to, get used to","These three forms look alike but mean different things.","used to + base verb (a past habit that has ended) · be used to + verb-ing or noun (it is normal for me now) · get used to + verb-ing or noun (it is becoming normal).","After be used to and get used to, use -ing: I am used to working, not I am used to work.","She used to fall asleep at ten.","It took months to get used to sleeping during the day."],
+[["She ___ fall asleep at ten, but now she works nights.","used to|is used to|gets used to",0],["He is used to ___ early.","get up|getting up|got up",1],["It takes time to get used to ___ on the left.","drive|drove|driving",2],["I ___ used to the noise now; it does not bother me.","am|did|use",0],["We ___ live in a village when I was a child.","were used to|used to|got used to",1],["She cannot ___ used to the cold weather.","be get|getting|get",2],["Are you used to ___ spicy food?","eating|eat|ate",0],["Did you ___ to play the piano?","used|use|using",1],["After a month he ___ used to the new schedule.","got|used|did",0],["They are not used ___ working at weekends.","for|at|to",2]],
+[["We left at ___, just as the sky was turning pink.","dawn"],["Exercise is part of my daily ___.","routine"],["The walk gave me a good ___ for lunch.","appetite"],["Her work ___ when she does not sleep well.","suffers"],["I do not ___ understand the instructions.","fully"]],
+"Describe a big change in your life, such as a new job, city or timetable. What did you use to do, and what have you got used to?");
+
+L("C1","Travel","Rarely Has a City Changed So Fast","Add emphasis with inversion after negative adverbials.",
+["Rarely has a city reinvented itself as swiftly as this former port.","Not only have the derelict warehouses been converted into studios, but the waterfront has also been opened to the public.","Seldom do visitors now encounter the grime that once defined the docks.","Hardly had the first galleries opened when property prices began to soar.","Only by walking the back streets can one sense what has been lost."],
+{"swiftly":"quickly","derelict":"in bad condition because nobody uses it","waterfront":"the part of a town next to a river, lake or sea","grime":"thick dirt on a surface","soar":"to rise very quickly"},
+["Inversion after negative adverbials","Starting a sentence with a negative or limiting adverbial adds emphasis in formal writing. The subject and auxiliary then change places.","Rarely / Seldom / Never / Not only / Only by… + auxiliary + subject + verb · Hardly had… when… · No sooner had… than…","An auxiliary is required: Rarely do we see, not Rarely we see.","Rarely has a city reinvented itself as swiftly.","Hardly had the first galleries opened when prices began to soar."],
+[["Rarely ___ such a transformation.","we have seen|have we seen|we saw",1],["Not only ___ late, but he also forgot the tickets.","he was|did he be|was he",2],["Seldom ___ visitors see the old docks.","do|are|have",0],["Hardly had we arrived ___ it began to rain.","than|when|then",1],["Never ___ I heard such nonsense.","did|am|have",2],["Only by working together ___ succeed.","we can|can we|we could",1],["No sooner had she left ___ the phone rang.","than|when|that",0],["Little ___ he know what was coming.","was|had|did",2],["Under no circumstances ___ leave the building.","should you|you should|you must",0],["Only later ___ the truth.","she realised|did she realise|she did realise",1]],
+[["The ambulance arrived ___, within four minutes.","swiftly"],["The ___ factory had broken windows and no roof.","derelict"],["We ate at a restaurant on the ___, watching the boats.","waterfront"],["His hands were black with ___ after cleaning the engine.","grime"],["Temperatures are expected to ___ above forty degrees.","soar"]],
+"Describe a place that has changed dramatically. Use at least three inverted sentences for emphasis.");
+
+L("C1","Work","The Rise of Remote Work","Write in a formal, compact style with nominalisation.",
+["The expansion of remote work has prompted a reassessment of what offices are for.","Its adoption was accelerated by necessity rather than design.","The reduction in commuting has brought measurable gains in wellbeing.","However, the erosion of informal contact has made collaboration harder to sustain.","The implications for city centres remain a matter of considerable debate."],
+{"prompted":"caused something to happen","reassessment":"the act of thinking again about something in order to change your opinion","erosion":"a gradual loss","sustain":"to keep something going","implications":"possible effects or results"},
+["Nominalisation","Formal writing often turns verbs and adjectives into nouns. This packs more information into each sentence and shifts attention from people to processes.","expand → expansion · reduce → reduction · adopt → adoption · erode → erosion · decide → decision. Often followed by of or in.","Do not overuse it. A chain such as 'the implementation of the reduction of costs' is hard to read.","The expansion of remote work has prompted a reassessment.","The reduction in commuting has brought measurable gains."],
+[["Remote work expanded. → The ___ of remote work…","expanding|expansion|expand",1],["The ___ in commuting improved wellbeing.","reduction|reduce|reduced",0],["Which is the noun form of adopt?","adoptive|adopted|adoption",2],["The ___ of the new policy caused confusion.","introduce|introduction|introductory",1],["Which sentence is the most formal?","People reacted angrily.|The reaction was one of anger.|People got angry.",1],["There has been a sharp ___ in prices.","increase|increasing|increased",0],["Which is the noun form of erode?","erosive|eroded|erosion",2],["The ___ of the two firms created a giant.","merger|merge|merged",0],["Her ___ to resign surprised everyone.","decide|decision|decisive",1],["The ___ of evidence led to his release.","lacking|lacked|lack",2]],
+[["The scandal ___ the minister to resign.","prompted"],["The poor results call for a ___ of the whole strategy.","reassessment"],["Critics warn of a gradual ___ of public trust.","erosion"],["It is hard to ___ such rapid growth for long.","sustain"],["The ruling has serious ___ for small businesses.","implications"]],
+"Write a formal paragraph on a change in working life. Use at least five nominalised forms.");
+
+L("C1","People","Had I Studied Medicine","Link past and present with mixed conditionals.",
+["If I had studied medicine, as my parents urged, I would be a consultant by now.","Instead I drifted into journalism, and I am not sure I would trade it.","If I were more ambitious, I would have applied for the editor's post last spring.","Had I not taken that first unpaid internship, I would not be writing this column.","If my parents had been less tolerant, I might still be resenting them."],
+{"urged":"strongly advised","drifted":"moved without a clear plan","ambitious":"determined to be successful","internship":"a period of work experience, often unpaid","resenting":"feeling angry about something you think is unfair"},
+["Mixed conditionals","Mixed conditionals connect different times: a past condition with a present result, or a permanent condition with a past result.","If + past perfect, would + base verb (past → present) · If + past simple, would have + past participle (present → past).","Decide the time of each clause separately before you choose the tense.","If I had studied medicine, I would be a consultant by now.","If I were more ambitious, I would have applied last spring."],
+[["If I had studied medicine, I ___ a doctor now.","would be|would have been|will be",0],["If she were more careful, she ___ the vase yesterday.","wouldn't break|wouldn't have broken|didn't break",1],["If we had left earlier, we ___ in traffic now.","wouldn't have sat|aren't sitting|wouldn't be sitting",2],["If he ___ so shy, he would have spoken to her at the party.","weren't|wouldn't be|isn't",0],["I would be rich today if I ___ those shares in 2010.","bought|had bought|would buy",1],["If I spoke French, I ___ the job in Paris last year.","would get|will have got|would have got",2],["Had I not taken the internship, I ___ here now.","would not be|would not have been|am not",0],["If you had slept properly, you ___ so tired now.","wouldn't have been|wouldn't be|aren't",1],["If she ___ afraid of flying, she would have come with us.","weren't|isn't|wouldn't be",0],["He would be alive today if he ___ his seatbelt.","wore|would wear|had worn",2]],
+[["Doctors ___ him to stop smoking.","urged"],["After university he ___ from job to job.","drifted"],["She is ___ and wants to run the company one day.","ambitious"],["He did a three-month ___ at a law firm before graduating.","internship"],["She is still ___ the way she was treated.","resenting"]],
+"Reflect on a decision that shaped your life. How would things be now if you had chosen differently?");
+
+L("C1","Technology","What Really Drives Innovation","Focus attention with cleft sentences.",
+["What drives innovation is rarely a single flash of genius.","It is sustained collaboration that turns a promising idea into a product.","What most start-ups lack is not talent but patient funding.","It was a cancelled project, ironically, that gave rise to the firm's best-selling device.","All that investors tend to remember, however, is the breakthrough itself."],
+{"genius":"exceptional intelligence or ability","promising":"likely to be successful","funding":"money provided for a purpose","gave rise to":"caused","breakthrough":"an important discovery or development"},
+["Cleft sentences","A cleft sentence splits one idea into two clauses in order to highlight one part of it.","It is / was + focus + that / who + clause · What + clause + is / was + focus · All (that) + clause + is / was + focus.","After What…, the verb be is singular: What we need is more data.","What drives innovation is rarely a single flash of genius.","It is sustained collaboration that turns an idea into a product."],
+[["___ drives innovation is collaboration.","That|What|It",1],["It is collaboration ___ turns ideas into products.","that|what|it",0],["What most start-ups lack ___ funding.","are|is|it is",1],["It ___ a cancelled project that led to the device.","is being|were|was",2],["___ I want is a quiet weekend.","All|It|That what",0],["It was my sister ___ told me the news.","what|who|which",1],["What she did ___ call the police.","is to|was|were",1],["It was in 2019 ___ the firm was founded.","that|when it|what",0],["___ annoys me is his attitude.","It|That|What",2],["It is not money ___ motivates her.","what|that|it",1]],
+[["Mozart was a musical ___.","genius"],["She is a ___ young scientist with a bright future.","promising"],["The school lost its government ___.","funding"],["The new tax ___ protests across the country.","gave rise to"],["The discovery was a major ___ in cancer research.","breakthrough"]],
+"What really makes a team or a company succeed? Argue your view, using cleft sentences to stress your main points.");
+
+L("C1","Travel","Having Crossed the Desert","Condense sentences with participle clauses.",
+["Having crossed the desert on foot, the expedition reached the oasis at dusk.","Exhausted by the heat, several members collapsed beside the well.","Not knowing how long supplies would last, the leader rationed the water.","Seen from the ridge, the settlement resembled a scattering of white stones.","The guides, sensing a storm, urged everyone to shelter before nightfall."],
+{"expedition":"an organised journey with a particular purpose","dusk":"the time just before dark","rationed":"allowed only a limited amount of","ridge":"the long narrow top of a hill","resembled":"looked like"},
+["Participle clauses","A participle clause replaces a full clause and makes writing more compact and formal.","verb-ing (active, at the same time) · having + past participle (an earlier action) · past participle (passive meaning). Negative: not + participle.","The clause must share the subject of the main clause. 'Walking home, the rain started' wrongly says the rain was walking.","Having crossed the desert, the expedition reached the oasis.","Exhausted by the heat, several members collapsed."],
+[["___ the desert, they reached the oasis.","Having crossed|Crossed|Having been crossed",0],["___ by the heat, he collapsed.","Exhausting|Exhausted|Having exhausted",1],["___ how long supplies would last, she rationed the water.","Not known|Not knowing|Not having know",1],["___ from the ridge, the town looked tiny.","Seeing|Having seen|Seen",2],["___ his speech, he sat down.","Having finished|Finished|Being finished",0],["The guides, ___ a storm, hurried on.","sensed|sensing|being sensed",1],["___ in 1850, the bridge is still in use.","Building|Having built|Built",2],["___ the news, she burst into tears.","Hearing|Heard|Being heard",0],["Which sentence is correct?","Walking home, the rain started.|Walking home, I got caught in the rain.|Walked home, I got caught in the rain.",1],["___ been warned, they took extra care.","Being|Have|Having",2]],
+[["The ___ to the South Pole took three months.","expedition"],["Bats come out at ___.","dusk"],["During the war, sugar was strictly ___.","rationed"],["We walked along the ___ and looked down into both valleys.","ridge"],["The clouds ___ a herd of sheep.","resembled"]],
+"Narrate a demanding journey, real or imagined. Use participle clauses to link the events.");
+
+L("C1","Work","The Committee Recommends","Use the subjunctive in formal recommendations.",
+["The committee recommends that the director review the budget without delay.","It is essential that every department submit its figures by the end of the month.","The auditors insisted that the contract be suspended pending an inquiry.","It is vital that no employee be penalised for raising concerns.","The board further proposes that an independent adviser be appointed."],
+{"committee":"a group of people chosen to make decisions","submit":"to give a document to someone in authority","auditors":"people who officially examine a company's accounts","pending":"while waiting for","penalised":"punished"},
+["The subjunctive","After verbs and adjectives of recommendation, demand and necessity, formal English uses the base form of the verb for every person.","recommend / insist / propose / demand / It is essential / It is vital + that + subject + base verb. Passive: be + past participle. Negative: not + base verb.","No -s and no is: that he review, that it be suspended. In British English, should + verb is a common alternative.","The committee recommends that the director review the budget.","The auditors insisted that the contract be suspended."],
+[["The committee recommends that he ___ the budget.","reviews|review|reviewed",1],["It is essential that every member ___ present.","be|is|are",0],["They insisted that the contract ___ suspended.","is|was|be",2],["It is vital that she ___ told immediately.","be|is|will be",0],["I suggest that he ___ a lawyer.","sees|see|saw",1],["The doctor advised that she ___ smoke.","doesn't|not|didn't",1],["They demanded that the manager ___.","resigns|resigned|resign",2],["It is important that the report ___ accurate.","be|is being|was",0],["We propose that an adviser ___ appointed.","is|be|will",1],["She requested that he ___ the meeting.","attends|attended|attend",2]],
+[["The ___ meets once a month to discuss funding.","committee"],["Please ___ your application by Friday.","submit"],["The ___ found errors in the company's accounts.","auditors"],["He was released ___ further investigation.","pending"],["Players are ___ for arriving late.","penalised"]],
+"Write formal recommendations to an organisation you know. Use the subjunctive at least five times.");
+
+L("C1","Nature","What the Explorers Should Have Packed","Criticise and speculate about the past with modal perfects.",
+["The party need not have carried so much tinned food; game was plentiful.","They should have brought warmer clothing, for the nights proved bitter.","With a better map they could have avoided the swamp entirely.","They ought to have heeded the locals, who warned of early snow.","Even so, they might easily have perished had the river frozen a week sooner."],
+{"plentiful":"available in large amounts","bitter":"extremely cold","swamp":"an area of very wet, soft land","heeded":"paid attention to advice or a warning","perished":"died"},
+["Modal perfects","Modal + have + past participle lets you judge or imagine past actions.","should / ought to have (it was a mistake not to) · need not have (it was done, but was unnecessary) · could have (it was possible, but did not happen) · might have (it was a real risk or possibility).","needn't have done means the action happened. didn't need to do usually means it did not.","They should have brought warmer clothing.","The party need not have carried so much tinned food."],
+[["They ___ have brought warmer clothes. It was a mistake not to.","should|needn't|might",0],["You ___ have cooked; we had already eaten. But thank you.","shouldn't|needn't|couldn't",1],["With a map they ___ have avoided the swamp.","must|needn't|could",2],["He ought ___ listened to the locals.","have|to have|having",1],["I ___ have told her, but I forgot.","should|must|needn't",0],["We ___ have died. We were very lucky.","needn't|might|ought",1],["You ___ have shouted at him. It was unkind.","needn't|couldn't|shouldn't",2],["She need not have ___; the train was late anyway.","hurried|hurry|hurrying",0],["They could have ___ us, but they chose not to.","help|helped|helping",1],["You ___ have seen the film; you described it perfectly.","needn't|shouldn't|must",2]],
+[["Fish are ___ in this river.","plentiful"],["A ___ wind blew from the north.","bitter"],["Crocodiles live in the ___.","swamp"],["Nobody ___ the warning, and the bridge collapsed.","heeded"],["Hundreds ___ in the earthquake.","perished"]],
+"Review a project, trip or event that did not go to plan. What should, could and need not have been done?");
+
+L("C1","Food","The Case for Organic Food","Concede a point with albeit, notwithstanding and nevertheless.",
+["Organic produce is widely assumed to be healthier, albeit on limited evidence.","Notwithstanding its higher price, demand has grown steadily.","Yields are generally lower; nevertheless, many farmers find the premium worthwhile.","Much as consumers value sustainability, few are willing to pay double.","Organic farming is no panacea, though it may well reduce pesticide residues."],
+{"produce":"fruit and vegetables grown on a farm","yields":"the amounts that a farm produces","premium":"an extra amount paid for something","panacea":"something that is supposed to solve every problem","residues":"small amounts that remain after a process"},
+["Concession","Concessive linkers admit one fact while asserting another that contrasts with it.","albeit + adjective or phrase · notwithstanding / despite + noun · nevertheless, linking two sentences · much as / although + clause · though, at the end of a sentence.","despite and notwithstanding take a noun, not a clause: despite the rain, but although it rained.","Notwithstanding its higher price, demand has grown.","Yields are lower; nevertheless, many farmers find the premium worthwhile."],
+[["The plan was approved, ___ reluctantly.","albeit|despite|nevertheless",0],["___ its price, demand has grown.","Nevertheless|Notwithstanding|Although",1],["Yields are lower; ___, farmers are satisfied.","albeit|much as|nevertheless",2],["___ I admire her work, I cannot agree.","Much as|Despite|Albeit",0],["___ the rain, the match went ahead.","Although|Despite|Much as",1],["___ it was raining, the match went ahead.","Despite|Notwithstanding|Although",2],["He accepted the job, ___ with some hesitation.","albeit|nevertheless|despite",0],["It is not perfect. It works well, ___.","albeit|though|despite",1],["In ___ of the delays, we finished on time.","despite|although|spite",2],["The evidence is thin. ___, the theory is popular.","Nevertheless|Albeit|Much as",0]],
+[["The market sells fresh local ___.","produce"],["Wheat ___ fell after the dry summer.","yields"],["Customers pay a ___ for faster delivery.","premium"],["Technology is not a ___ for every problem in education.","panacea"],["Tests found chemical ___ in the water.","residues"]],
+"Discuss a consumer choice people disagree about. Concede the strongest opposing points before giving your view.");
+
+L("C1","Science","The Bridge That Was to Change Everything","Narrate with the future in the past.",
+["In 1883 engineers unveiled a bridge that was to transform the region.","Few suspected that it would take another decade to complete.","The chief designer was going to retire that year, but he stayed on.","He was about to sign off the plans when a flaw was detected in the cables.","The delay, costly as it was, would later be credited with saving hundreds of lives."],
+{"unveiled":"showed something to the public for the first time","suspected":"believed that something was probably true","flaw":"a fault or weakness","detected":"discovered","credited":"said to be responsible for something good"},
+["The future in the past","When telling a story in the past, these forms describe what was still in the future at that moment.","was / were to + verb (what destiny held) · would + verb (what later happened) · was going to + verb (an intention, often not fulfilled) · was about to + verb (on the point of happening).","was going to often implies that the plan failed: I was going to call, but I forgot.","Engineers unveiled a bridge that was to transform the region.","He was about to sign off the plans when a flaw was detected."],
+[["The bridge ___ to transform the region.","was|would|is going",0],["Nobody knew that it ___ take ten years.","will|would|is to",1],["He ___ going to retire, but he changed his mind.","would|is|was",2],["She was ___ to leave when the phone rang.","about|going|soon",0],["They did not realise the war ___ last four years.","will|would|was",1],["The young clerk ___ to become president one day.","would|was going|was",2],["I ___ call you, but I lost your number.","would|was going to|am to",1],["He promised he ___ return.","would|will|was to going",0],["We were ___ to sign when a flaw was found.","to about|about|going",1],["The decision ___ later prove disastrous.","was|will|would",2]],
+[["The company ___ its new phone at a press event.","unveiled"],["Nobody ___ that the quiet clerk was a spy.","suspected"],["There is a serious ___ in your argument.","flaw"],["The test ___ traces of lead in the soil.","detected"],["She is widely ___ with reviving the local theatre.","credited"]],
+"Tell the story of an invention, building or career, showing what people expected at the time and what actually followed.");
+
+L("C2","People","A Dinner Best Forgotten","Convey attitude with advanced uses of modal verbs.",
+["I need not have fretted over the seating plan; half the guests failed to appear.","Those who did might at least have feigned an interest in the food.","My aunt would insist on recounting her operation in forensic detail.","I dare say the evening could have gone worse, though I struggle to imagine how.","Next year I would sooner dine alone than endure a repeat."],
+{"fretted":"worried","feigned":"pretended to feel something","recounting":"telling the story of","forensic":"extremely careful and detailed","endure":"to suffer something unpleasant patiently"},
+["Advanced modality","Beyond ability and obligation, modal verbs carry irony, reproach and preference.","would + verb, stressed (annoying insistence) · might / could have + past participle (reproach) · would sooner / rather + base verb (preference) · I dare say (I suppose) · may / might well (quite likely).","After would rather + a different subject, use a past form: I'd rather you didn't.","My aunt would insist on recounting her operation.","Those who did might at least have feigned an interest."],
+[["She ___ insist on interrupting; it drives me mad.","would|might|shall",0],["You ___ at least have phoned. I was worried sick.","must|might|would",1],["I would sooner ___ than apologise to him.","to resign|resigning|resign",2],["I ___ say he will be late, as usual.","dare|need|ought",0],["I ___ have worried; everything went smoothly.","mustn't|needn't|can't",1],["I'd rather you ___ mention this to anyone.","don't|won't|didn't",2],["He ___ well be right, though I doubt it.","may|shall|need",0],["You ___ have told me you were coming! I'd have cooked.","can|could|would",1],["Try as I ___, I could not open it.","would|should|might",2],["___ you ever need help, do call.","Should|Would|Might",0]],
+[["She ___ all night about the exam results.","fretted"],["He ___ surprise, though he had known for weeks.","feigned"],["He spent an hour ___ his adventures in Peru.","recounting"],["The report examined the accounts in ___ detail.","forensic"],["The villagers had to ___ months of drought.","endure"]],
+"Write a wry account of a social occasion that went badly, using modal verbs to convey irony and reproach.");
+
+L("C2","Work","Were It Not for the Merger","Write formal conditionals without if.",
+["Were it not for the merger, the firm would have folded within a year.","Had the board acted sooner, redundancies might have been averted.","Should the market recover, the remaining staff stand to benefit handsomely.","Were the regulators to intervene, however, the deal could yet unravel.","But for a handful of loyal clients, there would be little left to salvage."],
+{"folded":"closed because it failed, of a business","redundancies":"job losses","averted":"prevented from happening","unravel":"to fall apart","salvage":"to save something from loss or ruin"},
+["Inverted conditionals","In formal English, if can be dropped and the auxiliary moved in front of the subject.","Should + subject + verb (first conditional) · Were + subject (+ to + verb) (second) · Had + subject + past participle (third) · But for + noun (if it were not for).","Negatives are not contracted: Had I not known, never Hadn't I known.","Had the board acted sooner, redundancies might have been averted.","Should the market recover, the staff stand to benefit."],
+[["___ it not for her help, I would have failed.","Were|Did|Should",0],["___ the board acted sooner, jobs would have been saved.","Were|Had|Should",1],["___ you require assistance, please ask.","Had|Were|Should",2],["Were the regulators ___ intervene, the deal would collapse.","to|going|about",0],["___ for the clients, the firm would be gone.","Except|But|Without",1],["Had I ___, I would have come.","know|knew|known",2],["___ she here, she would agree.","Had|Were|Should",1],["Should the weather ___, we will cancel.","worsens|worsen|worsened",1],["Had it not ___ for the rain, we would have won.","be|being|been",2],["Which is the most formal?","If you need help, call.|Should you need help, call.|If you'll need help, call.",1]],
+[["The restaurant ___ after only six months.","folded"],["The factory announced two hundred ___.","redundancies"],["A strike was ___ by a last-minute deal.","averted"],["Their alibi began to ___ under questioning.","unravel"],["Divers tried to ___ the cargo from the wreck.","salvage"]],
+"Write a formal assessment of a business or institution at a turning point, using inverted conditionals throughout.");
+
+L("C2","Science","Reading the Ice","Control time precisely with perfect and continuous infinitives.",
+["The glacier is thought to have been retreating for well over a century.","By the time the survey concludes, researchers will have been drilling for eight consecutive summers.","The oldest cores appear to have formed long before humans reached the valley.","Had funding lapsed, decades of data would have been rendered worthless.","The team hopes to have published its findings before the next expedition sets out."],
+{"retreating":"moving back","consecutive":"following one after another without a break","cores":"long cylinders of ice or rock taken out of the ground","lapsed":"come to an end because it was not renewed","rendered":"caused to be in a particular state"},
+["Perfect and continuous infinitives","Infinitives carry aspect too, so you can place one action before or during another.","to have + past participle (earlier) · to have been + verb-ing (earlier and in progress) · will have been + verb-ing (duration up to a future point).","Compare: He seems to work hard (in general). He seems to have worked hard (before now).","The glacier is thought to have been retreating for a century.","The team hopes to have published its findings."],
+[["The glacier is thought ___ for a century.","to be retreated|to have been retreating|having retreat",1],["By June they ___ for eight summers.","will have been drilling|will be drilled|are drilling",0],["The cores appear ___ long ago.","to forming|to be form|to have formed",2],["She claims ___ the president last year.","to have met|to meet|meeting to",0],["He seems ___ all night; his eyes are red.","to work|to have been working|working",1],["They hope ___ the work by Friday.","to have finished|having finished|to finishing",0],["By next month I ___ here for twenty years.","will work|am working|will have been working",2],["The painting is believed ___ in 1650.","to paint|to have been painted|having painted",1],["I would like ___ her before she died.","meeting|to be met|to have met",2],["He is said ___ a fortune in the 1990s.","to have made|to making|made",0]],
+[["The army is ___ towards the border.","retreating"],["It rained for five ___ days.","consecutive"],["Scientists study ice ___ to learn about the ancient climate.","cores"],["My membership ___ because I forgot to renew it.","lapsed"],["The flood ___ the road impassable.","rendered"]],
+"Summarise a long-running piece of research or a historical process, placing each stage precisely in time.");
+
+L("C2","Culture","Strange Though It May Seem","Create emphasis by fronting.",
+["Strange though it may seem, the opera was booed at its premiere.","So radical was the score that half the orchestra threatened to walk out.","Gone were the lush melodies audiences had come to expect.","Such was the uproar that the composer fled the city by night.","Vindication he did eventually receive, though not in his lifetime."],
+{"premiere":"the first public performance","radical":"new and very different from what is usual","lush":"rich and pleasing","uproar":"noisy public protest","vindication":"proof that someone was right"},
+["Fronting for emphasis","Moving an element to the front of the clause throws weight on it, often with inversion.","adjective + though / as + subject + verb · So + adjective + be + subject + that… · Such + be + noun + that… · Gone / Here / On the hill + verb + subject.","These structures are literary. One or two in a text is effective; more sounds mannered.","Strange though it may seem, the opera was booed.","So radical was the score that half the orchestra threatened to walk out."],
+[["Strange ___ it may seem, he refused.","though|however|but",0],["So radical ___ the score that players walked out.","the score was|was|did",1],["___ was the uproar that he fled.","So|Such|As",1],["Gone ___ the days of cheap travel.","is|have|are",2],["Tired ___ she was, she kept working.","as|so|such",0],["So quickly ___ that nobody saw him.","he left|did he leave|left he",1],["Try ___ he might, he could not win.","though|so|as",2],["Such ___ his fame that crowds followed him.","was|did|had",0],["Much ___ I like him, I cannot support him.","though|as|so",1],["On the hill ___ a ruined castle.","it stood|did stand|stood",2]],
+[["The film had its ___ in Cannes.","premiere"],["The party proposed ___ changes to the tax system.","radical"],["The valley was full of ___ green vegetation.","lush"],["The decision caused an ___ in parliament.","uproar"],["The court's ruling was a ___ of her long campaign.","vindication"]],
+"Write about a work of art that was rejected at first and admired later. Use fronting for emphasis at key moments.");
+
+L("C2","Work","Two Ways to Say No","Shift register between formal and informal English.",
+["We regret to inform you that your application has been unsuccessful on this occasion.","The panel was unanimous in commending the calibre of your submission.","Regrettably, the volume of applicants precluded our offering feedback to each.","Put bluntly, somebody else got the job.","The art of formal refusal lies in cushioning that fact without obscuring it."],
+{"unanimous":"agreed by everyone","calibre":"quality or level of ability","precluded":"prevented","bluntly":"in a very direct way","cushioning":"making something less unpleasant"},
+["Register","Register is the level of formality you choose. The message stays the same while the vocabulary and grammar change.","Formal: single-word Latinate verbs (postpone, request), passives, nominalisation, no contractions · Informal: phrasal verbs (put off, ask for), contractions, direct address.","Mixing registers in one text jars the reader: 'We regret to inform you that you didn't get it.'","We regret to inform you that your application has been unsuccessful.","Put bluntly, somebody else got the job."],
+[["Which is the most formal?","We're sorry to say you didn't get it.|We regret to inform you that you were unsuccessful.|Bad news: no job.",1],["Formal equivalent of find out:","ascertain|check up|dig up",0],["Formal equivalent of put off:","delay a bit|postpone|push back",1],["Which fits a legal contract?","The tenant's got to pay.|The tenant should really pay.|The tenant shall pay.",2],["Informal equivalent of terminate:","end|conclude|discontinue",0],["Which is appropriate in an academic essay?","Loads of studies show this.|Numerous studies indicate this.|Tons of studies say so.",1],["Formal equivalent of ask for:","beg|want|request",2],["Which phrase is too informal for a report?","a great deal of|a significant number of|a whole bunch of",2],["Formal equivalent of get in touch with:","contact|ping|reach out to",0],["Which closing suits a formal letter to an unnamed recipient?","Cheers|Yours faithfully|Take care",1]],
+[["The jury reached a ___ verdict.","unanimous"],["The university attracts students of the highest ___.","calibre"],["His injury ___ any chance of a comeback.","precluded"],["To put it ___, the plan is a disaster.","bluntly"],["Savings helped in ___ the impact of losing her job.","cushioning"]],
+"Write the same refusal twice: once as a formal letter and once as a message to a friend. Then comment on the differences.");
+
+L("C2","Science","A Theory in Search of Evidence","Build and control complex noun phrases.",
+["The hypothesis that dark matter consists of as yet undetected particles remains unproven.","A series of increasingly sensitive underground experiments has so far yielded nothing.","The absence of any confirmed signal has emboldened proponents of rival theories.","Their central contention, that gravity itself requires modification, is hardly less speculative.","What both camps share is a reluctance to concede ground."],
+{"hypothesis":"an idea that has not yet been proved","yielded":"produced","emboldened":"made more confident","contention":"a claim made in an argument","concede":"to admit that something is true, or to give something up"},
+["Complex noun phrases","Academic prose packs information around a head noun. The verb agrees with that head noun, however far away it is.","determiner + modifiers + head noun + of-phrase or that-clause: the hypothesis that…, a series of experiments, the absence of any signal.","Find the head noun before choosing the verb: A series of experiments has…, not have.","The hypothesis that dark matter consists of undetected particles remains unproven.","A series of experiments has so far yielded nothing."],
+[["A series of experiments ___ yielded nothing.","have|has|are",1],["The hypothesis ___ dark matter exists is unproven.","that|which|what",0],["The absence of signals ___ encouraged rivals.","have|are|has",2],["The claim ___ gravity needs modifying is bold.","which|that|whose",1],["A number of studies ___ this view.","support|supports|is supporting",0],["The number of studies ___ growing.","are|is|were",1],["The fact ___ he lied is clear.","which|what|that",2],["Which is the head noun in 'the recent discovery of two new planets'?","discovery|planets|recent",0],["The idea ___ she proposed was rejected.","what|which|who",1],["The quality of the samples ___ poor.","were|are|was",2]],
+[["The experiment was designed to test a simple ___.","hypothesis"],["The search ___ no results.","yielded"],["The victory ___ the team to attack more.","emboldened"],["It is her ___ that the law is unfair.","contention"],["He refused to ___ defeat.","concede"]],
+"Explain an unresolved question in a field you know. Keep your noun phrases dense but your verb agreement exact.");
+
+L("C2","Technology","The Paradox of Choice Online","Link ideas with advanced reference and substitution.",
+["Streaming platforms offer both abundance and convenience; the former, however, often breeds paralysis.","The latter is harder to fault, which explains its enduring appeal.","Algorithms attempt to narrow the field, but in doing so they entrench existing tastes.","Such narrowing may be benign in entertainment; it is far less so in news.","Therein lies the dilemma that designers have yet to resolve."],
+{"abundance":"a very large quantity","paralysis":"the state of being unable to act","entrench":"to fix something so firmly that it is hard to change","benign":"not harmful","dilemma":"a difficult choice between two options"},
+["Cohesion and reference","Skilled writers point back to earlier ideas with compact reference words instead of repeating them.","the former / the latter (first and second of two) · such + noun (of that kind) · in doing so · less so · therein (in that) · thereby (by that means).","The former and the latter work only with exactly two items.","The former, however, often breeds paralysis.","In doing so they entrench existing tastes."],
+[["We offer tea and coffee; ___ is more popular. (coffee)","the former|the latter|such",1],["Cats and dogs differ: ___ are more independent. (cats)","the former|the latter|those",0],["He resigned, and in ___ so ended the crisis.","making|such|doing",2],["___ behaviour will not be tolerated.","Such|So|Thus",0],["The task is hard, but less ___ than it looks.","such|so|that",1],["___ lies the problem.","Therein|Such|Thereby",0],["She missed the train, ___ arriving late.","therein|such|thereby",2],["Prices rose. ___ rise was expected.","So|This|It",1],["Some agreed; ___ did not.","others|another|the other",0],["'Is he ready?' 'I believe ___.'","it|so|such",1]],
+[["The region has an ___ of fresh water.","abundance"],["The strike caused ___ across the transport network.","paralysis"],["Such policies only ___ inequality.","entrench"],["The tumour turned out to be ___.","benign"],["She faced a ___: stay in her job or follow her dream.","dilemma"]],
+"Analyse a technology that offers two competing benefits. Use reference devices so that you never repeat a key noun unnecessarily.");
+
+L("C2","Daily life","It Is High Time","Express criticism and preference with the unreal past.",
+["It is high time we overhauled the way this household runs.","My flatmate behaves as though chores were beneath him.","I would rather he did his share than apologised so profusely afterwards.","Suppose we drew up a rota; would anyone actually abide by it?","If only he had been brought up to wash a plate."],
+{"overhauled":"examined thoroughly and improved","chores":"regular jobs in the home","profusely":"in large amounts, of thanks or apologies","rota":"a list that shows when each person does a job","abide":"abide by: to accept and obey a rule"},
+["The unreal past","After certain expressions, a past tense refers to the present or future and marks the idea as unreal or desired.","It is (high) time + subject + past · would rather / sooner + subject + past · as if / as though + past · Suppose / Imagine + past.","With the same subject, would rather takes the base verb: I'd rather stay. With a new subject it takes the past: I'd rather you stayed.","It is high time we overhauled the way this household runs.","My flatmate behaves as though chores were beneath him."],
+[["It is high time we ___.","leave|left|will leave",1],["He talks as though he ___ the boss.","were|is being|would be",0],["I would rather you ___ here.","don't smoke|won't smoke|didn't smoke",2],["Suppose you ___ the lottery, what would you do?","won|win|would win",0],["It is time the children ___ in bed.","are|were|be",1],["She looked as if she ___ a ghost.","saw|has seen|had seen",2],["I'd rather she ___ told me yesterday.","had|has|would",0],["He spends money as though there ___ no tomorrow.","is being|were|will be",1],["I'd sooner you ___ tell anyone.","don't|won't|didn't",2],["It's about time somebody ___ the truth.","told|tells|has told",0]],
+[["The government ___ the tax system last year.","overhauled"],["The children do household ___ on Saturdays.","chores"],["He apologised ___ for being late.","profusely"],["According to the ___, it is my turn to cook.","rota"],["All members must ___ by the rules.","abide"]],
+"Write a complaint about a shared home, office or neighbourhood, using the unreal past to say what should change.");
+
+L("C2","Nature","Ostensibly Sustainable","Signal your stance with adverbials.",
+["The resort is ostensibly a model of sustainable tourism.","Its brochures, admittedly handsome, speak of pristine reefs and carbon neutrality.","Arguably, though, flying guests halfway round the world negates such claims.","The owners have purportedly offset every flight, a boast that is difficult to verify.","Undeniably, the local economy has prospered; whether the lagoon will is another matter."],
+{"pristine":"in its original, perfect condition","negates":"cancels the effect of","offset":"balanced one effect with an opposite one","verify":"to check that something is true","prospered":"became successful"},
+["Stance adverbials","A single adverb can show how far the writer accepts a claim.","ostensibly (apparently, but perhaps not really) · purportedly / allegedly / reputedly (others claim it) · arguably (a case can be made) · admittedly (I concede this) · undeniably (beyond dispute).","allegedly and purportedly distance you from a claim. Leaving them out can turn a report into an accusation.","The resort is ostensibly a model of sustainable tourism.","The owners have purportedly offset every flight."],
+[["The trip was ___ for business, but he spent it on the beach.","ostensibly|undeniably|admittedly",0],["The painting is ___ by Rembrandt, though experts doubt it.","undeniably|purportedly|admittedly",1],["She is ___ the finest pianist of her generation; many would agree.","ostensibly|purportedly|arguably",2],["___, I was wrong about the cost. I accept that.","Admittedly|Ostensibly|Purportedly",0],["The evidence is ___ strong; nobody disputes it.","allegedly|undeniably|ostensibly",1],["He ___ stole the money, but nothing has been proved.","undeniably|admittedly|allegedly",2],["Which adverb signals that the writer doubts the stated reason?","ostensibly|undeniably|admittedly",0],["Which adverb concedes a point before arguing against it?","arguably|admittedly|purportedly",1],["The plan is, ___, risky, but the alternatives are worse.","purportedly|ostensibly|admittedly",2],["___ the oldest pub in England, though no records survive to prove it.","Reputedly|Undeniably|Admittedly",0]],
+[["The beach was ___, without a single footprint.","pristine"],["One careless remark ___ months of diplomacy.","negates"],["Higher sales ___ the rise in costs.","offset"],["Journalists could not ___ the figures.","verify"],["The town ___ during the gold rush.","prospered"]],
+"Evaluate a company or product that claims to be environmentally friendly. Let your adverbs show how far you accept each claim.");
+
+/*EXTRA-END*/
+LESSONS.sort((a,b)=>LEVELS.indexOf(a.level)-LEVELS.indexOf(b.level));
+const WARM={"A Morning Routine": "What time do you wake up?", "At the Market": "Where does your family buy fruit and vegetables?", "My Family": "How many people are in your family?", "My Home": "Do you live in a house or a flat?", "What Can You Do?": "Can you swim or play an instrument?", "In the Classroom": "What is on your desk right now?", "My Town": "What is your favourite place in your town?", "My Best Friend": "What is your best friend's name?", "What Are They Wearing?": "What are you wearing today?", "Breakfast at the Café": "What do you eat for breakfast?", "A Weekend Trip by Train": "When did you last travel by train or bus?", "My First Day at the Office": "How did you feel on your first day at school or work?", "City or Village?": "Would you prefer to live in a city or a village?", "Records of the Natural World": "Which animal do you think is the most dangerous?", "Plans for the Holidays": "Where are you going to spend your next holiday?", "Tomorrow's Weather": "What is the weather like today?", "How Often Do You Exercise?": "How often do you do sport?", "Cooking for Friends": "What dish can you cook well?", "A Call from the Office": "Do you ever work or study from home?", "At the Doctor's": "What do you do when you have a cold?", "Why Families Build an Ofrenda": "How does your family remember relatives who have died?", "How Bees Find Their Way Home": "How do you find your way in a new city?", "A Life Abroad": "Have you ever lived in another country, or wanted to?", "If It Rains on Saturday": "What do you do when bad weather ruins your plans?", "If I Won the Lottery": "What is the first thing you would buy with a million dollars?", "Rules at the Hostel": "Which rules have annoyed you in a hotel or hostel?", "The Night the Lights Went Out": "What happened the last time the electricity went off at home?", "Ten Years in the Same Team": "What is the longest you have done the same job or hobby?", "How Chocolate Is Made": "Do you know where chocolate comes from?", "Learning to Swim at Thirty": "Which skill did you learn later than most people?", "The Four-Day Week Experiment": "Would you accept longer days in exchange for a three-day weekend?", "The Train I Missed": "Have you ever missed something important by a few minutes?", "What the Manager Said": "What was the last piece of news announced at your work or school?", "A City Under Construction": "What is being built in your city at the moment?", "Things I Wish I Had Known": "What advice would you give your twenty-year-old self?", "The Library That Lends Tools": "What would you borrow instead of buying, if you could?", "The Missing Painting": "Which famous theft or mystery do you know about?", "By 2050": "What will be the biggest change in daily life by 2050?", "Getting Things Done": "Which household jobs do you pay someone else to do?", "Getting Used to the Night Shift": "Which change of routine took you longest to get used to?", "What Sleep Does for Memory": "How does a bad night's sleep affect your ability to learn?", "Rarely Has a City Changed So Fast": "Which neighbourhood you know has changed beyond recognition?", "The Rise of Remote Work": "What is lost when colleagues stop sharing an office?", "Had I Studied Medicine": "Which career did you seriously consider and then abandon?", "What Really Drives Innovation": "Is innovation mostly the work of individuals or of teams?", "Having Crossed the Desert": "What is the most physically demanding journey you have made?", "The Committee Recommends": "What would you change first about an organisation you belong to?", "What the Explorers Should Have Packed": "What have you packed for a trip and never used?", "The Case for Organic Food": "Is organic food worth the extra cost?", "The Bridge That Was to Change Everything": "Which piece of infrastructure transformed your region?", "The Untranslatable Word": "Which word in your language resists translation into English?", "A Dinner Best Forgotten": "What makes a social occasion go irretrievably wrong?", "Were It Not for the Merger": "Which company you know was saved, or ruined, by a single decision?", "Reading the Ice": "How far should we trust predictions drawn from very old data?", "Strange Though It May Seem": "Which work of art was misjudged in its own time?", "Two Ways to Say No": "How do you soften a refusal without being dishonest?", "A Theory in Search of Evidence": "When is it reasonable to believe a theory that lacks direct evidence?", "The Paradox of Choice Online": "Does having more choice make you more or less satisfied?", "It Is High Time": "Which domestic habit of other people do you find hardest to tolerate?", "Ostensibly Sustainable": "How can a traveller tell real sustainability from marketing?"};
+LESSONS.forEach(l=>{l.w=WARM[l.title];});
+/*PHOTOS-START*/const PHOTOS={"l1": {"src": "img/l1.jpg", "by": "Candice Picard", "page": "https://unsplash.com/es/fotos/mujer-apoyada-en-la-pared-bebiendo-cafe-eI5yqPjpObU"}, "l2": {"src": "img/l2.jpg", "by": "Jacopo Maiarelli", "page": "https://unsplash.com/es/fotos/frutas-variadas-en-el-mercado--gOUx23DNks"}, "l3": {"src": "img/l3.jpg", "by": "Roméo A.", "page": "https://unsplash.com/es/fotos/mesa-y-sillas-de-madera-marron-cerca-del-cuerpo-de-agua-durante-el-dia-fdiAmvSyDX4"}, "l4": {"src": "img/l4.jpg", "by": "Redd Francisco", "page": "https://unsplash.com/es/fotos/people-sitting-on-chair-5U_28ojjgms"}, "l5": {"src": "img/l5.jpg", "by": "Chris Luengas", "page": "https://unsplash.com/es/fotos/una-exhibicion-de-calaveras-velas-y-decoraciones-YmouoHockxA"}, "l6": {"src": "img/l6.jpg", "by": "Krzysztof  Niewolny", "page": "https://unsplash.com/es/fotos/abeja-amarilla-y-negra-posada-en-flor-de-crisantemo-purpura-c3RWaj8L3M8"}, "l7": {"src": "img/l7.jpg", "by": "Bernd 📷 Dittrich", "page": "https://unsplash.com/es/fotos/una-oficina-con-muchos-escritorios-y-sillas-pYlBAu3de0w"}, "l8": {"src": "img/l8.jpg", "by": "iam_os", "page": "https://unsplash.com/es/fotos/una-persona-acostada-en-una-cama-tgMKcE-Qo5o"}, "l9": {"src": "img/l9.jpg", "by": "Akhilesh Sharma", "page": "https://unsplash.com/es/fotos/hojas-verdes-durante-el-dia-Hsjak-F8n3A"}, "a1-3": {"src": "img/a1-3.jpg", "by": "Ekaterina Shakharova", "page": "https://unsplash.com/es/fotos/mujer-mayor-abrazando-a-un-nino-pequeno-L4nwL3195U0"}, "a1-4": {"src": "img/a1-4.jpg", "by": "Sven Brandsma", "page": "https://unsplash.com/es/fotos/enciende-una-vela-en-una-mesa-de-centro-blanca-redonda-y-un-sofa-seccional-GZ5cKOgeIB0"}, "a1-5": {"src": "img/a1-5.jpg", "by": "Gabriel Gurrola", "page": "https://unsplash.com/es/fotos/persona-tocando-la-guitarra-2UuhMZEChdc"}, "a1-6": {"src": "img/a1-6.jpg", "by": "Nathan Cima", "page": "https://unsplash.com/es/fotos/un-aula-llena-de-pupitres-y-sillas-Qw6wa96IvvQ"}, "a1-7": {"src": "img/a1-7.jpg", "by": "micheile henderson", "page": "https://unsplash.com/es/fotos/una-hilera-de-edificios-de-ladrillo-con-mesas-y-sillas-frente-a-ellos-OOiBthIJFyE"}, "a1-8": {"src": "img/a1-8.jpg", "by": "Bhong Bahala", "page": "https://unsplash.com/es/fotos/un-par-de-ninos-jugando-un-partido-de-futbol-O5-jmjB0XjE"}, "a1-9": {"src": "img/a1-9.jpg", "by": "Jane Palash", "page": "https://unsplash.com/es/fotos/persona-sosteniendo-paraguas-al-lado-de-la-calle-Pj-7WtOi0ig"}, "a1-10": {"src": "img/a1-10.jpg", "by": "Roman Matovsky", "page": "https://unsplash.com/es/fotos/tortilla-de-huevo-en-plato-de-ceramica-blanca-4NdNhu9HxbE"}, "a2-3": {"src": "img/a2-3.jpg", "by": "Tomasz Zielonka", "page": "https://unsplash.com/es/fotos/un-camino-que-conduce-a-una-hilera-de-casas-IzYBo1J2eV4"}, "a2-4": {"src": "img/a2-4.jpg", "by": "Sammy Wong", "page": "https://unsplash.com/es/fotos/guepardo-en-la-hierba-verde-durante-el-dia-lFMIQ6AiiW8"}, "a2-5": {"src": "img/a2-5.jpg", "by": "Roman Lopez", "page": "https://unsplash.com/es/fotos/un-hombre-caminando-por-una-calle-junto-a-edificios-altos-92XOQbvqpdU"}, "a2-6": {"src": "img/a2-6.jpg", "by": "Nikolay Hristov", "page": "https://unsplash.com/es/fotos/tormenta-en-el-mar-9DBQ4D_LwNk"}, "a2-7": {"src": "img/a2-7.jpg", "by": "McCarthy Beckan", "page": "https://unsplash.com/es/fotos/mujer-corriendo-a-la-luz-de-la-hora-dorada-a6FHROHuQ9o"}, "a2-8": {"src": "img/a2-8.jpg", "by": "Jason Briscoe", "page": "https://unsplash.com/es/fotos/hombre-y-mujer-de-pie-frente-a-la-mesa-n4ymhyyFY7A"}, "a2-9": {"src": "img/a2-9.jpg", "by": "LinkedIn Sales Solutions", "page": "https://unsplash.com/es/fotos/man-in-black-sweater-using-macbook-pro-Be5aVKFv9ho"}, "a2-10": {"src": "img/a2-10.jpg", "by": "Online Marketing", "page": "https://unsplash.com/es/fotos/medico-sosteniendo-un-estetoscopio-rojo-hIgeoQjS_iE"}, "b1-3": {"src": "img/b1-3.jpg", "by": "Pylyp Sukhenko", "page": "https://unsplash.com/es/fotos/chef-cortando-verduras-en-la-cocina-del-restaurante-y-XZf_TNRms"}, "b1-4": {"src": "img/b1-4.jpg", "by": "Ioana Ye", "page": "https://unsplash.com/es/fotos/dos-mujeres-sentadas-en-un-muelle-h6z9AWEQ7Kw"}, "b1-5": {"src": "img/b1-5.jpg", "by": "Alejandro Garay", "page": "https://unsplash.com/es/fotos/adorno-redondo-blanco-y-azul-1RxbuMvugxk"}, "b1-6": {"src": "img/b1-6.jpg", "by": "Zoshua Colah", "page": "https://unsplash.com/es/fotos/una-habitacion-llena-de-literas-junto-a-una-ventana-TzMGehZmocI"}, "b1-7": {"src": "img/b1-7.jpg", "by": "Zoran Kokanovic", "page": "https://unsplash.com/es/fotos/foto-de-velas-de-candelita-encendidas-5FOfresB1G4"}, "b1-8": {"src": "img/b1-8.jpg", "by": "Jud Mackrill", "page": "https://unsplash.com/es/fotos/cuatro-companeros-sonriendo-alrededor-del-portatil-en-la-mesa-Of_m3hMsoAA"}, "b1-9": {"src": "img/b1-9.jpg", "by": "Aleksandar Popovski", "page": "https://unsplash.com/es/fotos/vainas-de-cacao-colgando-de-la-rama-de-un-arbol-sFCOat9rphk"}, "b1-10": {"src": "img/b1-10.jpg", "by": "Skytech Aviation", "page": "https://unsplash.com/es/fotos/instructor-ensenando-natacion-a-estudiantes-en-la-piscina-s_S9aUWOHuw"}, "b2-2": {"src": "img/b2-2.jpg", "by": "Claudio Schwarz", "page": "https://unsplash.com/es/fotos/banco-de-la-estacion-de-tren-de-metal-verde-294j9hG1N3w"}, "b2-3": {"src": "img/b2-3.jpg", "by": "Campaign Creators", "page": "https://unsplash.com/es/fotos/man-standing-in-front-of-people-sitting-beside-table-with-laptop-computers-gMsnXqILjp4"}, "b2-4": {"src": "img/b2-4.jpg", "by": "Raymond Yeung", "page": "https://unsplash.com/es/fotos/las-gruas-de-construccion-pueblan-el-paisaje-urbano-hbe2OSnR4vU"}, "b2-5": {"src": "img/b2-5.jpg", "by": "Stephanie Hau", "page": "https://unsplash.com/es/fotos/personas-en-traje-academico-de-pie-kMJhuPLEYVI"}, "b2-6": {"src": "img/b2-6.jpg", "by": "Ricky  Kharawala", "page": "https://unsplash.com/es/fotos/lote-de-herramientas-manuales-surtidas-en-estante-de-madera-marron-4dVDBMAho8c"}, "b2-7": {"src": "img/b2-7.jpg", "by": "In The Making Studio", "page": "https://unsplash.com/es/fotos/un-marco-cuadrado-de-madera-colgado-en-una-pared-gx6NxtpgHqY"}, "b2-8": {"src": "img/b2-8.jpg", "by": "Venti Views", "page": "https://unsplash.com/es/fotos/vista-aerea-de-los-edificios-de-la-ciudad-durante-la-noche-vahwUn0Uh0E"}, "b2-9": {"src": "img/b2-9.jpg", "by": "immo RENOVATION", "page": "https://unsplash.com/es/fotos/reforma-de-la-cocina-con-armarios-blancos-UqNEbyRQ660"}, "b2-10": {"src": "img/b2-10.jpg", "by": "Valentin Fernandez", "page": "https://unsplash.com/es/fotos/un-hombre-y-una-mujer-sentados-en-una-cama-de-hospital-vfN7r6Jg2WU"}, "c1-2": {"src": "img/c1-2.jpg", "by": "Kate Levitskaya", "page": "https://unsplash.com/es/fotos/edificio-frente-al-agua-reflejado-en-agua-tranquila-74QjOysOMS8"}, "c1-3": {"src": "img/c1-3.jpg", "by": "Microsoft Copilot", "page": "https://unsplash.com/es/fotos/mujer-trabajando-en-el-escritorio-con-cafe-8UnGiO4yesk"}, "c1-4": {"src": "img/c1-4.jpg", "by": "National Cancer Institute", "page": "https://unsplash.com/es/fotos/persona-sentada-mientras-usa-una-computadora-portatil-y-un-estetoscopio-verde-cerca-NFvdKIhxYlU"}, "c1-5": {"src": "img/c1-5.jpg", "by": "Kaleidico", "page": "https://unsplash.com/es/fotos/hombre-vestido-con-polo-gris-junto-a-la-pizarra-de-borrado-en-seco-3V8xo5Gbusk"}, "c1-6": {"src": "img/c1-6.jpg", "by": "Ze Paulo", "page": "https://unsplash.com/es/fotos/dunas-de-arena-marron-bajo-el-cielo-blanco-durante-el-dia-GeReAnOMiZ8"}, "c1-7": {"src": "img/c1-7.jpg", "by": "Danielle Cerullo", "page": "https://unsplash.com/es/fotos/sillas-rodantes-de-oficina-blancas-y-grises-bIZJRVBLfOM"}, "c1-8": {"src": "img/c1-8.jpg", "by": "Amey Meher", "page": "https://unsplash.com/es/fotos/hombre-en-chaqueta-verde-y-pantalones-negros-con-mochila-negra-de-pie-en-la-montana-cubierta-de-nieve-durante-CO0rIoWjvzo"}, "c1-9": {"src": "img/c1-9.jpg", "by": "Quilia", "page": "https://unsplash.com/es/fotos/exhibicion-de-variedad-de-verduras-con-senalizacion-organica-certificada-sEwtU-qy06c"}, "c1-10": {"src": "img/c1-10.jpg", "by": "Alexander Rotker", "page": "https://unsplash.com/es/fotos/fotografia-de-paisaje-de-puente--sQ4FsomXEs"}, "c2-2": {"src": "img/c2-2.jpg", "by": "Nadia Valko", "page": "https://unsplash.com/es/fotos/mesa-de-comedor-con-velas-0hAdietsUrE"}, "c2-3": {"src": "img/c2-3.jpg", "by": "Viktor Jakovlev", "page": "https://unsplash.com/es/fotos/foto-de-angulo-bajo-de-un-edificio-de-gran-altura-H0vuplqoX0c"}, "c2-4": {"src": "img/c2-4.jpg", "by": "Cassie Matias", "page": "https://unsplash.com/es/fotos/enfoque-selectivo-de-white-snow-butte-VSGEH7tKiUg"}, "c2-5": {"src": "img/c2-5.jpg", "by": "Dohyuk You", "page": "https://unsplash.com/es/fotos/el-interior-de-un-edificio-con-muchas-ventanas-N5ESEIaWfII"}, "c2-6": {"src": "img/c2-6.jpg", "by": "Towfiqu barbhuiya", "page": "https://unsplash.com/es/fotos/un-boligrafo-encima-de-un-pedazo-de-papel-6FpGIdn45_A"}, "c2-7": {"src": "img/c2-7.jpg", "by": "Stephan Widua", "page": "https://unsplash.com/es/fotos/antena-parabolica-blanca-bajo-el-cielo-azul-durante-la-noche-3YAIvBNlZM4"}, "c2-8": {"src": "img/c2-8.jpg", "by": "Glenn Carstens-Peters", "page": "https://unsplash.com/es/fotos/televisor-de-pantalla-plana-encendido-EOQhsfFBhRk"}, "c2-9": {"src": "img/c2-9.jpg", "by": "John Edgar", "page": "https://unsplash.com/es/fotos/cucharas-de-acero-inoxidable-sobre-fregadero-de-ceramica-blanca-rw3pe7UcV8o"}, "c2-10": {"src": "img/c2-10.jpg", "by": "Colin Watts", "page": "https://unsplash.com/es/fotos/muelle-y-barco-de-madera-en-maldivas-M1ObxvsWVhY"}};/*PHOTOS-END*/
+const GUIDE={
+ A1:{can:"Understand and use everyday expressions and very simple sentences.",g:["be and have","Present simple","there is / there are","a, an, some, any","can for ability"],v:["Family and people","Numbers, time and prices","Food and drink","Daily routines","Places in town"]},
+ A2:{can:"Talk about routine matters, past events and simple plans.",g:["Past simple","Present continuous","Comparatives and superlatives","going to and will","Adverbs of frequency"],v:["Travel and transport","Work and jobs","Shopping","Weather","Health and the body"]},
+ B1:{can:"Deal with familiar topics, describe experiences and give reasons.",g:["Present perfect and past simple","First and second conditional","Relative clauses","used to","Modals of obligation"],v:["Traditions and festivals","Nature and the environment","Feelings and opinions","Education","News and media"]},
+ B2:{can:"Follow complex texts and argue a point of view in detail.",g:["Passive forms","Third conditional","Reported speech","Linkers of contrast","wish and if only"],v:["Work and the economy","Society and change","Technology","Collocations","Phrasal verbs"]},
+ C1:{can:"Use language flexibly for academic and professional purposes.",g:["Hedging","Inversion for emphasis","Nominalisation","Mixed conditionals","Cleft sentences"],v:["Academic register","Research and evidence","Idioms","Abstract nouns","Word formation"]},
+ C2:{can:"Express fine shades of meaning with ease and precision.",g:["Ellipsis and substitution","Advanced modality","Full control of tense and aspect"],v:["Connotation and register shifts","Idiom and wordplay","Specialist terminology"]}
+};
+const TOPICS=[...new Set(LESSONS.map(l=>l.topic))];
+const VIEWS=[
+ ["library","Library",'<path d="M4 5h5v14H4zM10.5 5h5v14h-5zM17 7l3 .8-2.6 11-3-.8"/>'],
+ ["reader","Reader",'<path d="M12 6c-2-1.5-5-2-8-1.5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-13c-3-.5-6 0-8 1.5zM12 6v13"/>'],
+ ["writing","Writing",'<path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"/>'],
+ ["progress","Progress",'<path d="M4 20V11M10 20V5M16 20v-6M21 20H3"/>']
+];
+const KEY="peldano-dashboard-v1";
+const byId=id=>LESSONS.find(l=>l.id===id);
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const words=t=>t.trim().split(/\s+/).filter(Boolean).length;
+
+function seed(){return{
+  p:{l1:{open:1,read:1,listen:1,practice:1,write:1},l2:{open:1,read:1,listen:1},l3:{open:1}},
+  drafts:{},ex:{l1:Object.fromEntries(exQs(byId("l1")).map(q=>[q.k,q.a]))},
+  subs:{l1:{text:"I wake up at half past six. First I drink water and I wash my face. Then I eat eggs and tortillas with my family. My sister makes coffee. I leave home at seven fifteen and I take the bus to work. I like the morning because the street is quiet.",audio:"",at:Date.now()-2*864e5}},
+  cur:"l3",wcur:"l2",tab:"read",f:{level:"",topic:"",q:""}
+};}
+let S=seed();
+try{const raw=localStorage.getItem(KEY);if(raw){S=Object.assign(seed(),JSON.parse(raw));}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const audioFiles={}; // in memory only: {name,size,url}
+let wErr="";
+let glossOpen=null;
+
+function prog(id){return S.p[id]||(S.p[id]={});}
+function status(id){const p=S.p[id]||{};if(p.read&&p.listen&&p.practice&&p.write)return"done";if(p.open||p.read||p.listen||p.practice||p.write)return"doing";return"todo";}
+const SLAB={done:"Completed",doing:"In progress",todo:"Not started"};
+const pill=id=>{const s=status(id);return`<span class="pill ${s}">${SLAB[s]}</span>`;};
+const stepDots=id=>{const p=S.p[id]||{};return`<div class="steps"><span class="${p.read?"y":""}">Read</span><span class="${p.listen?"y":""}">Listen</span><span class="${p.practice?"y":""}">Practice</span><span class="${p.write?"y":""}">Write</span></div>`;};
+function setStep(id,k,v){const p=prog(id);if(v){p[k]=1;p.open=1;}else delete p[k];save();}
+
+/* ---------- navigation ---------- */
+function curView(){const h=location.hash.slice(1);return VIEWS.some(v=>v[0]===h)?h:"library";}
+function renderNav(){
+  const v=curView();
+  const html=VIEWS.map(([id,lab,ic])=>`<a href="#${id}" ${id===v?'aria-current="page"':""}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg>${lab}</a>`).join("");
+  $("#nav").innerHTML=html;$("#tabs").innerHTML=html;
+  VIEWS.forEach(([id])=>$("#v-"+id).classList.toggle("on",id===v));
+}
+function go(v){if(curView()===v){render();}else{location.hash=v;}window.scrollTo(0,0);}
+
+/* ---------- library ---------- */
+function renderLibrary(){
+  const f=S.f,q=f.q.trim().toLowerCase();
+  const list=LESSONS.filter(l=>(!f.level||l.level===f.level)&&(!f.topic||l.topic===f.topic)&&(!q||(l.title+" "+l.blurb+" "+l.topic+" "+l.gr.t+" "+Object.keys(l.g).join(" ")).toLowerCase().includes(q)));
+  const next=LESSONS.find(l=>status(l.id)==="doing")||LESSONS.find(l=>status(l.id)==="todo");
+  const done=LESSONS.filter(l=>status(l.id)==="done").length;
+  const usedLevels=LEVELS.filter(L=>LESSONS.some(l=>l.level===L));
+  $("#v-library").innerHTML=`
+  <div class="head"><h1>Lesson library</h1><span class="sub">${done} of ${LESSONS.length} lessons completed</span></div>
+  ${next?`<div class="card next"><div><div class="sub">${status(next.id)==="doing"?"Pick up where you stopped":"Next lesson"}</div><div class="t"><span class="lvl ${next.level}">${next.level}</span> ${esc(next.title)}</div>${stepDots(next.id)}</div><button class="btn primary" data-act="open" data-id="${next.id}">Continue</button></div>`:`<div class="card next"><div class="t">Every lesson is complete.</div></div>`}
+  <div class="filters">
+    <div class="fl" role="group" aria-label="Filter by CEFR level"><span class="lab">Level</span>
+      <button class="chip" data-act="flevel" data-v="" aria-pressed="${!f.level}">All</button>
+      ${usedLevels.map(L=>`<button class="chip" data-act="flevel" data-v="${L}" aria-pressed="${f.level===L}"><span class="dot" style="background:var(--${L.toLowerCase()})"></span>${L}</button>`).join("")}
+    </div>
+    <div class="fl" role="group" aria-label="Filter by topic"><span class="lab">Topic</span>
+      <button class="chip" data-act="ftopic" data-v="" aria-pressed="${!f.topic}">All</button>
+      ${TOPICS.map(t=>`<button class="chip" data-act="ftopic" data-v="${esc(t)}" aria-pressed="${f.topic===t}">${esc(t)}</button>`).join("")}
+    </div>
+    <div class="fl"><input class="search" id="lib-search" type="search" placeholder="Search lessons" aria-label="Search lessons" value="${esc(f.q)}"><span class="sub" id="lib-count">${list.length} shown</span></div>
+  </div>
+  <div id="lib-grid">${groupsHtml(list)}</div>`;
+}
+function syllabusHtml(L){
+  const ls=LESSONS.filter(l=>l.level===L);const closed=S.sc&&S.sc[L];
+  const words=ls.reduce((n,l)=>n+Object.keys(l.g).length,0),exs=ls.reduce((n,l)=>n+exQs(l).length,0);
+  return`<details class="card syl" data-syl="${L}" ${closed?"":"open"}>
+    <summary><span class="gs">${L} syllabus</span><span class="sub">${ls.length} topics · ${ls.length} grammar points · ${words} words · ${exs} exercises</span></summary>
+    <p class="can">${esc(GUIDE[L].can)}</p>
+    <ol class="sylist">${ls.map(l=>`<li><div class="st"><a href="#reader" data-act="open" data-id="${l.id}">${esc(l.title)}</a><span class="sub">${esc(l.topic)}</span>${pill(l.id)}</div>
+      <div class="sg"><b>Grammar</b> ${esc(l.gr.t)}</div><div class="sg"><b>Vocabulary</b> <span lang="en">${Object.keys(l.g).map(esc).join(", ")}</span></div>
+      <div class="sg"><b>Writing</b> ${l.min} to ${l.max} words</div></li>`).join("")}</ol>
+  </details>`;
+}
+function groupsHtml(list){
+  if(!list.length)return`<div class="card empty">No lessons match these filters. <button class="btn ghost" data-act="fclear">Clear filters</button></div>`;
+  return LEVELS.filter(L=>list.some(l=>l.level===L)).map(L=>{const ls=list.filter(l=>l.level===L);
+    return`<section class="lvg" aria-label="Level ${L}"><h2><span class="lvl ${L}">${L}</span>Level ${L}</h2>${syllabusHtml(L)}<div class="grid">${gridHtml(ls)}</div></section>`;}).join("");
+}
+function gridHtml(list){
+  if(!list.length)return`<div class="card empty" style="grid-column:1/-1">No lessons match these filters. <button class="btn ghost" data-act="fclear">Clear filters</button></div>`;
+  return list.map(l=>`<article class="card lesson">
+    ${PHOTOS[l.id]?`<img class="thumb" src="${PHOTOS[l.id].src}" alt="" loading="lazy" width="600" height="400">`:""}
+    <div class="top"><span class="row"><span class="lvl ${l.level}">${l.level}</span><span class="meta">${esc(l.topic)} · ${l.mins} min</span></span>${pill(l.id)}</div>
+    <h3>${esc(l.title)}</h3><p class="blurb">${esc(l.blurb)}</p>
+    <p class="gv"><b>Grammar</b> ${esc(l.gr.t)}<br><b>Practice</b> ${l.gq.length} grammar and ${exQs(l).length-l.gq.length} vocabulary exercises</p>
+    ${stepDots(l.id)}
+    <div class="row"><button class="btn primary" data-act="open" data-id="${l.id}">${status(l.id)==="todo"?"Start":"Open"}</button><button class="btn ghost" data-act="write" data-id="${l.id}">Writing task</button></div>
+  </article>`).join("");
+}
+
+/* ---------- reader ---------- */
+const canSpeak="speechSynthesis" in window&&"SpeechSynthesisUtterance" in window;
+let play={on:false,i:0,rate:1,tok:0};
+function stopSpeak(){play.on=false;play.tok++;if(canSpeak){try{speechSynthesis.cancel();}catch(e){}}}
+function speakFrom(i){
+  const l=byId(S.cur);if(!canSpeak||!l)return;
+  stopSpeak();
+  if(i>=l.s.length){play.i=0;setStep(l.id,"listen",1);updPlayer();renderProgress();return;}
+  play.i=i;play.on=true;const tok=play.tok;
+  const u=new SpeechSynthesisUtterance(l.s[i]);u.lang="en-US";u.rate=play.rate;
+  u.onend=()=>{if(tok!==play.tok)return;speakFrom(i+1);};
+  u.onerror=()=>{if(tok!==play.tok)return;play.on=false;updPlayer();};
+  try{speechSynthesis.speak(u);}catch(e){play.on=false;}
+  updPlayer();
+}
+function updPlayer(){
+  const l=byId(S.cur);if(!l)return;
+  document.querySelectorAll("#v-reader .s").forEach((el,i)=>el.classList.toggle("now",play.on&&i===play.i));
+  const b=$("#pp");if(b){b.innerHTML=play.on?ICON.pause:ICON.play;b.setAttribute("aria-label",play.on?"Pause audio":"Play audio");}
+  const bar=$("#pbar");if(bar)bar.style.width=(100*(play.i+(play.on?1:0))/l.s.length)+"%";
+  const c=$("#pcount");if(c)c.textContent=`Sentence ${Math.min(play.i+1,l.s.length)} of ${l.s.length}`;
+  const ls=$("#lstate");if(ls)ls.innerHTML=stepDots(l.id);
+}
+const ICON={
+ play:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',
+ pause:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>',
+ prev:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>',
+ next:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg>'
+};
+function sentenceHtml(l,txt){
+  let out=esc(txt);
+  Object.keys(l.g).forEach(k=>{
+    const re=new RegExp("\\b("+k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")\\b","i");
+    out=out.replace(re,`<button class="w" data-act="gloss" data-k="${esc(k)}">$1</button>`);
+  });
+  return out;
+}
+const TABS=[["read","Read and listen"],["grammar","Grammar"],["vocab","Vocabulary"]];
+function renderReader(){
+  const l=byId(S.cur)||LESSONS[0];const p=S.p[l.id]||{};
+  const tab=TABS.some(t=>t[0]===S.tab)?S.tab:"read";
+  const qs=exQs(l),ans=(S.ex&&S.ex[l.id])||{};
+  const sc=k=>{const a=qs.filter(q=>q.kind===k);return a.filter(q=>ans[q.k]===q.a).length+"/"+a.length;};
+  const badge={read:((p.read?1:0)+(p.listen?1:0))+"/2",grammar:sc("g"),vocab:sc("v")};
+  let body;
+  const ph=PHOTOS[l.id];const lo=l.level[0]==="A",hi=l.level[0]==="C";
+  if(tab==="read")body=`
+  <div class="card warm"><div class="flabel">Before you read</div>
+    ${ph?`<figure><img src="${ph.src}" alt="Photo for the reading “${esc(l.title)}”" width="600" height="400"><figcaption>Photo by ${ph.page?`<a href="${esc(ph.page)}">${esc(ph.by)}</a>`:esc(ph.by)} on Unsplash</figcaption></figure>`:""}
+    <ol class="wq">
+      ${ph?`<li>${lo?"Look at the photo. What can you see?":hi?"What does the photo suggest about the theme of the text?":"Describe the photo in two or three sentences."}</li>`:""}
+      <li>${esc(l.w)}</li>
+      <li>${lo?`The title is “${esc(l.title)}”. What is the text about?`:hi?`Note two things you would expect a text called “${esc(l.title)}” to say.`:`The title is “${esc(l.title)}”. What do you expect to read?`}</li>
+    </ol>
+    <div><div class="flabel" style="margin-bottom:6px">Words you will meet</div><div class="row" lang="en">${Object.keys(l.g).map(k=>`<span class="wchip">${esc(k)}</span>`).join("")}</div></div>
+  </div>
+  <div class="card player">
+    ${canSpeak?`<div class="ctl">
+      <button class="icon" data-act="pprev" aria-label="Previous sentence">${ICON.prev}</button>
+      <button class="icon big" id="pp" data-act="pp" aria-label="Play audio">${ICON.play}</button>
+      <button class="icon" data-act="pnext" aria-label="Next sentence">${ICON.next}</button>
+      <label class="sub" for="rate">Speed</label>
+      <select id="rate"><option value="0.7">Slow</option><option value="1" selected>Normal</option><option value="1.2">Fast</option></select>
+      <span class="count" id="pcount"></span>
+    </div><div class="bar"><i id="pbar"></i></div>`:`<p class="sub">This browser has no built-in voice, so audio is unavailable here. You can still read the text and mark listening as done on the Progress page.</p>`}
+  </div>
+  <div class="card"><div class="text" lang="en">${l.s.map((t,i)=>`<span class="s" data-act="sent" data-i="${i}">${sentenceHtml(l,t)}</span>`).join(" ")}</div></div>
+  <div id="gloss">${glossHtml(l)}</div>
+  <p class="tip">Tap a sentence to hear it from there. Tap a dotted word for its meaning.</p>
+  <div class="row"><button class="btn ${p.read?"":"primary"}" data-act="readdone">${p.read?"Reading marked as done":"Mark reading as done"}</button></div>`;
+  else{
+    const kind=tab==="grammar"?"g":"v";
+    const sub=S.sub==="practise"?"practise":"learn";
+    const subseg=`<div class="seg sm" role="group" aria-label="Learn or practise">
+      <button class="chip" id="sub-learn" data-act="sub" data-v="learn" aria-pressed="${sub==="learn"}">1 · Learn</button>
+      <button class="chip" id="sub-practise" data-act="sub" data-v="practise" aria-pressed="${sub==="practise"}">2 · Practise<span class="n">${badge[tab]}</span></button></div>`;
+    const lesson=kind==="g"?`
+    <div class="card learn"><div class="flabel">Grammar lesson</div><h2>${esc(l.gr.t)}</h2>
+      <div><h3>When to use it</h3><p>${esc(l.gr.r)}</p></div>
+      <div><h3>How to form it</h3><ul class="form">${l.gr.f.split(" · ").map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+      <div><h3>Examples from the text</h3><ul class="ex" lang="en">${l.gr.ex.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+      <div class="watch"><h3>Watch out</h3><p>${esc(l.gr.tip)}</p></div></div>`:`
+    <div class="card learn"><div class="flabel">Vocabulary lesson</div><h2>${Object.keys(l.g).length} words from “${esc(l.title)}”</h2>
+      <p class="sub">Read each meaning, then see how the word is used in the text.${canSpeak?" Tap the button to hear it.":""}</p>
+      <dl class="voc">${Object.keys(l.g).map(k=>{const re=new RegExp("\\b"+k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b","i");const ex=l.s.find(x=>re.test(x));
+        return`<div><dt lang="en">${esc(k)}${canSpeak?` <button class="say" data-act="say" data-k="${esc(k)}" aria-label="Hear ${esc(k)}">${ICON.play}</button>`:""}</dt><dd>${esc(l.g[k])}</dd>${ex?`<dd class="inx" lang="en">${esc(ex)}</dd>`:""}</div>`;}).join("")}</dl></div>`;
+    body=subseg+(sub==="learn"?lesson+`<div class="row"><button class="btn primary" data-act="sub" data-v="practise">Start the 10 exercises</button></div>`
+      :`<div class="card" id="exbox">${exHtml(l,kind)}</div><div class="row"><button class="btn ghost" data-act="sub" data-v="learn">Back to the lesson</button></div>`);
+  }
+  $("#v-reader").innerHTML=`
+  <div class="head"><div><div class="row"><span class="lvl ${l.level}">${l.level}</span><span class="sub">${esc(l.topic)} · ${l.mins} min read</span></div><h1 style="margin-top:6px">${esc(l.title)}</h1></div>
+    <div class="field"><label for="rd-pick" class="sub">Lesson</label><select class="sel" id="rd-pick">${LESSONS.map(x=>`<option value="${x.id}" ${x.id===l.id?"selected":""}>${x.level} · ${esc(x.title)}</option>`).join("")}</select></div></div>
+  <div class="field"><span class="flabel">Choose what to practise</span>
+    <div class="seg" role="group" aria-label="Choose what to practise">${TABS.map(([k,lab])=>`<button class="chip" id="tab-${k}" data-act="tab" data-v="${k}" aria-pressed="${k===tab}">${lab}<span class="n">${badge[k]}</span></button>`).join("")}
+      <button class="chip" data-act="write" data-id="${l.id}">Writing<span class="n">${p.write?"1/1":"0/1"}</span></button></div></div>
+  ${body}
+  <div class="row" id="lstate">${stepDots(l.id)}</div>`;
+  const r=$("#rate");if(r)r.value=String(play.rate);
+  updPlayer();
+}
+function exQs(l){
+  const keys=Object.keys(l.g);
+  const g=l.gq.map((x,i)=>({k:"g"+i,kind:"g",q:x.q,o:x.o,a:x.a}));
+  const v=keys.map((k,i)=>{const o=keys.slice().sort((a,b)=>((a.length*7+a.charCodeAt(0)*(i+3))%11)-((b.length*7+b.charCodeAt(0)*(i+3))%11));return{k:"v"+i,kind:"v",q:l.g[k],o,a:o.indexOf(k)};});
+  const w=l.vq.map((x,i)=>{const n=i+keys.length;const o=keys.slice().sort((a,b)=>((a.length*5+a.charCodeAt(1)*(n+2))%13)-((b.length*5+b.charCodeAt(1)*(n+2))%13));return{k:"v"+n,kind:"v",q:x[0],o,a:o.indexOf(x[1])};});
+  return g.concat(v,w);
+}
+function exHtml(l,kind){
+  const qs=exQs(l).filter(q=>q.kind===kind);const ans=(S.ex&&S.ex[l.id])||{};
+  const right=qs.filter(q=>ans[q.k]===q.a).length;const all=right===qs.length;
+  const started=qs.some(q=>ans[q.k]!==undefined);
+  return`<div class="row" style="justify-content:space-between"><h2>${kind==="g"?"Grammar exercises":"Vocabulary exercises"}</h2><span class="pill ${all?"done":right?"doing":"todo"}">${right} of ${qs.length} correct</span></div>
+  <p class="sub">${kind==="g"?"Choose the answer that completes the sentence.":"Questions 1 to 5: choose the word that matches the meaning. Questions 6 to 10: choose the word that completes the sentence."}</p>
+  <div class="exsec">${qs.map((q,n)=>{
+    const c=ans[q.k];const done=c===q.a;
+    return`<fieldset class="q"><legend>${n+1}. ${esc(q.q)}</legend><div class="opts">${q.o.map((o,i)=>`<button type="button" id="ex-${q.k}-${i}" class="opt ${c===i?(done?"ok":"no"):""}" data-act="ans" data-q="${q.k}" data-o="${i}" aria-pressed="${c===i}" ${done&&c!==i?"disabled":""} lang="en">${esc(o)}</button>`).join("")}</div>
+    ${c===undefined?"":`<p class="fb ${done?"ok":"no"}">${done?"✓ Correct":"✗ Not quite. Try another answer."}</p>`}</fieldset>`;}).join("")}</div>
+  <div class="row">${all?(kind==="g"?`<button class="btn primary" data-act="tab" data-v="vocab">Go to vocabulary</button>`:`<button class="btn primary" data-act="write" data-id="${l.id}">Go to the writing task</button>`):""}<button class="btn" data-act="exreset" data-kind="${kind}" ${started?"":"disabled"}>Start again</button></div>`;
+}
+function glossHtml(l){return glossOpen&&l.g[glossOpen]?`<div class="note" role="status"><b>${esc(glossOpen)}</b> · ${esc(l.g[glossOpen])}</div>`:"";}
+function openLesson(id){stopSpeak();play.i=0;glossOpen=null;S.cur=id;S.wcur=id;S.tab="read";S.sub="learn";prog(id).open=1;save();go("reader");}
+
+/* ---------- writing ---------- */
+function renderWriting(){
+  const l=byId(S.wcur)||LESSONS[0];const sub=S.subs[l.id];const draft=S.drafts[l.id]||"";const af=audioFiles[l.id];
+  const n=words(draft);
+  $("#v-writing").innerHTML=`
+  <div class="head"><h1>Writing assignment</h1>${pill(l.id)}</div>
+  <div class="field"><label for="w-pick">Lesson</label><select class="sel" id="w-pick">${LESSONS.map(x=>`<option value="${x.id}" ${x.id===l.id?"selected":""}>${x.level} · ${esc(x.title)}${S.subs[x.id]?" (submitted)":""}</option>`).join("")}</select></div>
+  <div class="card"><div class="row"><span class="lvl ${l.level}">${l.level}</span><span class="flabel">Task</span></div><p style="margin-top:8px;max-width:65ch">${esc(l.prompt)}</p><p class="sub" style="margin-top:6px">${l.min} to ${l.max} words</p></div>
+  ${sub?`<div class="card sent"><div class="row" style="justify-content:space-between"><span class="pill done">Submitted ${new Date(sub.at).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</span><span class="sub">${words(sub.text)} words${sub.audio?" · audio: "+esc(sub.audio):""}</span></div><pre>${esc(sub.text)}</pre></div>
+  <h2>${"Revise and resubmit"}</h2>`:""}
+  <form id="w-form" class="field" novalidate style="gap:16px">
+    <div class="field"><label for="w-text">Your text</label>
+      <textarea id="w-text" placeholder="Write your answer here" spellcheck="true" lang="en">${esc(draft)}</textarea>
+      <div class="wc"><span id="w-count"></span><span id="w-saved">Draft saves as you type</span></div>
+    </div>
+    <div class="field"><label for="w-audio">Audio recording <span class="sub" style="font-weight:400">(optional, read your text aloud)</span></label>
+      <div class="drop" id="w-drop">
+        ${af?`<div class="file"><strong>${esc(af.name)}</strong><span class="sub">${(af.size/1048576).toFixed(1)} MB</span><audio controls src="${af.url}"></audio><button type="button" class="btn" data-act="rmaudio">Remove</button></div>`
+        :`<span>Choose an audio file or drop it here</span><input type="file" id="w-audio" accept="audio/*"><span class="sub">MP3, M4A, WAV or OGG, up to 25 MB</span>`}
+      </div>
+    </div>
+    ${wErr?`<p class="err" role="alert">${esc(wErr)}</p>`:""}
+    <div class="row"><button class="btn primary" type="submit">${sub?"Resubmit":"Submit assignment"}</button><button class="btn ghost" type="button" data-act="open" data-id="${l.id}">Back to the text</button></div>
+    <p class="tip">Demo build: submissions stay in this browser and are not sent to a teacher yet.</p>
+  </form>`;
+  updCount();
+}
+function updCount(){
+  const l=byId(S.wcur);const t=$("#w-text");const c=$("#w-count");if(!l||!t||!c)return;
+  const n=words(t.value);
+  c.innerHTML=n<l.min?`${n} words · ${l.min-n} more to reach the minimum`:n>l.max?`${n} words · ${n-l.max} over the suggested maximum`:`<span class="ok">${n} words · within range</span>`;
+}
+function takeAudio(file){
+  const id=S.wcur;wErr="";
+  if(!file)return;
+  if(!/^audio\//.test(file.type)&&!/\.(mp3|m4a|wav|ogg|aac|webm)$/i.test(file.name)){wErr="That file is not audio. Choose an MP3, M4A, WAV or OGG file.";}
+  else if(file.size>25*1048576){wErr="That file is larger than 25 MB. Record a shorter clip or export at lower quality.";}
+  else{if(audioFiles[id])URL.revokeObjectURL(audioFiles[id].url);audioFiles[id]={name:file.name,size:file.size,url:URL.createObjectURL(file)};}
+  keepDraft();renderWriting();
+}
+function keepDraft(){const t=$("#w-text");if(t){S.drafts[S.wcur]=t.value;save();}}
+function submit(){
+  const l=byId(S.wcur);keepDraft();const text=(S.drafts[l.id]||"").trim();const n=words(text);
+  if(n<l.min){wErr=`Your text has ${n} words. Write at least ${l.min} before you submit.`;renderWriting();return;}
+  wErr="";S.subs[l.id]={text,audio:audioFiles[l.id]?audioFiles[l.id].name:"",at:Date.now()};
+  S.drafts[l.id]="";setStep(l.id,"write",1);save();render();
+}
+
+/* ---------- progress ---------- */
+function renderProgress(){
+  const tot=LESSONS.length;const cnt={done:0,doing:0,todo:0};LESSONS.forEach(l=>cnt[status(l.id)]++);
+  let steps=0;LESSONS.forEach(l=>{const p=S.p[l.id]||{};steps+=(p.read?1:0)+(p.listen?1:0)+(p.practice?1:0)+(p.write?1:0);});
+  const pct=Math.round(100*steps/(tot*4));const C=2*Math.PI*52;
+  const lv=LEVELS.filter(L=>LESSONS.some(l=>l.level===L)).map(L=>{const ls=LESSONS.filter(l=>l.level===L);const d=ls.filter(l=>status(l.id)==="done").length;return{L,d,n:ls.length};});
+  $("#v-progress").innerHTML=`
+  <div class="head"><h1>Progress</h1><button class="btn" data-act="reset">Reset sample progress</button></div>
+  <div class="card sum">
+    <div class="ring" role="img" aria-label="${pct} percent of lesson steps done"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="var(--sunken)" stroke-width="12"/><circle cx="60" cy="60" r="52" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct/100)}"/></svg><div class="n">${pct}%<small>${steps} of ${tot*4} steps</small></div></div>
+    <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+      <div class="tally"><div><b>${cnt.done}</b><span class="pill done">Completed</span></div><div><b>${cnt.doing}</b><span class="pill doing">In progress</span></div><div><b>${cnt.todo}</b><span class="pill todo">Not started</span></div></div>
+      <div class="lv">${lv.map(x=>`<div class="lvrow"><span class="lvl ${x.L}">${x.L}</span><div class="bar"><i style="width:${100*x.d/x.n}%;background:var(--${x.L.toLowerCase()})"></i></div><span>${x.d}/${x.n}</span></div>`).join("")}</div>
+    </div>
+  </div>
+  <div class="card"><h2 style="margin-bottom:4px">Lessons</h2><p class="sub">A lesson is complete when all four steps are ticked. Steps tick themselves as you read, listen, finish the exercises and submit.</p>
+    <div class="track" style="margin-top:8px">${LESSONS.map((l,i)=>{const p=S.p[l.id]||{};const hd=i===0||LESSONS[i-1].level!==l.level;const ls=LESSONS.filter(x=>x.level===l.level);return`${hd?`<h3 class="lvh"><span class="lvl ${l.level}">${l.level}</span>${ls.filter(x=>status(x.id)==="done").length} of ${ls.length} topics completed</h3>`:""}<div class="trow">
+      <div class="nm"><span class="lvl ${l.level}">${l.level}</span><a href="#reader" data-act="open" data-id="${l.id}">${esc(l.title)}</a></div>
+      ${pill(l.id)}
+      <div class="tog">${[["read","Read"],["listen","Listen"],["practice","Practice"],["write","Write"]].map(([k,lab])=>`<label><input type="checkbox" id="t-${l.id}-${k}" data-step="${k}" data-id="${l.id}" ${p[k]?"checked":""}>${lab}</label>`).join("")}</div>
+    </div>`;}).join("")}</div>
+  </div>`;
+}
+
+function render(){renderNav();renderLibrary();renderReader();renderWriting();renderProgress();}
+
+/* ---------- events ---------- */
+document.addEventListener("click",e=>{
+  const el=e.target.closest("[data-act]");if(!el)return;
+  const a=el.dataset.act,id=el.dataset.id;
+  if(a==="open"){e.preventDefault();openLesson(id);}
+  else if(a==="write"){stopSpeak();keepDraft();S.wcur=id;wErr="";prog(id).open=1;save();go("writing");}
+  else if(a==="flevel"){S.f.level=el.dataset.v;save();renderLibrary();}
+  else if(a==="ftopic"){S.f.topic=el.dataset.v;save();renderLibrary();}
+  else if(a==="fclear"){S.f={level:"",topic:"",q:""};save();renderLibrary();}
+  else if(a==="pp"){if(play.on){stopSpeak();updPlayer();}else speakFrom(play.i);}
+  else if(a==="pprev"){const i=Math.max(0,play.i-1);if(play.on)speakFrom(i);else{play.i=i;updPlayer();}}
+  else if(a==="pnext"){const n=byId(S.cur).s.length;const i=Math.min(n-1,play.i+1);if(play.on)speakFrom(i);else{play.i=i;updPlayer();}}
+  else if(a==="gloss"){e.stopPropagation();glossOpen=glossOpen===el.dataset.k?null:el.dataset.k;$("#gloss").innerHTML=glossHtml(byId(S.cur));}
+  else if(a==="say"){stopSpeak();updPlayer();try{const u=new SpeechSynthesisUtterance(el.dataset.k);u.lang="en-US";u.rate=.9;speechSynthesis.speak(u);}catch(err){}}
+  else if(a==="tab"){stopSpeak();glossOpen=null;S.tab=el.dataset.v;S.sub="learn";save();renderReader();const t=document.getElementById("tab-"+S.tab);if(t)t.focus();}
+  else if(a==="sub"){stopSpeak();S.sub=el.dataset.v;save();renderReader();const t=document.getElementById("sub-"+S.sub);if(t)t.focus();}
+  else if(a==="ans"){const l=byId(S.cur);S.ex=S.ex||{};const e=S.ex[l.id]||(S.ex[l.id]={});e[el.dataset.q]=+el.dataset.o;prog(l.id).open=1;
+    if(exQs(l).every(q=>e[q.k]===q.a))prog(l.id).practice=1;save();
+    renderLibrary();renderReader();renderWriting();renderProgress();
+    const again=document.getElementById(el.id);if(again)again.focus();}
+  else if(a==="exreset"){const e=S.ex&&S.ex[S.cur];if(e)Object.keys(e).forEach(k=>{if(k[0]===el.dataset.kind)delete e[k];});save();renderReader();}
+  else if(a==="sent"){if(canSpeak)speakFrom(+el.dataset.i);}
+  else if(a==="readdone"){setStep(S.cur,"read",1);render();}
+  else if(a==="rmaudio"){const f=audioFiles[S.wcur];if(f){URL.revokeObjectURL(f.url);delete audioFiles[S.wcur];}keepDraft();renderWriting();}
+  else if(a==="reset"){stopSpeak();S=seed();S.p={};S.subs={};S.cur="l1";S.wcur="l1";save();render();}
+});
+document.addEventListener("input",e=>{
+  const t=e.target;
+  if(t.id==="lib-search"){S.f.q=t.value;save();const f=S.f,q=f.q.trim().toLowerCase();
+    const list=LESSONS.filter(l=>(!f.level||l.level===f.level)&&(!f.topic||l.topic===f.topic)&&(!q||(l.title+" "+l.blurb+" "+l.topic+" "+l.gr.t+" "+Object.keys(l.g).join(" ")).toLowerCase().includes(q)));
+    $("#lib-grid").innerHTML=groupsHtml(list);$("#lib-count").textContent=list.length+" shown";}
+  else if(t.id==="w-text"){S.drafts[S.wcur]=t.value;if(t.value.trim())prog(S.wcur).open=1;save();updCount();}
+});
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.id==="rd-pick"){openLesson(t.value);}
+  else if(t.id==="w-pick"){keepDraft();S.wcur=t.value;wErr="";save();renderWriting();}
+  else if(t.id==="rate"){play.rate=+t.value;if(play.on)speakFrom(play.i);}
+  else if(t.id==="w-audio"){takeAudio(t.files[0]);}
+  else if(t.dataset.step){setStep(t.dataset.id,t.dataset.step,t.checked);renderNav();renderLibrary();renderReader();renderWriting();renderProgress();const again=document.getElementById(t.id);if(again)again.focus();}
+});
+document.addEventListener("toggle",e=>{const d=e.target;if(d&&d.dataset&&d.dataset.syl){S.sc=S.sc||{};S.sc[d.dataset.syl]=!d.open;save();}},true);
+document.addEventListener("submit",e=>{if(e.target.id==="w-form"){e.preventDefault();submit();}});
+["dragover","dragleave","drop"].forEach(ev=>document.addEventListener(ev,e=>{
+  const d=e.target.closest&&e.target.closest("#w-drop");if(!d)return;e.preventDefault();
+  d.classList.toggle("over",ev==="dragover");
+  if(ev==="drop"&&e.dataTransfer&&e.dataTransfer.files[0])takeAudio(e.dataTransfer.files[0]);
+}));
+window.addEventListener("hashchange",()=>{if(curView()!=="reader")stopSpeak();render();});
+window.addEventListener("pagehide",stopSpeak);
+render();
+</script>
+</body>
+</html>
