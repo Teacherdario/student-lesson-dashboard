@@ -4,7 +4,7 @@
 (function () {
   const D = window.DICT_DATA || { entries: [], ladder: [] };
   const LV = ["A1", "A2", "B1", "B2", "C1", "C2"];
-  const E = D.entries.map((r, i) => ({ i, w: r[0], t: r[1], c: r[2], p: r[3], es: r[4], s: r[5] || [], m: r[6], e: r[7], src: r[8], fam: r[9], up: r[10] }));
+  const E = D.entries.map((r, i) => ({ i, w: r[0], t: r[1], c: r[2], p: r[3], es: r[4], s: r[5] || [], m: r[6], e: r[7], src: r[8], fam: r[9], up: r[10], xs: r[11] || "" }));
   const escH = t => String(t == null ? "" : t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const norm = s => String(s || "").toLowerCase().replace(/[’`]/g, "'").replace(/\(.*?\)/g, " ").replace(/[^a-z' -]/g, " ").replace(/\s+/g, " ").trim();
 
@@ -155,7 +155,7 @@ Rules: cefr is the level at which learners typically meet this meaning (English 
       ${row("Pronunciation<br><span>Pronunciación</span>", `${e.p ? `<span class="ipa" lang="en">/${escH(e.p)}/</span>` : ""}${sayBtns(e.w)}`)}
       ${row("Spanish<br><span>Español</span>", `<b class="des" lang="es">${escH(e.es)}</b>`)}
       ${e.m ? row("Meaning<br><span>Significado</span>", `<span lang="en">${escH(e.m)}</span>`) : ""}
-      ${e.e ? row("Example<br><span>Ejemplo</span>", `<span class="dex" lang="en">${escH(e.e)}</span> <button class="dsay sm" type="button" data-dict="say" data-w="${escH(e.e)}" data-lang="en-GB" aria-label="Listen to the example">🔊</button>`) : ""}
+      ${e.e ? row("Example<br><span>Ejemplo</span>", `<span class="dex" lang="en">${escH(e.e)}</span> <button class="dsay sm" type="button" data-dict="say" data-w="${escH(e.e)}" data-lang="en-GB" aria-label="Listen to the example">🔊</button>${e.xs ? `<div class="sub" lang="es">${escH(e.xs)}</div>` : ""}`) : ""}
       ${row("Synonyms by level<br><span>Sinónimos por nivel</span>", synChips(e.s))}
       ${e.up ? row("Level up<br><span>Sube de nivel</span>", `<span class="sub">Use <b lang="en">${escH(e.w)}</b> instead of: </span>${e.up.map(u => `<button type="button" class="dchip" data-dict="go" data-w="${escH(u)}" lang="en">${escH(u)} <span class="lvl A2">A2</span></button>`).join(" ")}`) : ""}
       ${fam ? row("Word family<br><span>Familia de palabras</span>", fam) : ""}

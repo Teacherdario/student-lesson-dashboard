@@ -3,7 +3,7 @@
   const D = window.DICT_DATA; if (!D || typeof VIEWS === "undefined") return;
   const LV = ["A1", "A2", "B1", "B2", "C1", "C2"];
   const escH = t => String(t == null ? "" : t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const E = D.entries.map((r, i) => ({ i, w: r[0], t: r[1], c: r[2], p: r[3], es: r[4], e: r[7] }));
+  const E = D.entries.map((r, i) => ({ i, w: r[0], t: r[1], c: r[2], p: r[3], es: r[4], e: r[7], xs: r[11] || "" }));
   const WB = D.wb || [];
   const COMMON = new Set(); const CE = window.CEFR_EST || {}; ["A1", "A2", "B1", "B2"].forEach(l => String(CE[l] || "").split(" ").forEach(w => COMMON.add(w)));
   ["mexico", "messi", "shakira", "london", "paris", "spain", "canada"].forEach(w => COMMON.delete(w));
@@ -16,14 +16,15 @@
 
   /* ---------- build the sentence ---------- */
   function sbItems(lv) {
-    const pool = E.filter(e => e.c === lv && e.e && e.e.split(" ").length >= 4 && e.e.split(" ").length <= 14);
+    const pool = E.filter(e => e.c === lv && e.e && e.xs && e.e.split(" ").length >= 4 && e.e.split(" ").length <= 14);
     return shuffle(pool).slice(0, 10).map(e => {
       let s = e.e.trim(); const end = /[.!?]$/.test(s) ? s.slice(-1) : "."; if (/[.!?]$/.test(s)) s = s.slice(0, -1);
       const toks = s.split(/\s+/);
       const t0 = toks[0]; if (t0 !== "I" && /^[A-Z][a-z']*$/.test(t0) && COMMON.has(t0.toLowerCase())) toks[0] = t0.toLowerCase();
-      return { i: e.i, w: e.w, es: e.es, toks, end, order: shuffle(toks.map((_, k) => k)), picked: [], done: false };
+      return { i: e.i, w: e.w, es: e.es, xs: e.xs, toks, end, order: shuffle(toks.map((_, k) => k)), picked: [], done: false };
     });
   }
+  const full = x => { const t = x.toks.join(" ") + x.end; return t.charAt(0).toUpperCase() + t.slice(1); };
   const tokOK = q => q.picked.length === q.toks.length && q.picked.every((k, j) => nrm(q.toks[k]) === nrm(q.toks[j]));
   /* ---------- word building ---------- */
   function wbItems(lv) { return shuffle(WB.filter(x => x[0] === lv)).slice(0, 10).map(x => ({ s: x[1], root: x[2], a: x[3].split("/"), v: "" })); }
@@ -48,20 +49,20 @@
   }
   function sbHTML(v) {
     const q = v.sb;
-    if (!q || q.lv !== v.lv) return `<div class="card"><h2>Build the sentence · Ordena la oración</h2><p>Put the words in the right order to make a sentence. Each sentence uses a ${escH(v.lv)} word. Ten sentences per set.</p><p class="sub">Pon las palabras en orden para formar una oración.</p><button class="btn primary" type="button" data-voc="sb-new">Start 10 sentences · Empezar</button></div>`;
+    if (!q || q.lv !== v.lv) return `<div class="card"><h2>Build the sentence · Ordena la oración</h2><p>Read the sentence in Spanish, then put the English words in the right order. Each sentence uses a ${escH(v.lv)} word. Ten sentences per set.</p><p class="sub">Lee la oración en español y ordena las palabras en inglés.</p><button class="btn primary" type="button" data-voc="sb-new">Start 10 sentences · Empezar</button></div>`;
     const it = q.items[q.k];
-    if (!it) { const sc = q.items.filter(tokOK).length; return `<div class="card"><h2>Build the sentence · ${escH(v.lv)}</h2>${fb(sc, q.items.length, v.lv, "sb")}<ol class="vrev">${q.items.map(x => `<li class="${tokOK(x) ? "ok" : "no"}"><span lang="en">${escH(x.toks.join(" ") + x.end)}</span>${tokOK(x) ? " ✓" : ` <span class="sub">· you wrote: ${escH(x.picked.map(k => x.toks[k]).join(" ") || "–")}</span>`}</li>`).join("")}</ol><button class="btn primary" type="button" data-voc="sb-new">New set · Nueva serie</button></div>`; }
+    if (!it) { const sc = q.items.filter(tokOK).length; return `<div class="card"><h2>Build the sentence · ${escH(v.lv)}</h2>${fb(sc, q.items.length, v.lv, "sb")}<ol class="vrev">${q.items.map(x => `<li class="${tokOK(x) ? "ok" : "no"}"><span lang="en">${escH(full(x))}</span><br><span class="sub" lang="es">${escH(x.xs || "")}</span>${tokOK(x) ? " ✓" : ` <span class="sub">· you wrote: ${escH(x.picked.map(k => x.toks[k]).join(" ") || "–")}</span>`}</li>`).join("")}</ol><button class="btn primary" type="button" data-voc="sb-new">New set · Nueva serie</button></div>`; }
     const ok = it.done ? tokOK(it) : null;
     return `<div class="card"><div class="row" style="justify-content:space-between"><h2>Build the sentence · ${escH(v.lv)}</h2><span class="sub">${q.k + 1} / ${q.items.length}</span></div>
-      <p class="sub">Key word · Palabra clave: <b lang="en">${escH(it.w)}</b> = <span lang="es">${escH(it.es)}</span></p>
+      <div class="vxs"><span class="vxl">In Spanish · En español</span><span lang="es">${escH(it.xs || "")}</span></div><p class="sub">Key word · Palabra clave: <b lang="en">${escH(it.w)}</b> = <span lang="es">${escH(it.es)}</span></p>
       <div class="vans" aria-label="Your sentence">${it.picked.map((k, j) => `<button type="button" class="vtile on" data-voc="sb-un" data-j="${j}" ${it.done ? "disabled" : ""} lang="en">${escH(it.toks[k])}</button>`).join("")}${it.picked.length ? `<span class="vend">${escH(it.end)}</span>` : `<span class="sub">Tap the words below in order · Toca las palabras en orden</span>`}</div>
       <div class="vbank">${it.order.map(k => it.picked.includes(k) ? `<span class="vtile gone">${escH(it.toks[k])}</span>` : `<button type="button" class="vtile" data-voc="sb-pick" data-k="${k}" ${it.done ? "disabled" : ""} lang="en">${escH(it.toks[k])}</button>`).join("")}</div>
-      ${it.done ? `<div class="vfb ${ok ? "ok" : "no"}">${ok ? "Correct! · ¡Correcto!" : `Not quite. · Casi. Correct answer: <b lang="en">${escH(it.toks.join(" ") + it.end)}</b>`} <button class="dsay sm" type="button" data-dict="say" data-w="${escH(it.toks.join(" ") + it.end)}" data-lang="en-GB" aria-label="Listen to the sentence">🔊</button></div>` : ""}
+      ${it.done ? `<div class="vfb ${ok ? "ok" : "no"}">${ok ? "Correct! · ¡Correcto!" : `Not quite. · Casi. Correct answer: <b lang="en">${escH(full(it))}</b>`} <button class="dsay sm" type="button" data-dict="say" data-w="${escH(full(it))}" data-lang="en-GB" aria-label="Listen to the sentence">🔊</button></div>` : ""}
       <div class="row">${it.done ? `<button class="btn primary" type="button" data-voc="sb-next">${q.k + 1 < q.items.length ? "Next · Siguiente" : "See my score · Ver resultado"}</button>` : `<button class="btn" type="button" data-voc="sb-clear">Clear · Borrar</button><button class="btn primary" type="button" data-voc="sb-check" ${it.picked.length === it.toks.length ? "" : "disabled"}>Check · Revisar</button>`}</div></div>`;
   }
   function wbHTML(v) {
     const q = v.wb;
-    if (!q || q.lv !== v.lv) return `<div class="card"><h2>Word building · Formación de palabras</h2><p>Use the word in CAPITALS to form a word that fits the gap, like Cambridge Use of English Part 3. Ten sentences per set.</p><p class="sub">Usa la palabra en MAYÚSCULAS para formar la palabra correcta.</p><button class="btn primary" type="button" data-voc="wb-new">Start 10 sentences · Empezar</button></div>`;
+    if (!q || q.lv !== v.lv) return `<div class="card"><h2>Word building · Formación de palabras</h2><p>Use the <b class="vroot">BLUE WORD</b> in capitals to form a word that fits the gap, like Cambridge Use of English Part 3. Ten sentences per set.</p><p class="sub">Usa la palabra <b class="vroot">AZUL</b> en mayúsculas para formar la palabra correcta.</p><button class="btn primary" type="button" data-voc="wb-new">Start 10 sentences · Empezar</button></div>`;
     const sc = q.done ? q.items.filter(wbOK).length : 0;
     return `<div class="card"><h2>Word building · ${escH(v.lv)}</h2>${q.items.map((x, i) => { const ok = q.done ? wbOK(x) : null; const [a, b] = x.s.split("_____"); return `<div class="fq"><div class="stem"><span class="qn">${i + 1}</span> <span lang="en">${escH(a)}<input class="gap ${q.done ? (ok ? "ok" : "no") : ""}" data-voc-wb="${i}" value="${escH(x.v)}" aria-label="Gap ${i + 1}" autocomplete="off" autocapitalize="none" spellcheck="false" style="width:9em" ${q.done ? "disabled" : ""}>${escH(b)}</span> <b class="vroot">${escH(x.root)}</b>${q.done && !ok ? ` <span class="fix">${escH(x.a.join(" / "))}</span>` : ""}</div></div>`; }).join("")}
       ${q.done ? fb(sc, q.items.length, v.lv, "wb") + `<div class="row"><button class="btn primary" type="button" data-voc="wb-new">New set · Nueva serie</button></div>` : `<div class="row"><button class="btn primary" type="button" data-voc="wb-check">Check answers · Revisar</button></div>`}</div>`;
@@ -107,7 +108,8 @@
 .vtile{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 12px;min-height:42px;font:inherit;font-size:1.05rem;cursor:pointer}
 .vtile.on{background:var(--accent-soft);border-color:var(--accent)}.vtile.gone{display:none}.vend{font-size:1.2rem;font-weight:700}
 .vfb{border-radius:8px;padding:10px 12px;margin:10px 0}.vfb.ok{background:var(--good-soft);}.vfb.no{background:var(--warn-soft)}
-.vrev{padding-left:22px}.vrev li{margin:6px 0}.vrev li.ok{color:var(--good)}.vroot{font-size:.9rem;letter-spacing:.04em}`;
+.vrev{padding-left:22px}.vrev li{margin:6px 0}.vrev li.ok{color:var(--good)}.vroot{font-size:.95rem;letter-spacing:.04em;color:var(--accent);font-weight:800}
+.vxs{background:var(--accent-soft);border-left:4px solid var(--accent);border-radius:8px;padding:10px 12px;margin:8px 0;font-size:1.1rem}.vxs .vxl{display:block;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);margin-bottom:2px}`;
   document.head.appendChild(st);
 
   /* ---------- register the view ---------- */
