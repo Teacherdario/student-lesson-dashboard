@@ -203,6 +203,9 @@ main{padding:28px clamp(16px,4vw,40px) 60px;min-width:0}
 .warm img{height:auto}
 .warm figcaption a{color:inherit}
 
+.credit{font-size:.8rem;color:var(--muted)}
+main>.credit{margin-top:32px}
+
 /* Writing */
 .field{display:flex;flex-direction:column;gap:6px}
 .field label,.flabel{font-weight:700;font-size:.9rem}
@@ -247,7 +250,7 @@ textarea{width:100%;min-height:220px;border:1px solid var(--line);background:var
   .app{grid-template-columns:minmax(0,1fr)}
   .rail{display:none}
   main{padding-top:20px;padding-bottom:96px}
-  .tabs{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);z-index:5}
+  .tabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);z-index:5}
   .tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 10px;font-size:.72rem;font-weight:600;color:var(--muted);text-decoration:none}
   .tabs a svg{width:22px;height:22px}
   .tabs a[aria-current="page"]{color:var(--accent)}
@@ -264,6 +267,7 @@ textarea{width:100%;min-height:220px;border:1px solid var(--line);background:var
 <div class="app">
   <aside class="rail">
     <div class="brand"><span class="ladder" aria-hidden="true"><i style="height:8px;background:var(--a1)"></i><i style="height:11px;background:var(--a2)"></i><i style="height:14px;background:var(--b1)"></i><i style="height:17px;background:var(--b2)"></i><i style="height:20px;background:var(--c1)"></i><i style="height:23px;background:var(--c2)"></i></span>Peldaño</div>
+    <div class="credit" style="padding:0 10px;margin-top:-16px">Created by Teacher Dario</div>
     <nav class="nav" id="nav" aria-label="Sections"></nav>
     <div class="who"><b>Sample student</b>English · working at A2</div>
   </aside>
@@ -271,11 +275,14 @@ textarea{width:100%;min-height:220px;border:1px solid var(--line);background:var
     <section class="view" id="v-library" aria-label="Lesson library"></section>
     <section class="view" id="v-reader" aria-label="Reader"></section>
     <section class="view" id="v-writing" aria-label="Writing assignment"></section>
+    <section class="view" id="v-fce" aria-label="B2 First preparation"></section>
     <section class="view" id="v-progress" aria-label="Progress"></section>
+    <footer class="credit">Created by Teacher Dario</footer>
   </main>
 </div>
 <nav class="tabs" id="tabs" aria-label="Sections"></nav>
 
+<!--FCE-SCRIPTS--><script src="app.js"></script><script src="learn.js"></script><script src="photos.js"></script><script src="t1.js"></script><script src="t2.js"></script><script src="t3.js"></script><script src="t4.js"></script><script src="t5.js"></script><script src="t6.js"></script><script src="t7.js"></script><script src="t8.js"></script><script src="t9.js"></script><script src="t10.js"></script><!--/FCE-SCRIPTS-->
 <script>
 "use strict";
 const LEVELS=["A1","A2","B1","B2","C1","C2"];
@@ -770,6 +777,7 @@ const VIEWS=[
  ["library","Library",'<path d="M4 5h5v14H4zM10.5 5h5v14h-5zM17 7l3 .8-2.6 11-3-.8"/>'],
  ["reader","Reader",'<path d="M12 6c-2-1.5-5-2-8-1.5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-13c-3-.5-6 0-8 1.5zM12 6v13"/>'],
  ["writing","Writing",'<path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"/>'],
+ ["fce","B2 First",'<path d="M12 3l9 4.5-9 4.5-9-4.5zM6 9.5V15c0 1.7 2.7 3 6 3s6-1.3 6-3V9.5M21 7.5V13"/>'],
  ["progress","Progress",'<path d="M4 20V11M10 20V5M16 20v-6M21 20H3"/>']
 ];
 const KEY="peldano-dashboard-v1";
@@ -1053,7 +1061,7 @@ function renderProgress(){
   </div>`;
 }
 
-function render(){renderNav();renderLibrary();renderReader();renderWriting();renderProgress();}
+function render(){renderNav();renderLibrary();renderReader();renderWriting();renderProgress();if(typeof renderFCE==="function")renderFCE();}
 
 /* ---------- events ---------- */
 document.addEventListener("click",e=>{
@@ -1107,8 +1115,6 @@ window.addEventListener("hashchange",()=>{if(curView()!=="reader")stopSpeak();re
 window.addEventListener("pagehide",stopSpeak);
 render();
 </script>
-</body>
-</html>
 
 <!-- Sign-in and cloud saving (Firebase). Added for the GitHub Pages copy. -->
 <style>
@@ -1244,3 +1250,6 @@ $id("add-form").addEventListener("submit",async e=>{
   $id("a-btn").disabled=false;
 });
 </script>
+
+</body>
+</html>
