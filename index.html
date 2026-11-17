@@ -1154,7 +1154,7 @@ body.onelevel .fl[aria-label="Filter by CEFR level"]{display:none}
     <div class="addgrid">
       <div class="field"><label for="a-user">Username</label><input id="a-user" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="maria"></div>
       <div class="field"><label for="a-pass">Password</label><input id="a-pass" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="6 characters or more"></div>
-      <div class="field"><label for="a-level">Level</label><select id="a-level"><option value="">All levels</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option></select></div>
+      <div class="field"><label for="a-level">Level</label><select id="a-level"><option value="">All levels</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option><option value="FCE">B2 First (FCE)</option></select></div>
       <button class="btn primary" id="a-btn" type="submit">Add student</button>
     </div>
     <p id="a-msg" role="status" style="margin-top:10px"></p>
@@ -1168,13 +1168,13 @@ import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getFirestore,doc,getDoc,setDoc,deleteDoc,collection,getDocs} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const cfg={apiKey:"AIzaSyC3BO7LU1bVlQrGuKla_hB3jI7Ur8_20SE",authDomain:"teacher-dario.firebaseapp.com",projectId:"teacher-dario",storageBucket:"teacher-dario.firebasestorage.app",messagingSenderId:"736407157022",appId:"1:736407157022:web:e5cde493e544d8ce2db10f"};
-const DOMAIN="@students.peldano.app",TEACHER="teacher"+DOMAIN,LV=["A1","A2","B1","B2","C1","C2"];
+const DOMAIN="@students.peldano.app",TEACHER="teacher"+DOMAIN,LV=["A1","A2","B1","B2","C1","C2"],LVX=[...LV,"FCE"],LVN=x=>x==="FCE"?"B2 First (FCE)":x;function fceSum(st){const R=(st&&st.fce&&st.fce.res)||{},k=Object.keys(R);if(!k.length)return"";const sk={};k.forEach(x=>{const r=R[x];if(!r||!r.m)return;const a=sk[r.sk]||(sk[r.sk]=[0,0]);a[0]+=r.s;a[1]+=r.m;});const N={read:"Reading",uoe:"Use of English",lis:"Listening"};return`<p class="sub" style="margin-top:6px"><b>B2 First:</b> ${k.length} parts marked in ${new Set(k.map(x=>x.split(".")[0])).size} tests${Object.keys(sk).map(x=>" · "+(N[x]||x)+" "+Math.round(100*sk[x][0]/sk[x][1])+"%").join("")}</p>`;}
 const app=initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
 let adminApp=null;const adminAuth=()=>{adminApp=adminApp||initializeApp(cfg,"admin");return getAuth(adminApp);};
 const $id=x=>document.getElementById(x);
 let uid=null,ready=false,timer=null,asTeacher=false;
 const ALL=LESSONS.slice();
-function setLevel(lv){const keep=lv&&LV.includes(lv)?ALL.filter(l=>l.level===lv):ALL;LESSONS.splice(0,LESSONS.length,...keep);TOPICS.splice(0,TOPICS.length,...new Set(keep.map(l=>l.topic)));document.body.classList.toggle("onelevel",keep.length!==ALL.length);}
+let FCEV=null,FCEI=3;function fceView(on){const i=VIEWS.findIndex(v=>v[0]==="fce");if(!on&&i>=0){FCEI=i;FCEV=VIEWS.splice(i,1)[0];}else if(on&&i<0&&FCEV)VIEWS.splice(FCEI,0,FCEV);const t=document.getElementById("tabs");if(t)t.style.gridTemplateColumns="repeat("+VIEWS.length+",1fr)";if(!on&&location.hash==="#fce")location.hash="library";}function setLevel(lv){const fce=lv==="FCE",lvl=fce?"B2":lv;fceView(!lv||fce);const keep=lvl&&LV.includes(lvl)?ALL.filter(l=>l.level===lvl):ALL;LESSONS.splice(0,LESSONS.length,...keep);TOPICS.splice(0,TOPICS.length,...new Set(keep.map(l=>l.topic)));document.body.classList.toggle("onelevel",keep.length!==ALL.length);}
 const blank=()=>{const s=seed();s.p={};s.subs={};s.ex={};s.drafts={};s.cur="l1";s.wcur="l1";return s;};
 if(!document.querySelector("main>.credit")){const f=document.createElement("footer");f.className="credit";f.textContent="Created by Teacher Dario";document.querySelector("main").appendChild(f);}
 if(!document.querySelector(".rail .credit")){const c=document.createElement("div");c.className="credit";c.style.padding="0 10px";c.textContent="Created by Teacher Dario";const b=document.querySelector(".rail .brand");if(b)b.after(c);}
@@ -1206,9 +1206,9 @@ onAuthStateChanged(auth,async u=>{
   uid=u.uid;let next=blank();
   try{const snap=await getDoc(doc(db,"students",uid));if(snap.exists())next=Object.assign(blank(),JSON.parse(snap.data().state));}catch(e){console.warn("Could not load saved work",e);}
   setLevel(level);S=next;S.f=Object.assign({level:"",topic:"",q:""},S.f,{level:""});if(!TOPICS.includes(S.f.topic))S.f.topic="";
-  ready=true;localSave();render();
-  const nm=isT?"Teacher Dario":u.email.split("@")[0];$id("acct-name").textContent=nm+(level?" · "+level:"");$id("acct").hidden=false;$id("acct-class").hidden=!isT;
-  const w=document.querySelector(".rail .who");if(w){w.innerHTML="<b></b><span></span>";w.firstChild.textContent=nm;w.lastChild.textContent=isT?"Teacher":level?"Level "+level:"All levels";}
+  ready=true;if(level==="FCE"&&(!location.hash||location.hash==="#library"))location.hash="fce";localSave();render();
+  const nm=isT?"Teacher Dario":u.email.split("@")[0];$id("acct-name").textContent=nm+(level?" · "+LVN(level):"");$id("acct").hidden=false;$id("acct-class").hidden=!isT;
+  const w=document.querySelector(".rail .who");if(w){w.innerHTML="<b></b><span></span>";w.firstChild.textContent=nm;w.lastChild.textContent=isT?"Teacher":level==="FCE"?"B2 First (FCE)":level?"Level "+level:"All levels";}
   $id("gate").hidden=true;
 });
 $id("klass-close").addEventListener("click",()=>{$id("klass").hidden=true;});
@@ -1224,8 +1224,8 @@ async function loadClass(){
       const started=ALL.filter(l=>p[l.id]&&Object.keys(p[l.id]).length).length;
       const list=ALL.filter(l=>subs[l.id]).map(l=>`<details><summary><span class="lvl ${l.level}">${l.level}</span> ${esc(l.title)} · ${words(subs[l.id].text)} words · ${new Date(subs[l.id].at).toLocaleDateString()}</summary><pre>${esc(subs[l.id].text)}</pre></details>`).join("");
       return`<div class="card"><div class="srow"><h2>${esc(r.name)}</h2>
-        <span class="row"><label class="sub" for="lv-${r.id}">Level</label><select id="lv-${r.id}" data-lv="${r.id}"><option value="">All levels</option>${LV.map(x=>`<option ${x===r.level?"selected":""}>${x}</option>`).join("")}</select>
-        <button class="btn" type="button" data-rm="${r.id}" data-name="${esc(r.name)}">Remove</button></span></div>
+        <span class="row"><label class="sub" for="lv-${r.id}">Level</label><select id="lv-${r.id}" data-lv="${r.id}"><option value="">All levels</option>${LVX.map(x=>`<option value="${x}" ${x===r.level?"selected":""}>${LVN(x)}</option>`).join("")}</select>
+        <button class="btn" type="button" data-rm="${r.id}" data-name="${esc(r.name)}">Remove</button></span></div>${fceSum(r.w.s)}
         <p class="sub" style="margin-top:6px">${done} completed · ${started} started · last active ${r.w.updated?new Date(r.w.updated).toLocaleDateString():"never"}</p>
         <div style="margin-top:8px">${list||'<p class="sub">No writing submitted yet.</p>'}</div></div>`;}).join(""):'<p class="sub">No students yet. Add the first one with the form.</p>';
   }catch(e){body.textContent="Could not load the class. Only the teacher account can open this list.";}
@@ -1244,7 +1244,7 @@ $id("add-form").addEventListener("submit",async e=>{
   $id("a-btn").disabled=true;msg.textContent="";
   try{const a=adminAuth();const cred=await createUserWithEmailAndPassword(a,name+DOMAIN,pass);
     await setDoc(doc(db,"roster",cred.user.uid),{name,level,created:Date.now()});await signOut(a);
-    msg.className="ok";msg.textContent="Added "+name+(level?" at level "+level:" with all levels")+". Give them the username and the password you typed.";
+    msg.className="ok";msg.textContent="Added "+name+(level?" at level "+LVN(level):" with all levels")+". Give them the username and the password you typed.";
     $id("a-user").value="";$id("a-pass").value="";loadClass();
   }catch(err){const c=err&&err.code||"";msg.textContent=c.includes("already-in-use")?"That username is already taken. Choose another.":c.includes("weak-password")?"The password needs at least 6 characters.":c.includes("network")?"No connection. Check your internet and try again.":"Could not add the student. Try again.";}
   $id("a-btn").disabled=false;
