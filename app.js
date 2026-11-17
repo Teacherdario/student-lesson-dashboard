@@ -691,8 +691,9 @@ function fLearnFb(score, n) {
 }
 function fRenderLearn() {
   const L = FCE.learn; const f = FS(); if (!L) return `<p class="sub">Loading…</p>`;
-  const tabs = [["pv", "Phrasal verbs"], ["ex", "Expressions"], ["wf", "Word formation"], ["up", "A2 → B2 words"]];
+  const tabs = [["dict", "Dictionary"], ["pv", "Phrasal verbs"], ["ex", "Expressions"], ["wf", "Word formation"], ["up", "A2 → B2 words"]];
   let h = `<div class="seg sm" role="group" aria-label="Learning topics">${tabs.map(([k, l]) => `<button class="chip" type="button" data-fce="lt" data-v="${k}" aria-pressed="${f.lt === k}">${l}</button>`).join("")}</div>`;
+  if (f.lt === "dict") return h + `<div data-dict-mount="fce" style="margin-top:12px">${window.DICT ? DICT.html("fce") : `<p class="sub">Loading the dictionary…</p>`}</div>`;
   const q = f.lq[f.lt];
   h += `<div class="card"><div class="row" style="justify-content:space-between"><h2>Practice</h2><button class="btn primary" type="button" data-fce="lq-new">${q ? "New set of 10" : "Start 10 questions"}</button></div>`;
   if (q) {
