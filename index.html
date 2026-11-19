@@ -1137,6 +1137,11 @@ main{padding-top:56px}
 .credit{font-size:.8rem;color:var(--muted)}
 main>.credit{margin-top:32px}
 body.onelevel .fl[aria-label="Filter by CEFR level"]{display:none}
+.lvpick{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.lvc{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;min-height:38px;cursor:pointer;background:var(--surface);font-size:.92rem}
+.lvc input{width:18px!important;height:18px;min-height:0!important;margin:0;accent-color:var(--accent,#2f6feb)}
+.lvc:has(input:checked){border-color:var(--accent,#2f6feb);background:color-mix(in srgb,var(--accent,#2f6feb) 12%,var(--surface));font-weight:600}
+#klass .lvrow{margin-top:8px;display:block}.lvrow>.sub{display:block}.lbl{font-weight:600;display:block}
 </style>
 <div id="gate"><form id="gate-form" class="card" novalidate>
   <h1>Sign in</h1>
@@ -1155,9 +1160,9 @@ body.onelevel .fl[aria-label="Filter by CEFR level"]{display:none}
     <div class="addgrid">
       <div class="field"><label for="a-user">Username</label><input id="a-user" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="maria"></div>
       <div class="field"><label for="a-pass">Password</label><input id="a-pass" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="6 characters or more"></div>
-      <div class="field"><label for="a-level">Level</label><select id="a-level"><option value="">All levels</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option><option value="FCE">B2 First (FCE)</option><option value="VOC">Vocabulary course</option><option value="VERB">Verbs course</option></select></div>
-      <button class="btn primary" id="a-btn" type="submit">Add student</button>
-    </div>
+      </div>
+    <div class="field" style="margin-top:12px"><span class="lbl">Levels and courses <span class="sub">(tick as many as you want; none ticked = everything)</span></span><div id="a-level"></div></div>
+    <button class="btn primary" id="a-btn" type="submit" style="margin-top:12px">Add student</button>
     <p id="a-msg" role="status" style="margin-top:10px"></p>
     <p class="tip">Write the password down before you add the student. It is not shown again, and it can only be changed in the Firebase console.</p>
   </form>
@@ -1175,7 +1180,19 @@ let adminApp=null;const adminAuth=()=>{adminApp=adminApp||initializeApp(cfg,"adm
 const $id=x=>document.getElementById(x);
 let uid=null,ready=false,timer=null,asTeacher=false;
 const ALL=LESSONS.slice();
-const VALL=VIEWS.slice();let FCEONLY=false,ONLY=null;function setViews(lv){FCEONLY=lv==="FCE";window.TD_LEVEL=lv||"";const keep=FCEONLY?VALL.filter(v=>v[0]==="fce"):lv==="VOC"?VALL.filter(v=>v[0]==="vocab"||v[0]==="dict"):lv==="VERB"?VALL.filter(v=>v[0]==="verbs"||v[0]==="dict"):lv?VALL.filter(v=>v[0]!=="fce"):VALL;ONLY=(FCEONLY||lv==="VOC"||lv==="VERB")?keep.map(v=>v[0]):null;VIEWS.splice(0,VIEWS.length,...keep);VALL.forEach(([id])=>{if(!keep.some(v=>v[0]===id)){const e=document.getElementById("v-"+id);if(e)e.classList.remove("on");}});const t=document.getElementById("tabs");if(t)t.style.gridTemplateColumns="repeat("+VIEWS.length+",1fr)";const h=location.hash.slice(1);if(ONLY&&!ONLY.includes(h))location.hash=ONLY[0];else if(!ONLY&&h&&!VIEWS.some(v=>v[0]===h))location.hash="library";}window.addEventListener("hashchange",()=>{if(ONLY&&!ONLY.includes(location.hash.slice(1)))location.hash=ONLY[0];});function setLevel(lv){setViews(lv);const lvl=(lv==="FCE"||lv==="VOC"||lv==="VERB")?"":lv;const keep=lvl&&LV.includes(lvl)?ALL.filter(l=>l.level===lvl):ALL;LESSONS.splice(0,LESSONS.length,...keep);TOPICS.splice(0,TOPICS.length,...new Set(keep.map(l=>l.topic)));document.body.classList.toggle("onelevel",keep.length!==ALL.length);}
+const VALL=VIEWS.slice();let ONLY=null;
+const parseLv=x=>String(x||"").split(",").map(t=>t.trim()).filter(t=>LVX.includes(t));
+const lvLabel=c=>!c.length?"All levels and courses":c.map(LVN).join(" · ");
+function setViews(c){const cefr=c.filter(x=>LV.includes(x));window.TD_LEVEL=cefr[0]||"";let ids=null;
+  if(c.length){ids=new Set();if(cefr.length)["library","reader","writing","progress","dict"].forEach(x=>ids.add(x));if(c.includes("FCE"))ids.add("fce");if(c.includes("VOC")){ids.add("vocab");ids.add("dict");}if(c.includes("VERB")){ids.add("verbs");ids.add("dict");}}
+  const keep=ids?VALL.filter(v=>ids.has(v[0])):VALL;ONLY=ids?keep.map(v=>v[0]):null;VIEWS.splice(0,VIEWS.length,...keep);
+  VALL.forEach(([id])=>{if(!keep.some(v=>v[0]===id)){const e=document.getElementById("v-"+id);if(e)e.classList.remove("on");}});
+  const t=document.getElementById("tabs");if(t)t.style.gridTemplateColumns="repeat("+VIEWS.length+",1fr)";
+  const h=location.hash.slice(1);if(ONLY&&!ONLY.includes(h))location.hash=ONLY[0];else if(!ONLY&&h&&!VIEWS.some(v=>v[0]===h))location.hash="library";}
+window.addEventListener("hashchange",()=>{if(ONLY&&!ONLY.includes(location.hash.slice(1)))location.hash=ONLY[0];});
+function setLevel(lv){const c=parseLv(lv);setViews(c);const cefr=c.filter(x=>LV.includes(x));const keep=cefr.length?ALL.filter(l=>cefr.includes(l.level)):ALL;LESSONS.splice(0,LESSONS.length,...keep);TOPICS.splice(0,TOPICS.length,...new Set(keep.map(l=>l.topic)));document.body.classList.toggle("onelevel",cefr.length===1);}
+const pick=(name,sel)=>`<div class="lvpick" role="group" aria-label="Levels and courses">${LVX.map(x=>`<label class="lvc"><input type="checkbox" name="${name}" value="${x}" ${sel.includes(x)?"checked":""}><span>${LVN(x)}</span></label>`).join("")}</div>`;
+const picked=root=>[...root.querySelectorAll('input[type=checkbox]:checked')].map(i=>i.value).join(",");
 const blank=()=>{const s=seed();s.p={};s.subs={};s.ex={};s.drafts={};s.cur="l1";s.wcur="l1";return s;};
 if(!document.querySelector("main>.credit")){const f=document.createElement("footer");f.className="credit";f.textContent="Created by Teacher Dario";document.querySelector("main").appendChild(f);}
 if(!document.querySelector(".rail .credit")){const c=document.createElement("div");c.className="credit";c.style.padding="0 10px";c.textContent="Created by Teacher Dario";const b=document.querySelector(".rail .brand");if(b)b.after(c);}
@@ -1202,14 +1219,14 @@ onAuthStateChanged(auth,async u=>{
     let entry=null,failed=false;
     try{const r=await getDoc(doc(db,"roster",u.uid));if(r.exists())entry=r.data();}catch(e){failed=true;}
     if(!entry){await signOut(auth);$id("g-err").textContent=failed?"Could not check the class list. Try again in a moment.":"This account is not on the class list. Ask your teacher.";return;}
-    level=entry.level||null;
+    level=entry.level||"";
   }
   uid=u.uid;let next=blank();
   try{const snap=await getDoc(doc(db,"students",uid));if(snap.exists())next=Object.assign(blank(),JSON.parse(snap.data().state));}catch(e){console.warn("Could not load saved work",e);}
   setLevel(level);S=next;S.f=Object.assign({level:"",topic:"",q:""},S.f,{level:""});if(!TOPICS.includes(S.f.topic))S.f.topic="";
-  ready=true;if(level==="FCE"&&(!location.hash||location.hash==="#library"))location.hash="fce";localSave();render();
-  const nm=isT?"Teacher Dario":u.email.split("@")[0];$id("acct-name").textContent=nm+(level?" · "+LVN(level):"");$id("acct").hidden=false;$id("acct-class").hidden=!isT;
-  const w=document.querySelector(".rail .who");if(w){w.innerHTML="<b></b><span></span>";w.firstChild.textContent=nm;w.lastChild.textContent=isT?"Teacher":(level==="FCE"||level==="VOC"||level==="VERB")?LVN(level):level?"Level "+level:"All levels";}
+  ready=true;if(ONLY&&!ONLY.includes(location.hash.slice(1)))location.hash=ONLY[0];localSave();render();
+  const nm=isT?"Teacher Dario":u.email.split("@")[0];$id("acct-name").textContent=nm;$id("acct").hidden=false;$id("acct-class").hidden=!isT;
+  const w=document.querySelector(".rail .who");if(w){w.innerHTML="<b></b><span></span>";w.firstChild.textContent=nm;w.lastChild.textContent=isT?"Teacher":lvLabel(parseLv(level));}
   $id("gate").hidden=true;
 });
 $id("klass-close").addEventListener("click",()=>{$id("klass").hidden=true;});
@@ -1225,28 +1242,27 @@ async function loadClass(){
       const started=ALL.filter(l=>p[l.id]&&Object.keys(p[l.id]).length).length;
       const list=ALL.filter(l=>subs[l.id]).map(l=>`<details><summary><span class="lvl ${l.level}">${l.level}</span> ${esc(l.title)} · ${words(subs[l.id].text)} words · ${new Date(subs[l.id].at).toLocaleDateString()}</summary><pre>${esc(subs[l.id].text)}</pre></details>`).join("");
       return`<div class="card"><div class="srow"><h2>${esc(r.name)}</h2>
-        <span class="row"><label class="sub" for="lv-${r.id}">Level</label><select id="lv-${r.id}" data-lv="${r.id}"><option value="">All levels</option>${LVX.map(x=>`<option value="${x}" ${x===r.level?"selected":""}>${LVN(x)}</option>`).join("")}</select>
-        <button class="btn" type="button" data-rm="${r.id}" data-name="${esc(r.name)}">Remove</button></span></div>${fceSum(r.w.s)}${vocSum(r.w.s)}${verbSum(r.w.s)}
+        <span class="row"><button class="btn" type="button" data-rm="${r.id}" data-name="${esc(r.name)}">Remove</button></span></div><div class="lvrow" data-lv="${r.id}"><span class="sub">Levels and courses: <b class="lvnow">${esc(lvLabel(parseLv(r.level)))}</b></span>${pick("lv-"+r.id,parseLv(r.level))}</div>${fceSum(r.w.s)}${vocSum(r.w.s)}${verbSum(r.w.s)}
         <p class="sub" style="margin-top:6px">${done} completed · ${started} started · last active ${r.w.updated?new Date(r.w.updated).toLocaleDateString():"never"}</p>
         <div style="margin-top:8px">${list||'<p class="sub">No writing submitted yet.</p>'}</div></div>`;}).join(""):'<p class="sub">No students yet. Add the first one with the form.</p>';
   }catch(e){body.textContent="Could not load the class. Only the teacher account can open this list.";}
 }
-$id("acct-class").addEventListener("click",()=>{$id("klass").hidden=false;$id("a-msg").textContent="";loadClass();});
-$id("klass-body").addEventListener("change",async e=>{const id=e.target.dataset&&e.target.dataset.lv;if(!id)return;try{await setDoc(doc(db,"roster",id),{level:e.target.value},{merge:true});}catch(err){e.target.insertAdjacentHTML("afterend",'<span class="err">Not saved</span>');}});
+$id("acct-class").addEventListener("click",()=>{$id("klass").hidden=false;if(!$id("a-level").firstChild)$id("a-level").innerHTML=pick("a-lv",[]);$id("a-msg").textContent="";loadClass();});
+$id("klass-body").addEventListener("change",async e=>{const box=e.target.closest(".lvrow");if(!box)return;const id=box.dataset.lv,val=picked(box);box.querySelectorAll(".err,.ok").forEach(x=>x.remove());try{await setDoc(doc(db,"roster",id),{level:val},{merge:true});box.querySelector(".lvnow").textContent=lvLabel(parseLv(val));box.insertAdjacentHTML("beforeend",'<span class="ok">Saved</span>');setTimeout(()=>{const o=box.querySelector(".ok");if(o)o.remove();},1500);}catch(err){box.insertAdjacentHTML("beforeend",'<span class="err">Not saved</span>');}});
 $id("klass-body").addEventListener("click",async e=>{const b=e.target.closest("[data-rm]");if(!b)return;
   if(!b.dataset.sure){b.dataset.sure="1";b.textContent="Tap again to remove "+b.dataset.name;return;}
   b.disabled=true;try{await deleteDoc(doc(db,"roster",b.dataset.rm));loadClass();}catch(err){b.disabled=false;b.textContent="Could not remove";}});
 $id("add-form").addEventListener("submit",async e=>{
   e.preventDefault();e.stopPropagation();const msg=$id("a-msg");msg.className="err";
-  const name=$id("a-user").value.trim().toLowerCase(),pass=$id("a-pass").value,level=$id("a-level").value;
+  const name=$id("a-user").value.trim().toLowerCase(),pass=$id("a-pass").value,level=picked($id("a-level"));
   if(!/^[a-z0-9._-]{2,30}$/.test(name)){msg.textContent="Use 2 to 30 letters, numbers, dots or dashes for the username, with no spaces.";return;}
   if(name==="teacher"){msg.textContent="That username is reserved for you.";return;}
   if(pass.length<6){msg.textContent="The password needs at least 6 characters.";return;}
   $id("a-btn").disabled=true;msg.textContent="";
   try{const a=adminAuth();const cred=await createUserWithEmailAndPassword(a,name+DOMAIN,pass);
     await setDoc(doc(db,"roster",cred.user.uid),{name,level,created:Date.now()});await signOut(a);
-    msg.className="ok";msg.textContent="Added "+name+(level?" at level "+LVN(level):" with all levels")+". Give them the username and the password you typed.";
-    $id("a-user").value="";$id("a-pass").value="";loadClass();
+    msg.className="ok";msg.textContent="Added "+name+": "+lvLabel(parseLv(level))+". Give them the username and the password you typed.";
+    $id("a-user").value="";$id("a-pass").value="";$id("a-level").innerHTML=pick("a-lv",[]);loadClass();
   }catch(err){const c=err&&err.code||"";msg.textContent=c.includes("already-in-use")?"That username is already taken. Choose another.":c.includes("weak-password")?"The password needs at least 6 characters.":c.includes("network")?"No connection. Check your internet and try again.":"Could not add the student. Try again.";}
   $id("a-btn").disabled=false;
 });
