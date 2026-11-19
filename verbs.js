@@ -3,13 +3,15 @@
 (function () {
   const VD = window.VERBS_DATA; if (!VD || typeof VIEWS === "undefined") return;
   const LV = ["A1", "A2", "B1", "B2", "C1", "C2"];
-  const GRAM = { A1: "Present simple · Presente simple", A2: "Past simple, going to, present continuous · Pasado simple y futuro", B1: "Present perfect, past continuous, will, first conditional · Presente perfecto y condicional 1", B2: "Passive, 2nd and 3rd conditional, reported speech · Voz pasiva y condicionales", C1: "Perfect modals, inversion, participle clauses · Modales perfectos e inversión", C2: "Advanced structures and formal style · Estructuras avanzadas" };
+  const LVA = [...LV, "FCE"];
+  const ALW = () => { const a = (window.TD_ALLOW || {})["VERB"]; return a && a.length ? LVA.filter(l => a.includes(l)) : LVA; };
+  const GRAM = { A1: "Present simple · Presente simple", A2: "Past simple, going to, present continuous · Pasado simple y futuro", B1: "Present perfect, past continuous, will, first conditional · Presente perfecto y condicional 1", B2: "Passive, 2nd and 3rd conditional, reported speech · Voz pasiva y condicionales", C1: "Perfect modals, inversion, participle clauses · Modales perfectos e inversión", C2: "Advanced structures and formal style · Estructuras avanzadas", FCE: "B2 First phrasal verbs · Verbos frasales del examen B2 First" };
   const escH = t => String(t == null ? "" : t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const nrm = s => String(s || "").toLowerCase().replace(/[’`]/g, "'").replace(/[^a-z0-9' /-]/g, "").replace(/\s+/g, " ").trim();
   // entry: [base, past, pp, es, esPast, esPP, figBase, figPast, figPP, irregular, sentence, spanish, by, page]
-  const V = {}; LV.forEach(l => { V[l] = (VD[l] || []).map((r, i) => ({ id: "v_" + r[0].replace(/[^a-z]/gi, "_"), lv: l, n: i + 1, b: r[0], pa: r[1], pp: r[2], es: r[3], esp: r[4], espp: r[5], fb: r[6], fpa: r[7], fpp: r[8], irr: !!r[9], s: r[10], xs: r[11], by: r[12] || "", page: r[13] || "" })); });
-  const ALLV = LV.flatMap(l => V[l]);
+  const V = {}; LVA.forEach(l => { V[l] = (VD[l] || []).map((r, i) => ({ id: "v_" + r[0].replace(/[^a-z]/gi, "_"), lv: l, n: i + 1, b: r[0], pa: r[1], pp: r[2], es: r[3], esp: r[4], espp: r[5], fb: r[6], fpa: r[7], fpp: r[8], irr: !!r[9], s: r[10], xs: r[11], by: r[12] || "", page: r[13] || "" })); });
+  const ALLV = LVA.flatMap(l => V[l]);
   const IMG = window.VERB_IMG = window.VERB_IMG || {};
   const imgLoading = {};
   function loadImgs(lv) {
@@ -27,7 +29,7 @@
   const yday = () => { const d = new Date(Date.now() - 864e5); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   function St() {
     if (!S.verb) S.verb = {}; const v = S.verb;
-    v.lv = v.lv || (LV.includes(window.TD_LEVEL) ? window.TD_LEVEL : "A1"); v.tab = v.tab || "path";
+    v.lv = v.lv || (LVA.includes(window.TD_LEVEL) ? window.TD_LEVEL : "A1"); v.tab = v.tab || "path";
     v.xp = v.xp || 0; v.units = v.units || {}; v.seen = v.seen || []; v.best = v.best || {};
     v.streak = v.streak || { n: 0, last: "" }; if (!v.day || v.day.d !== today()) v.day = { d: today(), xp: 0 };
     if (v.streak.last && v.streak.last !== today() && v.streak.last !== yday()) v.streak.n = 0;
@@ -44,7 +46,7 @@
   function beep(ok) { if (St().snd === false) return; try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); const t0 = actx.currentTime; (ok ? [[660, 0], [880, .09]] : [[220, 0], [180, .12]]).forEach(([f, d]) => { const o = actx.createOscillator(), g = actx.createGain(); o.type = ok ? "sine" : "square"; o.frequency.value = f; g.gain.setValueAtTime(.0001, t0 + d); g.gain.exponentialRampToValueAtTime(ok ? .18 : .06, t0 + d + .02); g.gain.exponentialRampToValueAtTime(.0001, t0 + d + .16); o.connect(g); g.connect(actx.destination); o.start(t0 + d); o.stop(t0 + d + .18); }); } catch (e) { } }
 
   /* ---------- exercises ---------- */
-  const typeForms = lv => LV.indexOf(lv) >= 2;          // B1+ type the forms
+  const typeForms = lv => lv === "FCE" || LV.indexOf(lv) >= 2;          // B1+ type the forms
   const COMMON = new Set(); { const CE = window.CEFR_EST || {}; ["A1", "A2", "B1", "B2"].forEach(l => String(CE[l] || "").split(" ").forEach(w => COMMON.add(w))); }
   function mkBuild(v) {
     let s = v.s.trim(); const end = /[.!?]$/.test(s) ? s.slice(-1) : "."; if (/[.!?]$/.test(s)) s = s.slice(0, -1);
@@ -166,10 +168,10 @@
     return `<div class="glesson">${top}${stepHTML(st)}${foot}</div>`;
   }
   function html() {
-    const v = St(); loadImgs(v.lv);
+    const v = St(); if (!ALW().includes(v.lv)) v.lv = ALW()[0]; loadImgs(v.lv);
     if (L) return lessonHTML(v);
-    return `<div class="head"><h1>Verbs</h1><span class="sub">Verbos · 1,000 verbs from A1 to C2 · ${ALLV.length} ready</span></div>${statsBar(v)}
-      <div class="seg" role="group" aria-label="Level">${LV.map(l => { const u = units(l), d = u.filter((_, i) => done(v, l, i)).length; return `<button class="chip" type="button" data-vb="lv" data-v="${l}" aria-pressed="${v.lv === l}" ${V[l].length ? "" : "disabled"}><span class="lvl ${l}">${l}</span> <span class="sub">${V[l].length ? `${d}/${u.length}` : "soon"}</span></button>`; }).join("")}</div>
+    return `<div class="head"><h1>Verbs</h1><span class="sub">Verbos · 1,000 verbs from A1 to C2 + 60 B2 First phrasal verbs · ${ALLV.length} ready</span></div>${statsBar(v)}
+      <div class="seg" role="group" aria-label="Level">${ALW().map(l => { const u = units(l), d = u.filter((_, i) => done(v, l, i)).length; return `<button class="chip" type="button" data-vb="lv" data-v="${l}" aria-pressed="${v.lv === l}" ${V[l].length ? "" : "disabled"}><span class="lvl ${l}">${l}</span> <span class="sub">${V[l].length ? `${d}/${u.length}` : "soon"}</span></button>`; }).join("")}</div>
       <p class="sub gintro">${escH(GRAM[v.lv])}</p>
       <div class="gtabs" role="tablist">${[["path", "🗺️", "Learn", "Aprender"], ["table", "📋", "Verb table", "Tabla"], ["practice", "🏋️", "Practice", "Practicar"]].map(([k, ic, l, es]) => `<button role="tab" type="button" class="gtab" data-vb="tab" data-v="${k}" aria-selected="${v.tab === k}"><span>${ic} ${l}</span><small>${es}</small></button>`).join("")}</div>
       ${v.tab === "path" ? pathHTML(v) : v.tab === "table" ? tableHTML(v) : practiceHTML(v)}`;
@@ -182,7 +184,7 @@
     const b = ev.target.closest && ev.target.closest("[data-vb]"); if (!b) return; const a = b.dataset.vb, v = St();
     if (a === "say") { speak(b.dataset.w); return; }
     if (a === "say-slow") { speak(b.dataset.w, .55); return; }
-    if (a === "lv") { v.lv = b.dataset.v; v.q = ""; }
+    if (a === "lv" && ALW().includes(b.dataset.v)) { v.lv = b.dataset.v; v.q = ""; }
     else if (a === "tab") { v.tab = b.dataset.v; }
     else if (a === "snd") { v.snd = v.snd === false; }
     else if (a === "unit") { const ui = +b.dataset.u, U = units(v.lv), fo = U.findIndex((_, i) => !done(v, v.lv, i)); if (ui > (fo < 0 ? U.length : fo)) { toast("Finish the unit before this one first. · Primero termina la unidad anterior."); return; } start(v.lv, ui); return; }
@@ -223,7 +225,7 @@
 
   /* ---------- styles ---------- */
   const css = document.createElement("style");
-  css.textContent = `.vpic{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:14px;background:var(--sunken)}.vpic.big{max-width:420px;margin:0 auto 14px}.vpic.mid{max-width:280px;margin:0 0 12px}
+  css.textContent = `.lvl.FCE{background:#7b2cbf;color:#fff}.vpic{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:14px;background:var(--sunken)}.vpic.big{max-width:420px;margin:0 auto 14px}.vpic.mid{max-width:280px;margin:0 0 12px}
 .vpic-empty{display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--muted)}
 .vcard{align-items:stretch}.vrh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .vforms{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
