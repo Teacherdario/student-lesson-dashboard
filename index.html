@@ -1143,6 +1143,11 @@ body.onelevel .fl[aria-label="Filter by CEFR level"]{display:none}
 .lvc:has(input:checked){border-color:var(--accent,#2f6feb);background:color-mix(in srgb,var(--accent,#2f6feb) 12%,var(--surface));font-weight:600}
 .lvsub{margin-top:10px}.lvh{display:block;font-weight:600;font-size:.9rem;margin-bottom:4px}.lvsub>.sub{margin:0 2px}.lvlv{display:flex;flex-wrap:wrap;gap:6px}.lvc.sm{padding:4px 10px;min-height:32px;font-size:.85rem}.lvhint{margin-top:6px;font-size:.85rem}
 #klass .lvrow{margin-top:8px;display:block}.lvrow>.sub{display:block}.lbl{font-weight:600;display:block}
+.credrow{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-top:8px;font-size:.92rem}
+.pwset{display:flex;gap:6px;align-items:center;flex-wrap:wrap}#klass .pwset input{width:190px;min-height:38px;padding:6px 10px}
+.ctbl{display:grid;margin-top:8px;border:1px solid var(--line);border-radius:8px;overflow:hidden}.ctr{display:grid;grid-template-columns:1fr 1fr 2fr;gap:8px;padding:8px 10px;border-top:1px solid var(--line);align-items:center;font-size:.92rem}.ctr:first-child{border-top:0}.ctr.ch{background:var(--surface);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.03em}code.pw{font-size:.95rem;background:var(--surface);padding:2px 6px;border-radius:5px}
+@media(max-width:520px){#acct:has(#viewas:not([hidden])) #acct-name{display:none}}
+#viewas{min-height:34px;padding:2px 6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:.85rem;max-width:150px}
 </style>
 <div id="gate"><form id="gate-form" class="card" novalidate>
   <h1>Sign in</h1>
@@ -1154,7 +1159,7 @@ body.onelevel .fl[aria-label="Filter by CEFR level"]{display:none}
   <button class="btn primary" id="g-btn" type="submit">Sign in</button>
   <p class="credit">Created by Teacher Dario</p>
 </form></div>
-<div id="acct" hidden><span id="acct-name"></span><button class="btn" id="acct-class" type="button" hidden>Administration</button><button class="btn" id="acct-out" type="button">Sign out</button></div>
+<div id="acct" hidden><span id="acct-name"></span><select id="viewas" aria-label="Preview as a level" hidden></select><button class="btn" id="acct-class" type="button" hidden>Administration</button><button class="btn" id="acct-out" type="button">Sign out</button></div>
 <div id="klass" hidden><div class="in">
   <div class="head"><div><h1>Teacher administration</h1><p class="credit">Created by Teacher Dario</p></div><button class="btn" id="klass-close" type="button">Close</button></div>
   <form class="card" id="add-form" novalidate><h2 style="margin-bottom:10px">Add a student</h2>
@@ -1229,28 +1234,40 @@ onAuthStateChanged(auth,async u=>{
   try{const snap=await getDoc(doc(db,"students",uid));if(snap.exists())next=Object.assign(blank(),JSON.parse(snap.data().state));}catch(e){console.warn("Could not load saved work",e);}
   setLevel(level);S=next;S.f=Object.assign({level:"",topic:"",q:""},S.f,{level:""});if(!TOPICS.includes(S.f.topic))S.f.topic="";
   ready=true;if(ONLY&&!ONLY.includes(location.hash.slice(1)))location.hash=ONLY[0];localSave();render();
-  const nm=isT?"Teacher Dario":u.email.split("@")[0];$id("acct-name").textContent=nm;$id("acct").hidden=false;$id("acct-class").hidden=!isT;
+  const nm=isT?"Teacher Dario":u.email.split("@")[0];$id("acct-name").textContent=nm;$id("acct").hidden=false;$id("acct-class").hidden=!isT;$id("viewas").hidden=!isT;if(isT)fillViewAs();
   const w=document.querySelector(".rail .who");if(w){w.innerHTML="<b></b><span></span>";w.firstChild.textContent=nm;w.lastChild.textContent=isT?"Teacher":lvLabel(parseLv(level));}
   $id("gate").hidden=true;
 });
 $id("klass-close").addEventListener("click",()=>{$id("klass").hidden=true;});
+function fillViewAs(){const o=[["","See everything"]];LV.forEach(l=>o.push([l,"Lessons "+l]));o.push(["FCE","B2 First test practice"]);LVS.forEach(l=>o.push(["VOC:"+l,"Vocabulary "+l]));LVS.forEach(l=>o.push(["VERB:"+l,"Verbs "+l]));$id("viewas").innerHTML=o.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");}
+$id("viewas").addEventListener("change",e=>{const v=e.target.value;setLevel(v);const c=parseLv(v);if(c.some(x=>x.startsWith("VOC:"))&&S.voc)S.voc.lv=c[0].split(":")[1];if(c.some(x=>x.startsWith("VERB:"))&&S.verb)S.verb.lv=c[0].split(":")[1];if(ONLY&&!ONLY.includes(location.hash.slice(1)))location.hash=ONLY[0];render();});
 async function loadClass(){
   const body=$id("klass-body");body.textContent="Loading…";
   try{
     const [ros,sts]=await Promise.all([getDocs(collection(db,"roster")),getDocs(collection(db,"students"))]);
     const work={};sts.forEach(d=>{const v=d.data();let s={};try{s=JSON.parse(v.state);}catch(e){}work[d.id]={updated:v.updated,s};});
-    const rows=[];ros.forEach(d=>{const v=d.data();rows.push({id:d.id,name:v.name||d.id,level:v.level||"",w:work[d.id]||{s:{}}});});
+    const rows=[];ros.forEach(d=>{const v=d.data();rows.push({id:d.id,name:v.name||d.id,level:v.level||"",pw:v.pw||"",w:work[d.id]||{s:{}}});});
     rows.sort((a,b)=>a.name.localeCompare(b.name));
-    body.innerHTML=rows.length?rows.map(r=>{const p=r.w.s.p||{},subs=r.w.s.subs||{};
+    const tbl=rows.length?`<div class="card" id="cred-card"><div class="srow"><h2>Usernames and passwords</h2><span class="row"><button class="btn" type="button" id="cred-eye">${SHOWPW?"Hide passwords":"Show passwords"}</button><button class="btn" type="button" id="cred-copy">Copy list</button></span></div>
+      <div class="ctbl" role="table"><div class="ctr ch" role="row"><span role="columnheader">Username</span><span role="columnheader">Password</span><span role="columnheader">Levels and courses</span></div>${rows.map(r=>`<div class="ctr" role="row"><span role="cell"><b>${esc(r.name)}</b></span><span role="cell">${r.pw?`<code class="pw">${SHOWPW?esc(r.pw):"••••••"}</code>`:'<span class="sub">not saved</span>'}</span><span role="cell" class="sub">${esc(lvLabel(parseLv(r.level)))}</span></div>`).join("")}</div>
+      <p class="tip">Students added from now on have their password saved here automatically. For students added before, type the password you gave them on their card below and tap Save. This only records it for you; it does not change the password they use.</p></div>`:"";
+    window.__rows=rows;
+    body.innerHTML=tbl+(rows.length?rows.map(r=>{const p=r.w.s.p||{},subs=r.w.s.subs||{};
       const done=ALL.filter(l=>{const x=p[l.id]||{};return x.read&&x.listen&&x.practice&&x.write;}).length;
       const started=ALL.filter(l=>p[l.id]&&Object.keys(p[l.id]).length).length;
       const list=ALL.filter(l=>subs[l.id]).map(l=>`<details><summary><span class="lvl ${l.level}">${l.level}</span> ${esc(l.title)} · ${words(subs[l.id].text)} words · ${new Date(subs[l.id].at).toLocaleDateString()}</summary><pre>${esc(subs[l.id].text)}</pre></details>`).join("");
       return`<div class="card"><div class="srow"><h2>${esc(r.name)}</h2>
-        <span class="row"><button class="btn" type="button" data-rm="${r.id}" data-name="${esc(r.name)}">Remove</button></span></div><div class="lvrow" data-lv="${r.id}"><span class="sub">Levels and courses: <b class="lvnow">${esc(lvLabel(parseLv(r.level)))}</b></span>${pick("lv-"+r.id,parseLv(r.level))}</div>${fceSum(r.w.s)}${vocSum(r.w.s)}${verbSum(r.w.s)}
+        <span class="row"><button class="btn" type="button" data-rm="${r.id}" data-name="${esc(r.name)}">Remove</button></span></div><div class="credrow"><span>Username: <b>${esc(r.name)}</b></span><span class="pwset"><label for="pw-${r.id}">Password:</label><input id="pw-${r.id}" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(SHOWPW?r.pw:"")}" placeholder="${r.pw&&!SHOWPW?"saved (hidden)":"not saved, type it here"}"><button class="btn" type="button" data-pw="${r.id}">Save</button></span></div><div class="lvrow" data-lv="${r.id}"><span class="sub">Levels and courses: <b class="lvnow">${esc(lvLabel(parseLv(r.level)))}</b></span>${pick("lv-"+r.id,parseLv(r.level))}</div>${fceSum(r.w.s)}${vocSum(r.w.s)}${verbSum(r.w.s)}
         <p class="sub" style="margin-top:6px">${done} completed · ${started} started · last active ${r.w.updated?new Date(r.w.updated).toLocaleDateString():"never"}</p>
-        <div style="margin-top:8px">${list||'<p class="sub">No writing submitted yet.</p>'}</div></div>`;}).join(""):'<p class="sub">No students yet. Add the first one with the form.</p>';
+        <div style="margin-top:8px">${list||'<p class="sub">No writing submitted yet.</p>'}</div></div>`;}).join(""):'<p class="sub">No students yet. Add the first one with the form.</p>');
   }catch(e){body.textContent="Could not load the class. Only the teacher account can open this list.";}
 }
+let SHOWPW=true;
+$id("klass-body").addEventListener("click",async e=>{
+  if(e.target.id==="cred-eye"){SHOWPW=!SHOWPW;loadClass();return;}
+  if(e.target.id==="cred-copy"){const t=(window.__rows||[]).map(r=>r.name+"\t"+(r.pw||"(not saved)")+"\t"+lvLabel(parseLv(r.level))).join("\n");try{await navigator.clipboard.writeText("Username\tPassword\tLevels\n"+t);e.target.textContent="Copied";}catch(err){e.target.textContent="Could not copy";}setTimeout(()=>{e.target.textContent="Copy list";},1800);return;}
+  const b=e.target.closest("[data-pw]");if(!b)return;const id=b.dataset.pw,inp=$id("pw-"+id),v=inp.value.trim();
+  if(!v){inp.focus();return;}b.disabled=true;try{await setDoc(doc(db,"roster",id),{pw:v},{merge:true});b.textContent="Saved ✓";setTimeout(loadClass,700);}catch(err){b.textContent="Not saved";}b.disabled=false;});
 $id("acct-class").addEventListener("click",()=>{$id("klass").hidden=false;if(!$id("a-level").firstChild)$id("a-level").innerHTML=pick("a-lv",[]);$id("a-msg").textContent="";loadClass();});
 $id("klass-body").addEventListener("change",async e=>{const box=e.target.closest(".lvrow");if(!box)return;const id=box.dataset.lv,val=picked(box);box.querySelectorAll(".err,.ok").forEach(x=>x.remove());try{await setDoc(doc(db,"roster",id),{level:val},{merge:true});box.querySelector(".lvnow").textContent=lvLabel(parseLv(val));box.insertAdjacentHTML("beforeend",'<span class="ok">Saved</span>');setTimeout(()=>{const o=box.querySelector(".ok");if(o)o.remove();},1500);}catch(err){box.insertAdjacentHTML("beforeend",'<span class="err">Not saved</span>');}});
 $id("klass-body").addEventListener("click",async e=>{const b=e.target.closest("[data-rm]");if(!b)return;
@@ -1264,7 +1281,7 @@ $id("add-form").addEventListener("submit",async e=>{
   if(pass.length<6){msg.textContent="The password needs at least 6 characters.";return;}
   $id("a-btn").disabled=true;msg.textContent="";
   try{const a=adminAuth();const cred=await createUserWithEmailAndPassword(a,name+DOMAIN,pass);
-    await setDoc(doc(db,"roster",cred.user.uid),{name,level,created:Date.now()});await signOut(a);
+    await setDoc(doc(db,"roster",cred.user.uid),{name,level,pw:pass,created:Date.now()});await signOut(a);
     msg.className="ok";msg.textContent="Added "+name+": "+lvLabel(parseLv(level))+". Give them the username and the password you typed.";
     $id("a-user").value="";$id("a-pass").value="";$id("a-level").innerHTML=pick("a-lv",[]);loadClass();
   }catch(err){const c=err&&err.code||"";msg.textContent=c.includes("already-in-use")?"That username is already taken. Choose another.":c.includes("weak-password")?"The password needs at least 6 characters.":c.includes("network")?"No connection. Check your internet and try again.":"Could not add the student. Try again.";}
