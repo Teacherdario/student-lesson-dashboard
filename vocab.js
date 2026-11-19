@@ -2,12 +2,12 @@
 (function () {
   const D = window.DICT_DATA; if (!D || typeof VIEWS === "undefined") return;
   const LV = ["A1", "A2", "B1", "B2", "C1", "C2"];
-  const LVA = [...LV, "FCE"];
+  const LVA = [...LV, "PET", "FCE"];
   const ALW = () => { const a = (window.TD_ALLOW || {})["VOC"]; return a && a.length ? LVA.filter(l => a.includes(l)) : LVA; };
-  const inLv = (e, lv) => lv === "FCE" ? /^B2 First/.test(e.src || "") : e.c === lv;
-  const wbLv = lv => lv === "FCE" ? "B2" : lv;
+  const inLv = (e, lv) => lv === "FCE" ? /^B2 First/.test(e.src || "") : lv === "PET" ? (e.tags || []).includes("PET") : e.c === lv;
+  const wbLv = lv => lv === "FCE" ? "B2" : lv === "PET" ? "B1" : lv;
   const escH = t => String(t == null ? "" : t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const E = D.entries.map((r, i) => ({ i, w: r[0], t: r[1], c: r[2], p: r[3], es: r[4], e: r[7], src: r[8] || "", xs: r[11] || "" }));
+  const E = D.entries.map((r, i) => ({ i, w: r[0], t: r[1], c: r[2], p: r[3], es: r[4], e: r[7], src: r[8] || "", xs: r[11] || "", tags: r[12] || [] }));
   const WB = D.wb || [];
   const COMMON = new Set(); const CE = window.CEFR_EST || {}; ["A1", "A2", "B1", "B2"].forEach(l => String(CE[l] || "").split(" ").forEach(w => COMMON.add(w)));
   ["mexico", "messi", "shakira", "london", "paris", "spain", "canada"].forEach(w => COMMON.delete(w));
@@ -240,9 +240,9 @@
   function html() {
     const v = G(); if (!ALW().includes(v.lv)) v.lv = ALW()[0];
     if (L) return lessonHTML(v);
-    const counts = Object.fromEntries(LV.map(l => [l, E.filter(e => inLv(e, l)).length]));
+    const counts = Object.fromEntries(LVA.map(l => [l, E.filter(e => inLv(e, l)).length]));
     const U = units(v.lv), done = U.filter((_, i) => unitDone(v, v.lv, i)).length;
-    return `<div class="head"><h1>Vocabulary</h1><span class="sub">Vocabulario · A1 to C2 + B2 First</span></div>${statsBar(v)}
+    return `<div class="head"><h1>Vocabulary</h1><span class="sub">Vocabulario · A1 to C2 + B1 Preliminary (PET) + B2 First (FCE)</span></div>${statsBar(v)}
       <div class="seg" role="group" aria-label="Level">${ALW().map(l => { const u = units(l), d = u.filter((_, i) => unitDone(v, l, i)).length; return `<button class="chip" type="button" data-voc="lv" data-v="${l}" aria-pressed="${v.lv === l}"><span class="lvl ${l}">${l}</span> <span class="sub">${d}/${u.length}</span></button>`; }).join("")}</div>
       <div class="gtabs" role="tablist">${[["path", "🗺️", "Learn", "Aprender"], ["words", "📖", "Words", "Palabras"], ["practice", "🏋️", "Practice", "Practicar"]].map(([k, ic, l, es]) => `<button role="tab" type="button" class="gtab" data-voc="tab" data-v="${k}" aria-selected="${v.tab === k}"><span>${ic} ${l}</span><small>${es}</small></button>`).join("")}</div>
       ${v.tab === "path" ? `<p class="sub gintro">${done}/${U.length} units done in ${v.lv} · ${counts[v.lv]} words. Each lesson takes about 3 minutes. · Cada lección dura unos 3 minutos.</p>${pathHTML(v)}` : v.tab === "words" ? wordsTabHTML(v) : practiceTabHTML(v)}`;
@@ -298,7 +298,7 @@
 
   /* ---------- styles ---------- */
   const st = document.createElement("style");
-  st.textContent = `.lvl.FCE{background:#7b2cbf;color:#fff}.vh{margin:16px 0 6px}.vlist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+  st.textContent = `.lvl.FCE{background:#7b2cbf;color:#fff}.lvl.PET{background:#0e7c86;color:#fff}.vh{margin:16px 0 6px}.vlist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
 .vlist li{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);display:flex;flex-direction:column;gap:2px}
 .vw{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.vlink{border:0;background:none;padding:0;font:inherit;font-family:var(--read);font-size:1.12rem;font-weight:700;color:var(--ink);cursor:pointer;text-align:left}.vlink:hover{text-decoration:underline}
 .vw .ipa{font-size:.92rem;color:var(--muted)}.vlist .des{color:var(--muted)}.vlist .dex{font-size:.92rem}
