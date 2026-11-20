@@ -1115,7 +1115,7 @@ window.addEventListener("hashchange",()=>{if(curView()!=="reader")stopSpeak();re
 window.addEventListener("pagehide",stopSpeak);
 render();
 </script>
-<script src="dictdata.js"></script><script src="cefr.js"></script><script src="dict.js"></script><script src="vocab.js"></script><script>window.VERB_IMG_BASE="";</script><script src="verbsdata.js"></script><script src="verbs.js"></script><script src="pet.js"></script><script src="petphotos.js"></script><script src="p1.js"></script><script src="p2.js"></script><script src="p3.js"></script><script src="p4.js"></script><script src="p5.js"></script><script src="p6.js"></script><script src="p7.js"></script><script src="p8.js"></script><script src="p9.js"></script><script src="p10.js"></script><script src="fig.js"></script><script src="book.js"></script><script src="book-a1.js"></script><script src="book-a2.js"></script><script src="book-b1.js"></script><script src="book-b2.js"></script><script src="book-c1.js"></script><script src="book-c2.js"></script><script src="book-verbs.js"></script><script src="book-exams.js"></script>
+<script src="dictdata.js"></script><script src="cefr.js"></script><script src="dict.js"></script><script src="vocab.js"></script><script>window.VERB_IMG_BASE="";</script><script src="verbsdata.js"></script><script src="verbs.js"></script><script src="pet.js"></script><script src="petphotos.js"></script><script src="p1.js"></script><script src="p2.js"></script><script src="p3.js"></script><script src="p4.js"></script><script src="p5.js"></script><script src="p6.js"></script><script src="p7.js"></script><script src="p8.js"></script><script src="p9.js"></script><script src="p10.js"></script><script src="fig.js"></script><script src="book.js"></script><script src="book-a1.js"></script><script src="book-a2.js"></script><script src="book-b1.js"></script><script src="book-b2.js"></script><script src="book-c1.js"></script><script src="book-c2.js"></script><script src="book-verbs.js"></script><script src="book-exams.js"></script><script src="tools.js"></script>
 
 <!-- Sign-in and cloud saving (Firebase). Added for the GitHub Pages copy. -->
 <style>
@@ -1148,6 +1148,20 @@ body.onelevel .fl[aria-label="Filter by CEFR level"]{display:none}
 .ctbl{display:grid;margin-top:8px;border:1px solid var(--line);border-radius:8px;overflow:hidden}.ctr{display:grid;grid-template-columns:1fr 1fr 2fr;gap:8px;padding:8px 10px;border-top:1px solid var(--line);align-items:center;font-size:.92rem}.ctr:first-child{border-top:0}.ctr.ch{background:var(--surface);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.03em}code.pw{font-size:.95rem;background:var(--surface);padding:2px 6px;border-radius:5px}
 @media(max-width:520px){#acct:has(#viewas:not([hidden])) #acct-name{display:none}}
 #viewas{min-height:34px;padding:2px 6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:.85rem;max-width:150px}
+#acct .nb:not(:empty){display:inline-block;min-width:18px;margin-left:4px;padding:0 5px;border-radius:999px;background:#d64545;color:#fff;font-size:.72rem;font-weight:800;line-height:18px}
+.st-dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:#b8bec8;margin-right:8px;vertical-align:middle}.st-dot.on{background:#22a85a;box-shadow:0 0 0 3px #22a85a33}
+.rbadge{font-size:.72rem;font-weight:800;border-radius:999px;padding:2px 8px;background:var(--sunken);color:var(--muted);vertical-align:middle}.rbadge.teacher{background:#e8eefc;color:#1f4e9c}.rbadge.demo{background:#fff3cd;color:#7a5a00}
+.xrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}.xrow select{width:auto!important;min-height:36px!important;padding:4px 8px!important}
+.tlist{display:flex;flex-direction:column;gap:6px;margin-top:8px}.titem{display:flex;gap:8px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface);flex-wrap:wrap}.titem.done{background:#eefaf2;border-color:#b7e2c3}.titem small{color:var(--muted)}
+#pop{position:fixed;inset:0;z-index:60;background:#0008;display:flex;align-items:flex-end;justify-content:center}#pop[hidden]{display:none}
+.pop-in{position:relative;background:var(--bg);width:min(640px,100%);max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px 16px 24px}@media(min-width:700px){#pop{align-items:center}.pop-in{border-radius:18px}}
+.pop-x{position:absolute;right:12px;top:12px}
+.thread{display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow:auto;padding:8px;background:var(--sunken);border-radius:12px;margin:10px 0}
+.bub{max-width:80%;padding:8px 12px;border-radius:14px;background:var(--surface);border:1px solid var(--line);white-space:pre-wrap}.bub.me{align-self:flex-end;background:#e8eefc;border-color:#c7d6f7}.bub small{display:block;color:var(--muted);font-size:.72rem;margin-top:2px}
+.pop-in textarea{width:100%;min-height:80px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit}
+.pop-in select,.pop-in input{border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:42px;width:100%;background:var(--surface)}
+.pop-in .field{display:flex;flex-direction:column;gap:4px;margin-top:10px}
+.ovw{display:flex;flex-wrap:wrap;gap:10px}.ovw .tile{flex:1 1 140px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface)}.ovw .tile b{font-size:1.6rem;display:block}
 </style>
 <div id="gate"><form id="gate-form" class="card" novalidate>
   <h1>Sign in</h1>
@@ -1159,12 +1173,14 @@ body.onelevel .fl[aria-label="Filter by CEFR level"]{display:none}
   <button class="btn primary" id="g-btn" type="submit">Sign in</button>
   <p class="credit">Created by Teacher Dario</p>
 </form></div>
-<div id="acct" hidden><span id="acct-name"></span><select id="viewas" aria-label="Preview as a level" hidden></select><button class="btn" id="acct-class" type="button" hidden>Administration</button><button class="btn" id="acct-out" type="button">Sign out</button></div>
+<div id="acct" hidden><span id="acct-name"></span><select id="viewas" aria-label="Preview as a level" hidden></select><button class="btn" id="acct-inbox" type="button" hidden title="Messages · Mensajes">💬<span class="nb" id="ib-n"></span></button><button class="btn" id="acct-tasks" type="button" hidden title="Tasks · Tareas">📋<span class="nb" id="tk-n"></span></button><button class="btn" id="acct-class" type="button" hidden>Administration</button><button class="btn" id="acct-out" type="button">Sign out</button></div>
+<div id="pop" hidden><div class="pop-in" role="dialog" aria-modal="true"><button class="btn pop-x" type="button" data-pop="close">✕</button><div id="pop-body"></div></div></div>
 <div id="klass" hidden><div class="in">
   <div class="head"><div><h1>Teacher administration</h1><p class="credit">Created by Teacher Dario</p></div><button class="btn" id="klass-close" type="button">Close</button></div>
   <form class="card" id="add-form" novalidate><h2 style="margin-bottom:10px">Add a student</h2>
     <div class="addgrid">
       <div class="field"><label for="a-user">Username</label><input id="a-user" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="maria"></div>
+      <div class="field"><label for="a-role">Role · Rol</label><select id="a-role"><option value="student">Student · Alumno</option><option value="teacher">Teacher · Maestro</option><option value="demo">Demo (try everything, nothing saved)</option></select></div>
       <div class="field"><label for="a-pass">Password</label><input id="a-pass" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="6 characters or more"></div>
       </div>
     <div class="field" style="margin-top:12px"><span class="lbl">Levels and courses <span class="sub">(tick as many as you want; none ticked = everything)</span></span><div id="a-level"></div></div>
@@ -1178,7 +1194,7 @@ body.onelevel .fl[aria-label="Filter by CEFR level"]{display:none}
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc,deleteDoc,collection,getDocs} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFirestore,doc,getDoc,setDoc,deleteDoc,collection,getDocs,onSnapshot,arrayUnion} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const cfg={apiKey:"AIzaSyC3BO7LU1bVlQrGuKla_hB3jI7Ur8_20SE",authDomain:"teacher-dario.firebaseapp.com",projectId:"teacher-dario",storageBucket:"teacher-dario.firebasestorage.app",messagingSenderId:"736407157022",appId:"1:736407157022:web:e5cde493e544d8ce2db10f"};
 const DOMAIN="@students.peldano.app",TEACHER="teacher"+DOMAIN,LV=["A1","A2","B1","B2","C1","C2"],LVX=[...LV,"PET","FCE","VOC","VERB"],LVN=x=>x==="PET"?"B1 Preliminary (PET)":x==="FCE"?"B2 First (FCE)":x==="VOC"?"Vocabulary course":x==="VERB"?"Verbs course":x;function verbSum(st){const v=st&&st.verb;if(!v)return"";const u=v.units||{},b=v.best||{};const parts=[];if(v.xp)parts.push("⚡ "+v.xp+" XP");if(v.streak&&v.streak.n)parts.push("🔥 "+v.streak.n+"-day streak (last "+v.streak.last+")");const ud=[...LV,"PET","FCE"].filter(l=>u[l]&&Object.keys(u[l]).length).map(l=>l+" "+Object.keys(u[l]).length);if(ud.length)parts.push("units done: "+ud.join(", "));const k=[...LV,"PET","FCE"].filter(l=>b[l]&&b[l].forms);if(k.length)parts.push("forms drill best: "+k.map(l=>l+" "+b[l].forms[0]+"/10").join(", "));if(!parts.length)return"";return`<p class="sub" style="margin-top:6px"><b>Verbs:</b> ${parts.join(" · ")}</p>`;}function vocSum(st){const v=st&&st.voc;if(!v)return"";const b=v.best||{},u=v.units||{};const parts=[];if(v.xp)parts.push("⚡ "+v.xp+" XP");if(v.streak&&v.streak.n)parts.push("🔥 "+v.streak.n+"-day streak (last "+v.streak.last+")");const ud=[...LV,"PET","FCE"].filter(l=>u[l]&&Object.keys(u[l]).length).map(l=>l+" "+Object.keys(u[l]).length);if(ud.length)parts.push("units done: "+ud.join(", "));const f=x=>x?x[0]+"/"+x[1]:"–";const k=[...LV,"PET","FCE"].filter(l=>b[l]);if(k.length)parts.push("practice best: "+k.map(l=>l+" build "+f(b[l].sb)+", word building "+f(b[l].wb)).join("; "));if(!parts.length)return"";return`<p class="sub" style="margin-top:6px"><b>Vocabulary:</b> ${parts.join(" · ")}</p>`;}function petSum(st){const R=(st&&st.pet&&st.pet.res)||{},k=Object.keys(R);if(!k.length)return"";const sk={};k.forEach(x=>{const r=R[x];if(!r||!r.m)return;const a=sk[r.sk]||(sk[r.sk]=[0,0]);a[0]+=r.s;a[1]+=r.m;});const N={read:"Reading",lis:"Listening"};return`<p class="sub" style="margin-top:6px"><b>B1 Preliminary:</b> ${k.length} parts marked in ${new Set(k.map(x=>x.split(".")[0])).size} tests${Object.keys(sk).map(x=>" · "+(N[x]||x)+" "+Math.round(100*sk[x][0]/sk[x][1])+"%").join("")}</p>`;}function fceSum(st){const R=(st&&st.fce&&st.fce.res)||{},k=Object.keys(R);if(!k.length)return"";const sk={};k.forEach(x=>{const r=R[x];if(!r||!r.m)return;const a=sk[r.sk]||(sk[r.sk]=[0,0]);a[0]+=r.s;a[1]+=r.m;});const N={read:"Reading",uoe:"Use of English",lis:"Listening"};return`<p class="sub" style="margin-top:6px"><b>B2 First:</b> ${k.length} parts marked in ${new Set(k.map(x=>x.split(".")[0])).size} tests${Object.keys(sk).map(x=>" · "+(N[x]||x)+" "+Math.round(100*sk[x][0]/sk[x][1])+"%").join("")}</p>`;}
 const app=initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
@@ -1188,11 +1204,12 @@ let uid=null,ready=false,timer=null,asTeacher=false;
 const ALL=LESSONS.slice();window.ALL_LESSONS=ALL;
 const VALL=VIEWS.slice();let ONLY=null;
 const SUBC=["VOC","VERB"],LVS=[...LV,"PET","FCE"],isSub=t=>/^(VOC|VERB):(A1|A2|B1|B2|C1|C2|PET|FCE)$/.test(t),has=(c,k)=>c.some(x=>x===k||x.startsWith(k+":")),subs=(c,k)=>LVS.filter(l=>c.includes(k+":"+l)),CN={VOC:"Vocabulary",VERB:"Verbs"};
-const parseLv=x=>String(x||"").split(",").map(t=>t.trim()).filter(t=>LVX.includes(t)||isSub(t));
-const lvLabel=c=>{if(!c.length)return"All levels and courses";const o=c.filter(x=>LV.includes(x)||x==="FCE"||x==="PET").map(LVN);SUBC.forEach(k=>{if(has(c,k)){const l=subs(c,k);o.push(CN[k]+" "+(l.length?l.join(", "):"(all levels)"));}});return o.join(" · ");};
+const BKS=[...LV,"VOC","VERB","PET","FCE"],BKN=x=>x==="VOC"?"Vocabulary":x==="VERB"?"Verbs":x;
+const parseLv=x=>String(x||"").split(",").map(t=>t.trim()).filter(t=>LVX.includes(t)||isSub(t)||/^BOOK:/.test(t));
+const lvLabel=c=>{if(!c.length)return"All levels and courses";const o=c.filter(x=>LV.includes(x)||x==="FCE"||x==="PET").map(LVN);SUBC.forEach(k=>{if(has(c,k)){const l=subs(c,k);o.push(CN[k]+" "+(l.length?l.join(", "):"(all levels)"));}});const bk=c.filter(x=>x.startsWith("BOOK:")).map(x=>BKN(x.slice(5)));if(bk.length)o.push("Book "+bk.join(", "));return o.join(" · ")||"All levels and courses";};
 function setViews(c){window.TD_CODES=c;const cefr=c.filter(x=>LV.includes(x));window.TD_LEVEL=cefr[0]||"";window.TD_ALLOW={VOC:subs(c,"VOC"),VERB:subs(c,"VERB")};let ids=null;
   if(c.length){ids=new Set(["book"]);if(cefr.length)["library","reader","writing","progress","dict"].forEach(x=>ids.add(x));if(c.includes("FCE"))ids.add("fce");if(c.includes("PET"))ids.add("pet");if(has(c,"VOC")){ids.add("vocab");ids.add("dict");}if(has(c,"VERB")){ids.add("verbs");ids.add("dict");}}
-  const keep=ids?VALL.filter(v=>ids.has(v[0])):VALL;ONLY=ids?keep.map(v=>v[0]):null;VIEWS.splice(0,VIEWS.length,...keep);
+  const keep=(ids?VALL.filter(v=>ids.has(v[0])):VALL).filter(v=>v[0]!=="tools"||window.TD_TEACHER);ONLY=ids?keep.map(v=>v[0]):null;VIEWS.splice(0,VIEWS.length,...keep);
   VALL.forEach(([id])=>{if(!keep.some(v=>v[0]===id)){const e=document.getElementById("v-"+id);if(e)e.classList.remove("on");}});
   const t=document.getElementById("tabs");if(t)t.style.gridTemplateColumns="repeat("+VIEWS.length+",1fr)";
   const h=location.hash.slice(1);if(ONLY&&!ONLY.includes(h))location.hash=ONLY[0];else if(!ONLY&&h&&!VIEWS.some(v=>v[0]===h))location.hash="library";}
@@ -1200,13 +1217,13 @@ window.addEventListener("hashchange",()=>{if(ONLY&&!ONLY.includes(location.hash.
 function setLevel(lv){const c=parseLv(lv);setViews(c);const cefr=c.filter(x=>LV.includes(x));const keep=cefr.length?ALL.filter(l=>cefr.includes(l.level)):ALL;LESSONS.splice(0,LESSONS.length,...keep);TOPICS.splice(0,TOPICS.length,...new Set(keep.map(l=>l.topic)));document.body.classList.toggle("onelevel",cefr.length===1);}
 const chk=(name,x,lab,on,cls)=>`<label class="lvc${cls||""}"><input type="checkbox" name="${name}" value="${x}" ${on?"checked":""}><span>${lab}</span></label>`;
 const pick=(name,sel)=>{const row=(t,items)=>`<div class="lvsub"><span class="lvh">${t}</span><div class="lvlv">${items}</div></div>`;const sub=k=>LVS.map(l=>chk(name,k+":"+l,l,sel.includes(k+":"+l)||sel.includes(k)," sm")).join("");
-  return row("Lessons · Lecciones",LV.map(x=>chk(name,x,x,sel.includes(x)," sm")).join(""))+row("Cambridge test practice",chk(name,"PET","B1 Preliminary (PET)",sel.includes("PET")," sm")+chk(name,"FCE","B2 First (FCE)",sel.includes("FCE")," sm"))+row("Vocabulary · Vocabulario",sub("VOC"))+row("Verbs · Verbos",sub("VERB"));};
+  return row("Lessons · Lecciones",LV.map(x=>chk(name,x,x,sel.includes(x)," sm")).join(""))+row("Cambridge test practice",chk(name,"PET","B1 Preliminary (PET)",sel.includes("PET")," sm")+chk(name,"FCE","B2 First (FCE)",sel.includes("FCE")," sm"))+row("Vocabulary · Vocabulario",sub("VOC"))+row("Verbs · Verbos",sub("VERB"))+row("Student Book · Libro (if none ticked, the book follows the courses above)",BKS.map(x=>chk(name,"BOOK:"+x,BKN(x),sel.includes("BOOK:"+x)," sm")).join(""));};
 const picked=root=>[...root.querySelectorAll('input[type=checkbox]:checked')].map(i=>i.value).join(",");
 const blank=()=>{const s=seed();s.p={};s.subs={};s.ex={};s.drafts={};s.cur="l1";s.wcur="l1";return s;};
 if(!document.querySelector("main>.credit")){const f=document.createElement("footer");f.className="credit";f.textContent="Created by Teacher Dario";document.querySelector("main").appendChild(f);}
 if(!document.querySelector(".rail .credit")){const c=document.createElement("div");c.className="credit";c.style.padding="0 10px";c.textContent="Created by Teacher Dario";const b=document.querySelector(".rail .brand");if(b)b.after(c);}
 const localSave=window.save;
-async function push(){if(!uid||!ready)return;try{await setDoc(doc(db,"students",uid),{name:auth.currentUser.email.split("@")[0],updated:Date.now(),state:JSON.stringify(S)});}catch(e){console.warn("Could not save to the cloud",e);}}
+async function push(){if(!uid||!ready||window.TD_DEMO)return;try{await setDoc(doc(db,"students",uid),{name:auth.currentUser.email.split("@")[0],updated:Date.now(),seen:Date.now(),state:JSON.stringify(S)},{merge:true});}catch(e){console.warn("Could not save to the cloud",e);}}
 window.save=function(){localSave();if(!uid||!ready)return;clearTimeout(timer);timer=setTimeout(push,1500);};
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){clearTimeout(timer);push();}});
 function who(t){asTeacher=t;$id("g-st").setAttribute("aria-pressed",String(!t));$id("g-te").setAttribute("aria-pressed",String(t));$id("g-userwrap").hidden=t;$id("g-hint").textContent=t?"Teacher Dario: type your teacher password.":"Use the username and password your teacher gave you.";$id("g-err").textContent="";}
@@ -1222,20 +1239,21 @@ $id("gate-form").addEventListener("submit",async e=>{
 });
 $id("acct-out").addEventListener("click",async()=>{clearTimeout(timer);await push();ready=false;uid=null;try{localStorage.removeItem(KEY);}catch(e){}await signOut(auth);});
 onAuthStateChanged(auth,async u=>{
-  if(!u){uid=null;ready=false;setLevel(null);$id("acct").hidden=true;$id("klass").hidden=true;$id("gate").hidden=false;return;}
-  const isT=u.email===TEACHER;let level=null;
-  if(!isT){
+  if(!u){uid=null;ready=false;window.TD_TEACHER=false;window.TD_DEMO=false;stopLive();setLevel(null);$id("acct").hidden=true;$id("klass").hidden=true;$id("gate").hidden=false;$id("acct-inbox").hidden=true;$id("acct-tasks").hidden=true;return;}
+  const main=u.email===TEACHER;let isT=main;let level=null;let role=main?"teacher":"student";
+  if(!main){
     let entry=null,failed=false;
     try{const r=await getDoc(doc(db,"roster",u.uid));if(r.exists())entry=r.data();}catch(e){failed=true;}
     if(!entry){await signOut(auth);$id("g-err").textContent=failed?"Could not check the class list. Try again in a moment.":"This account is not on the class list. Ask your teacher.";return;}
-    level=entry.level||"";
+    level=entry.level||"";role=entry.role||"student";if(role==="teacher"){isT=true;level=null;}
   }
+  window.TD_TEACHER=isT;window.TD_DEMO=role==="demo";window.TD_ME=main?"Teacher Dario":u.email.split("@")[0];
   uid=u.uid;let next=blank();
   try{const snap=await getDoc(doc(db,"students",uid));if(snap.exists())next=Object.assign(blank(),JSON.parse(snap.data().state));}catch(e){console.warn("Could not load saved work",e);}
   setLevel(level);S=next;S.f=Object.assign({level:"",topic:"",q:""},S.f,{level:""});if(!TOPICS.includes(S.f.topic))S.f.topic="";
   ready=true;if(ONLY&&!ONLY.includes(location.hash.slice(1)))location.hash=ONLY[0];localSave();render();
-  const nm=isT?"Teacher Dario":u.email.split("@")[0];$id("acct-name").textContent=nm;$id("acct").hidden=false;$id("acct-class").hidden=!isT;$id("viewas").hidden=!isT;if(isT)fillViewAs();
-  const w=document.querySelector(".rail .who");if(w){w.innerHTML="<b></b><span></span>";w.firstChild.textContent=nm;w.lastChild.textContent=isT?"Teacher":lvLabel(parseLv(level));}
+  const nm=main?"Teacher Dario":u.email.split("@")[0]+(role==="demo"?" · Demo":role==="teacher"?" · Teacher":"");startLive(isT);$id("acct-name").textContent=nm;$id("acct").hidden=false;$id("acct-class").hidden=!isT;$id("viewas").hidden=!isT;if(isT)fillViewAs();
+  const w=document.querySelector(".rail .who");if(w){w.innerHTML="<b></b><span></span>";w.firstChild.textContent=nm;w.lastChild.textContent=isT?"Teacher":role==="demo"?"Demo account · nothing is saved":lvLabel(parseLv(level));}
   $id("gate").hidden=true;
 });
 $id("klass-close").addEventListener("click",()=>{$id("klass").hidden=true;});
@@ -1245,20 +1263,20 @@ async function loadClass(){
   const body=$id("klass-body");body.textContent="Loading…";
   try{
     const [ros,sts]=await Promise.all([getDocs(collection(db,"roster")),getDocs(collection(db,"students"))]);
-    const work={};sts.forEach(d=>{const v=d.data();let s={};try{s=JSON.parse(v.state);}catch(e){}work[d.id]={updated:v.updated,s};});
-    const rows=[];ros.forEach(d=>{const v=d.data();rows.push({id:d.id,name:v.name||d.id,level:v.level||"",pw:v.pw||"",w:work[d.id]||{s:{}}});});
+    const work={};sts.forEach(d=>{const v=d.data();let s={};try{s=JSON.parse(v.state||"{}");}catch(e){}work[d.id]={updated:v.updated,s,seen:v.seen||0,msgs:v.msgs||[]};});window.__work=work;
+    const rows=[];ros.forEach(d=>{const v=d.data();rows.push({id:d.id,name:v.name||d.id,level:v.level||"",pw:v.pw||"",role:v.role||"student",tmsgs:v.tmsgs||[],tasks:v.tasks||[],tread:v.tread||0,w:work[d.id]||{s:{},msgs:[]}});});
     rows.sort((a,b)=>a.name.localeCompare(b.name));
     const tbl=rows.length?`<div class="card" id="cred-card"><div class="srow"><h2>Usernames and passwords</h2><span class="row"><button class="btn" type="button" id="cred-eye">${SHOWPW?"Hide passwords":"Show passwords"}</button><button class="btn" type="button" id="cred-copy">Copy list</button></span></div>
       <div class="ctbl" role="table"><div class="ctr ch" role="row"><span role="columnheader">Username</span><span role="columnheader">Password</span><span role="columnheader">Levels and courses</span></div>${rows.map(r=>`<div class="ctr" role="row"><span role="cell"><b>${esc(r.name)}</b></span><span role="cell">${r.pw?`<code class="pw">${SHOWPW?esc(r.pw):"••••••"}</code>`:'<span class="sub">not saved</span>'}</span><span role="cell" class="sub">${esc(lvLabel(parseLv(r.level)))}</span></div>`).join("")}</div>
       <p class="tip">Students added from now on have their password saved here automatically. For students added before, type the password you gave them on their card below and tap Save. This only records it for you; it does not change the password they use.</p></div>`:"";
     window.__rows=rows;
-    body.innerHTML=tbl+(rows.length?rows.map(r=>{const p=r.w.s.p||{},subs=r.w.s.subs||{};
+    body.innerHTML=classTop(rows)+tbl+(rows.length?rows.map(r=>{const p=r.w.s.p||{},subs=r.w.s.subs||{};const on=isOn(r.w.seen);
       const done=ALL.filter(l=>{const x=p[l.id]||{};return x.read&&x.listen&&x.practice&&x.write;}).length;
       const started=ALL.filter(l=>p[l.id]&&Object.keys(p[l.id]).length).length;
       const list=ALL.filter(l=>subs[l.id]).map(l=>`<details><summary><span class="lvl ${l.level}">${l.level}</span> ${esc(l.title)} · ${words(subs[l.id].text)} words · ${new Date(subs[l.id].at).toLocaleDateString()}</summary><pre>${esc(subs[l.id].text)}</pre></details>`).join("");
-      return`<div class="card"><div class="srow"><h2>${esc(r.name)}</h2>
+      return`<div class="card" id="sc-${r.id}"><div class="srow"><h2><span class="st-dot ${on?"on":""}" id="dot-${r.id}" title="${on?"Online now":"Offline"}"></span>${esc(r.name)} <span class="rbadge ${r.role}">${ROLEN[r.role]||"Student"}</span></h2>
         <span class="row"><button class="btn" type="button" data-rm="${r.id}" data-name="${esc(r.name)}">Remove</button></span></div><div class="credrow"><span>Username: <b>${esc(r.name)}</b></span><span class="pwset"><label for="pw-${r.id}">Password:</label><input id="pw-${r.id}" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(SHOWPW?r.pw:"")}" placeholder="${r.pw&&!SHOWPW?"saved (hidden)":"not saved, type it here"}"><button class="btn" type="button" data-pw="${r.id}">Save</button></span></div><div class="lvrow" data-lv="${r.id}"><span class="sub">Levels and courses: <b class="lvnow">${esc(lvLabel(parseLv(r.level)))}</b></span>${pick("lv-"+r.id,parseLv(r.level))}</div>${petSum(r.w.s)}${fceSum(r.w.s)}${vocSum(r.w.s)}${verbSum(r.w.s)}
-        <p class="sub" style="margin-top:6px">${done} completed · ${started} started · last active ${r.w.updated?new Date(r.w.updated).toLocaleDateString():"never"}</p>
+        <p class="sub" style="margin-top:6px">${done} completed · ${started} started · last active ${r.w.updated?new Date(r.w.updated).toLocaleDateString():"never"} · <span id="seen-${r.id}">${seenTxt(r.w.seen)}</span></p>${extras(r)}
         <div style="margin-top:8px">${list||'<p class="sub">No writing submitted yet.</p>'}</div></div>`;}).join(""):'<p class="sub">No students yet. Add the first one with the form.</p>');
   }catch(e){body.textContent="Could not load the class. Only the teacher account can open this list.";}
 }
@@ -1275,18 +1293,137 @@ $id("klass-body").addEventListener("click",async e=>{const b=e.target.closest("[
   b.disabled=true;try{await deleteDoc(doc(db,"roster",b.dataset.rm));loadClass();}catch(err){b.disabled=false;b.textContent="Could not remove";}});
 $id("add-form").addEventListener("submit",async e=>{
   e.preventDefault();e.stopPropagation();const msg=$id("a-msg");msg.className="err";
-  const name=$id("a-user").value.trim().toLowerCase(),pass=$id("a-pass").value,level=picked($id("a-level"));
+  const name=$id("a-user").value.trim().toLowerCase(),pass=$id("a-pass").value,level=picked($id("a-level")),role=$id("a-role").value;
   if(!/^[a-z0-9._-]{2,30}$/.test(name)){msg.textContent="Use 2 to 30 letters, numbers, dots or dashes for the username, with no spaces.";return;}
   if(name==="teacher"){msg.textContent="That username is reserved for you.";return;}
   if(pass.length<6){msg.textContent="The password needs at least 6 characters.";return;}
   $id("a-btn").disabled=true;msg.textContent="";
   try{const a=adminAuth();const cred=await createUserWithEmailAndPassword(a,name+DOMAIN,pass);
-    await setDoc(doc(db,"roster",cred.user.uid),{name,level,pw:pass,created:Date.now()});await signOut(a);
-    msg.className="ok";msg.textContent="Added "+name+": "+lvLabel(parseLv(level))+". Give them the username and the password you typed.";
+    await setDoc(doc(db,"roster",cred.user.uid),{name,level,pw:pass,role,created:Date.now()});await signOut(a);
+    msg.className="ok";msg.textContent="Added "+name+" ("+ROLEN[role]+"): "+lvLabel(parseLv(level))+". Give them the username and the password you typed.";
     $id("a-user").value="";$id("a-pass").value="";$id("a-level").innerHTML=pick("a-lv",[]);loadClass();
   }catch(err){const c=err&&err.code||"";msg.textContent=c.includes("already-in-use")?"That username is already taken. Choose another.":c.includes("weak-password")?"The password needs at least 6 characters.":c.includes("network")?"No connection. Check your internet and try again.":"Could not add the student. Try again.";}
   $id("a-btn").disabled=false;
 });
+/* ---------- roles, presence, messages, tasks ---------- */
+const ROLEN={student:"Student",teacher:"Teacher",demo:"Demo"};
+const isOn=t=>t&&Date.now()-t<150000;
+const seenTxt=t=>!t?"never online":isOn(t)?"🟢 online now":"last seen "+new Date(t).toLocaleString([], {dateStyle:"short",timeStyle:"short"});
+const fmtT=t=>new Date(t).toLocaleString([], {dateStyle:"short",timeStyle:"short"});
+let RO={},MINE={},unsubs=[],hb=null;
+function stopLive(){unsubs.forEach(f=>{try{f();}catch(e){}});unsubs=[];clearInterval(hb);hb=null;}
+function beat(){if(!uid||window.TD_TEACHER||window.TD_DEMO||document.visibilityState!=="visible")return;setDoc(doc(db,"students",uid),{seen:Date.now(),name:auth.currentUser.email.split("@")[0]},{merge:true}).catch(()=>{});}
+function startLive(isT){
+  stopLive();
+  if(!isT){
+    beat();hb=setInterval(beat,60000);document.addEventListener("visibilitychange",beat);
+    unsubs.push(onSnapshot(doc(db,"roster",uid),d=>{RO=d.exists()?d.data():{};badges();if(!$id("pop").hidden&&POP.k==="me")renderMe();},()=>{}));
+    unsubs.push(onSnapshot(doc(db,"students",uid),d=>{MINE=d.exists()?d.data():{};if(!$id("pop").hidden&&POP.k==="me")renderMe();},()=>{}));
+    $id("acct-inbox").hidden=false;$id("acct-tasks").hidden=false;
+  } else {$id("acct-inbox").hidden=true;$id("acct-tasks").hidden=true;}
+}
+function badges(){
+  const seenAt=(S.msgSeen||0);const un=(RO.tmsgs||[]).filter(m=>m.at>seenAt).length;$id("ib-n").textContent=un?un:"";
+  const open=(RO.tasks||[]).filter(t=>!(S.taskDone||{})[t.id]).length;$id("tk-n").textContent=open?open:"";
+}
+const POP={k:"",id:"",tab:"msg"};
+function openPop(k,id,tab){POP.k=k;POP.id=id||"";POP.tab=tab||"msg";$id("pop").hidden=false;if(k==="me")renderMe();if(k==="msg")renderMsg();if(k==="task")renderTaskForm();}
+function closePop(){$id("pop").hidden=true;POP.k="";if(window.__klassOpen)refreshLive();}
+const thread=(a,mineFrom)=>{const all=a.slice().sort((x,y)=>x.at-y.at);return`<div class="thread" id="thr">${all.length?all.map(m=>`<div class="bub ${m.from===mineFrom?"me":""}">${esc(m.t)}<small>${m.from==="t"?esc(m.by||"Teacher"):"Student"} · ${fmtT(m.at)}</small></div>`).join(""):'<p class="sub">No messages yet. · Aún no hay mensajes.</p>'}</div>`;};
+/* student panel */
+function renderMe(){
+  const tabs=`<div class="seg sm"><button class="chip" type="button" data-pop="tab" data-v="msg" aria-pressed="${POP.tab==="msg"}">💬 Messages · Mensajes</button><button class="chip" type="button" data-pop="tab" data-v="task" aria-pressed="${POP.tab==="task"}">📋 Tasks · Tareas</button></div>`;
+  let h=`<h2>${POP.tab==="msg"?"Messages with your teacher":"Your tasks"}</h2>`+tabs;
+  if(POP.tab==="msg"){const all=[...(RO.tmsgs||[]),...(MINE.msgs||[])];h+=thread(all,"s")+`<label class="sub" for="msg-t">Write to your teacher · Escribe a tu maestro</label><textarea id="msg-t" maxlength="1000"></textarea><div class="row" style="margin-top:8px"><button class="btn primary" type="button" data-pop="send-s">Send · Enviar</button><span class="sub" id="msg-st"></span></div>`;S.msgSeen=Date.now();try{localSave();}catch(e){}badges();}
+  else{const T=(RO.tasks||[]).slice().sort((a,b)=>(a.due||"9").localeCompare(b.due||"9"));const D=S.taskDone||{};h+=T.length?`<div class="tlist">${T.map(t=>`<div class="titem ${D[t.id]?"done":""}"><div><b>${esc(t.title)}</b>${t.note?`<br><span>${esc(t.note)}</span>`:""}<br><small>${t.due?"Due · Entrega: "+esc(t.due)+" · ":""}from ${esc(t.by||"Teacher")}</small></div><span class="row"><button class="btn" type="button" data-pop="open" data-id="${t.id}">Open · Abrir</button><button class="btn ${D[t.id]?"":"primary"}" type="button" data-pop="done" data-id="${t.id}">${D[t.id]?"✓ Done":"Mark done · Terminé"}</button></span></div>`).join("")}</div>`:'<p class="sub">No tasks right now. · No tienes tareas.</p>';}
+  $id("pop-body").innerHTML=h;const th=$id("thr");if(th)th.scrollTop=th.scrollHeight;
+}
+function openTask(t){
+  closePop();const v=t.v;
+  if(t.k==="lesson"){if(typeof openLesson==="function")openLesson(v);return;}
+  if(t.k==="book"){const [c,u]=v.split("|");S.book=S.book||{};S.book.c=c;S.book.u=u||"";location.hash="book";setTimeout(()=>{try{BOOK.draw();}catch(e){}},50);return;}
+  if(t.k==="pet"){S.pet=S.pet||{};Object.assign(S.pet,{tab:"tests",view:"test",test:+v,paper:"rd",part:1});location.hash="pet";setTimeout(render,50);return;}
+  if(t.k==="fce"){S.fce=S.fce||{};Object.assign(S.fce,{tab:"tests",view:"test",test:+v,paper:"rue",part:1});location.hash="fce";setTimeout(render,50);return;}
+  if(t.k==="vocab"){S.voc=S.voc||{};S.voc.lv=v;location.hash="vocab";setTimeout(render,50);return;}
+  if(t.k==="verbs"){S.verb=S.verb||{};S.verb.lv=v;location.hash="verbs";setTimeout(render,50);return;}
+}
+/* teacher: messages */
+function renderMsg(){
+  const r=(window.__rows||[]).find(x=>x.id===POP.id);if(!r)return;const w=(window.__work||{})[r.id]||{};
+  const all=[...(r.tmsgs||[]),...(w.msgs||[])];
+  $id("pop-body").innerHTML=`<h2><span class="st-dot ${isOn(w.seen)?"on":""}"></span>${esc(r.name)}</h2><p class="sub">${seenTxt(w.seen)}</p>${thread(all,"t")}<label class="sub" for="msg-t">Message to ${esc(r.name)}</label><textarea id="msg-t" maxlength="1000"></textarea><div class="row" style="margin-top:8px"><button class="btn primary" type="button" data-pop="send-t">Send · Enviar</button><span class="sub" id="msg-st"></span></div>`;
+  const th=$id("thr");if(th)th.scrollTop=th.scrollHeight;
+  setDoc(doc(db,"roster",r.id),{tread:Date.now()},{merge:true}).then(()=>{r.tread=Date.now();const b=$id("ub-"+r.id);if(b)b.textContent="";}).catch(()=>{});
+}
+/* teacher: tasks */
+const KINDS=[["lesson","Lesson (Library) · Lección"],["book","Student Book unit · Libro"],["vocab","Vocabulary course level"],["verbs","Verbs course level"],["pet","B1 Preliminary test"],["fce","B2 First test"]];
+function kindItems(k){
+  if(k==="lesson")return ALL.map(l=>[l.id,l.level+" · "+l.title]);
+  if(k==="book"){const o=[];LV.forEach(lv=>{o.push([lv+"|","Book "+lv+" · whole level (syllabus)"]);ALL.filter(l=>l.level===lv).forEach((l,i)=>o.push([lv+"|"+l.id,"Book "+lv+" · Unit "+(i+1)+" · "+((l.gr&&l.gr.t)||l.title)]));});["VOC","VERB","PET","FCE"].forEach(c=>o.push([c+"|","Book · "+BKN(c)+" course"]));return o;}
+  if(k==="vocab"||k==="verbs")return LVS.map(l=>[l,(k==="vocab"?"Vocabulary ":"Verbs ")+l]);
+  if(k==="pet")return((window.PET&&PET.tests)||[]).map(t=>[String(t.n),"PET Test "+t.n+" · "+t.theme]);
+  if(k==="fce")return((window.FCE&&FCE.tests)||[]).map(t=>[String(t.n),"FCE Test "+t.n+" · "+t.theme]);
+  return[];
+}
+function renderTaskForm(){
+  const rows=window.__rows||[];const k=POP.kind||"lesson";const items=kindItems(k);
+  $id("pop-body").innerHTML=`<h2>Assign a task · Asignar tarea</h2>
+  <div class="field"><label for="tk-to">Student · Alumno</label><select id="tk-to"><option value="*">All students · Todos</option>${rows.filter(r=>r.role!=="teacher").map(r=>`<option value="${r.id}" ${POP.id===r.id?"selected":""}>${esc(r.name)}</option>`).join("")}</select></div>
+  <div class="field"><label for="tk-k">Type · Tipo</label><select id="tk-k">${KINDS.map(x=>`<option value="${x[0]}" ${x[0]===k?"selected":""}>${x[1]}</option>`).join("")}</select></div>
+  <div class="field"><label for="tk-v">What · Qué</label><select id="tk-v">${items.map(x=>`<option value="${esc(x[0])}">${esc(x[1])}</option>`).join("")}</select></div>
+  <div class="field"><label for="tk-note">Instructions (optional) · Instrucciones</label><input id="tk-note" maxlength="300" placeholder="e.g. Read the unit and do the quick check"></div>
+  <div class="field"><label for="tk-d">Due date (optional) · Fecha de entrega</label><input id="tk-d" type="date"></div>
+  <div class="row" style="margin-top:12px"><button class="btn primary" type="button" data-pop="assign">Assign · Asignar</button><span class="sub" id="tk-st"></span></div>`;
+}
+async function assign(){
+  const to=$id("tk-to").value,k=$id("tk-k").value,v=$id("tk-v").value,lab=$id("tk-v").selectedOptions[0].textContent;
+  const t={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),k,v,title:lab,note:$id("tk-note").value.trim(),due:$id("tk-d").value||"",at:Date.now(),by:window.TD_ME||"Teacher"};
+  const ids=to==="*"?(window.__rows||[]).filter(r=>r.role!=="teacher").map(r=>r.id):[to];
+  $id("tk-st").textContent="Saving…";
+  try{await Promise.all(ids.map(id=>setDoc(doc(db,"roster",id),{tasks:arrayUnion(t)},{merge:true})));$id("tk-st").textContent="✓ Assigned to "+ids.length+(ids.length===1?" student":" students");setTimeout(()=>{closePop();loadClass();},900);}
+  catch(e){$id("tk-st").textContent="Could not save. Check your connection.";}
+}
+async function removeTask(sid,tid){const r=(window.__rows||[]).find(x=>x.id===sid);if(!r)return;const left=(r.tasks||[]).filter(t=>t.id!==tid);try{await setDoc(doc(db,"roster",sid),{tasks:left},{merge:true});loadClass();}catch(e){}}
+/* class view extras */
+function unread(r){const w=(window.__work||{})[r.id]||{};return(w.msgs||[]).filter(m=>m.at>(r.tread||0)).length;}
+function classTop(rows){
+  const st=rows.filter(r=>r.role!=="teacher");const on=st.filter(r=>isOn(r.w.seen)).length;const un=rows.reduce((n,r)=>n+unread(r),0);
+  const open=st.reduce((n,r)=>n+(r.tasks||[]).filter(t=>!((r.w.s||{}).taskDone||{})[t.id]).length,0);
+  return`<div class="card"><div class="srow"><h2>Class overview · Resumen</h2><span class="row"><button class="btn" type="button" data-x="task" data-id="">📋 Assign a task</button><button class="btn" type="button" data-x="refresh">↻ Refresh</button></span></div><div class="ovw"><div class="tile"><span class="sub">Students</span><b>${st.length}</b></div><div class="tile"><span class="sub">🟢 Online now</span><b id="ov-on">${on}</b></div><div class="tile"><span class="sub">💬 Unread messages</span><b id="ov-un">${un}</b></div><div class="tile"><span class="sub">📋 Open tasks</span><b>${open}</b></div></div></div>`;
+}
+function extras(r){
+  const D=(r.w.s||{}).taskDone||{};const un=unread(r);
+  return`<div class="xrow"><label class="sub" for="role-${r.id}">Role</label><select id="role-${r.id}" data-role="${r.id}">${["student","teacher","demo"].map(x=>`<option value="${x}" ${r.role===x?"selected":""}>${ROLEN[x]}</option>`).join("")}</select>
+    <button class="btn" type="button" data-x="msg" data-id="${r.id}">💬 Messages <span class="nb" id="ub-${r.id}" style="${un?"":"display:none"}">${un||""}</span></button>
+    <button class="btn" type="button" data-x="task" data-id="${r.id}">📋 Assign task</button></div>
+    ${(r.tasks||[]).length?`<div class="tlist">${r.tasks.slice().sort((a,b)=>b.at-a.at).map(t=>`<div class="titem ${D[t.id]?"done":""}"><div><b>${esc(t.title)}</b>${t.note?` · ${esc(t.note)}`:""}<br><small>${D[t.id]?"✓ done "+fmtT(D[t.id]):"not done yet"}${t.due?" · due "+esc(t.due):""}</small></div><button class="btn ghost" type="button" data-x="untask" data-id="${r.id}" data-t="${t.id}">Remove</button></div>`).join("")}</div>`:""}`;
+}
+function refreshLive(){const w=window.__work||{};let on=0,un=0;(window.__rows||[]).forEach(r=>{const x=w[r.id]||{};r.w.seen=x.seen;r.w.msgs=x.msgs||[];const d=$id("dot-"+r.id);if(d){d.classList.toggle("on",isOn(x.seen));}const s2=$id("seen-"+r.id);if(s2)s2.textContent=seenTxt(x.seen);const n=unread(r);const b=$id("ub-"+r.id);if(b){b.textContent=n||"";b.style.display=n?"":"none";}if(r.role!=="teacher"&&isOn(x.seen))on++;un+=n;});const a=$id("ov-on");if(a)a.textContent=on;const c=$id("ov-un");if(c)c.textContent=un;if(!$id("pop").hidden&&POP.k==="msg")renderMsg();}
+let unK=null;
+function watchClass(){if(unK)return;unK=onSnapshot(collection(db,"students"),qs=>{const w=window.__work||{};qs.forEach(d=>{const v=d.data();const old=w[d.id]||{};w[d.id]=Object.assign(old,{seen:v.seen||0,msgs:v.msgs||[],updated:v.updated});});window.__work=w;refreshLive();},()=>{});}
+setInterval(()=>{if(window.__klassOpen)refreshLive();},30000);
+$id("acct-class").addEventListener("click",()=>{window.__klassOpen=true;watchClass();});
+$id("klass-close").addEventListener("click",()=>{window.__klassOpen=false;if(unK){unK();unK=null;}});
+$id("klass-body").addEventListener("click",e=>{const b=e.target.closest("[data-x]");if(!b)return;const a=b.dataset.x;
+  if(a==="msg")openPop("msg",b.dataset.id);if(a==="task"){POP.kind="lesson";openPop("task",b.dataset.id);}if(a==="refresh")loadClass();
+  if(a==="untask"){if(!b.dataset.sure){b.dataset.sure="1";b.textContent="Tap again";return;}removeTask(b.dataset.id,b.dataset.t);}});
+$id("klass-body").addEventListener("change",async e=>{const id=e.target.dataset&&e.target.dataset.role;if(!id)return;try{await setDoc(doc(db,"roster",id),{role:e.target.value},{merge:true});const r=(window.__rows||[]).find(x=>x.id===id);if(r)r.role=e.target.value;e.target.insertAdjacentHTML("afterend",'<span class="ok">Saved</span>');setTimeout(loadClass,800);}catch(err){e.target.insertAdjacentHTML("afterend",'<span class="err">Not saved</span>');}});
+$id("acct-inbox").addEventListener("click",()=>openPop("me","","msg"));
+$id("acct-tasks").addEventListener("click",()=>openPop("me","","task"));
+$id("pop").addEventListener("click",async e=>{
+  if(e.target.id==="pop"){closePop();return;}
+  const b=e.target.closest("[data-pop]");if(!b)return;const a=b.dataset.pop;
+  if(a==="close")closePop();
+  if(a==="tab"){POP.tab=b.dataset.v;renderMe();}
+  if(a==="open"){const t=(RO.tasks||[]).find(x=>x.id===b.dataset.id);if(t)openTask(t);}
+  if(a==="done"){S.taskDone=S.taskDone||{};if(S.taskDone[b.dataset.id])delete S.taskDone[b.dataset.id];else S.taskDone[b.dataset.id]=Date.now();save();badges();renderMe();}
+  if(a==="assign")assign();
+  if(a==="send-s"||a==="send-t"){const t=$id("msg-t").value.trim();if(!t)return;b.disabled=true;$id("msg-st").textContent="Sending…";
+    try{if(a==="send-s"){await setDoc(doc(db,"students",uid),{msgs:arrayUnion({t,at:Date.now(),from:"s"})},{merge:true});$id("msg-t").value="";$id("msg-st").textContent="✓ Sent";}
+      else{const at=Date.now();const m={t,at,from:"t",by:window.TD_ME||"Teacher"};await setDoc(doc(db,"roster",POP.id),{tmsgs:arrayUnion(m),tread:at},{merge:true});const r=(window.__rows||[]).find(x=>x.id===POP.id);if(r){r.tmsgs=(r.tmsgs||[]).concat([m]);r.tread=at;}renderMsg();}}
+    catch(err){$id("msg-st").textContent="Could not send. Check your connection.";}b.disabled=false;}
+});
+$id("pop").addEventListener("change",e=>{if(e.target.id==="tk-k"){POP.kind=e.target.value;const keep={to:$id("tk-to").value,n:$id("tk-note").value,d:$id("tk-d").value};renderTaskForm();$id("tk-to").value=keep.to;$id("tk-note").value=keep.n;$id("tk-d").value=keep.d;}});
 </script>
 
 </body>

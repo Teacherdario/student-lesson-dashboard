@@ -42,6 +42,9 @@ BOOK.words = list => list.forEach(r => { BOOK.extra[r[0].toLowerCase()] = { w: r
   /* ---------- access ---------- */
   function allowed() {
     const c = window.TD_CODES || []; const all = [...LV, "VOC", "VERB", "PET", "FCE"];
+    if (window.TD_TEACHER || !document.getElementById("gate")) return all;
+    const bk = c.filter(x => x.startsWith("BOOK:")).map(x => x.slice(5)).filter(x => all.includes(x));
+    if (bk.length) return all.filter(x => bk.includes(x));
     if (!c.length) return all;
     const out = LV.filter(l => c.includes(l));
     if (c.some(x => x === "VOC" || x.startsWith("VOC:"))) out.push("VOC");
@@ -126,13 +129,14 @@ BOOK.words = list => list.forEach(r => { BOOK.extra[r[0].toLowerCase()] = { w: r
     const b = B(); const al = allowed(); if (!al.includes(b.c)) { b.c = al[0] || "A1"; b.u = ""; }
     let h = `<div class="head"><div><h1>Student Book</h1><p class="sub">Libro del estudiante · Grammar and vocabulary reference · Created by Teacher Dario</p></div><label class="bk-tog"><input type="checkbox" data-bk="es" ${b.es ? "checked" : ""}> Español</label></div>
       <div class="seg bk-courses" role="group" aria-label="Courses">${al.map(k => `<button class="chip" type="button" data-bk="course" data-v="${k}" aria-pressed="${b.c === k}">${LV.includes(k) ? `<span class="lvl ${k}">${k}</span>` : escB(cName(k)[0].replace(" course", "").replace(/ \(.*\)/, ""))}</button>`).join("")}</div>`;
+    if ((window.TD_TEACHER || !document.getElementById("gate")) && window.TOOLS && !b.u) h += `<div class="row" style="justify-content:flex-end"><button class="btn primary" type="button" data-tools="bookpdf" data-v="${b.c}">⬇ Download this book as PDF · Descargar PDF</button></div>`;
     if (b.u && BOOK.special[b.c] && BOOK.special[b.c].unit) h += BOOK.special[b.c].unit(b.u);
     else if (b.u) h += renderUnit(b.u);
     else h += renderCourse(b.c);
     return h;
   }
   function draw() { const s = document.getElementById("v-book"); if (s) s.innerHTML = html(); }
-  BOOK.draw = draw;
+  BOOK.draw = draw; BOOK.renderCourse = renderCourse; BOOK.renderUnit = renderUnit; BOOK.allowed = allowed; BOOK.lessonsOf = lessonsOf; BOOK.cName = cName;
 
   document.addEventListener("click", e => {
     const el = e.target.closest("[data-bk]"); if (!el || !el.closest("#v-book")) return; const b = B(); const a = el.dataset.bk;
