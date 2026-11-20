@@ -147,6 +147,8 @@
   function allowed() {
     if (window.TD_TEACHER || !document.getElementById("gate")) return ALLV;
     const c = window.TD_CODES || []; if (!c.length) return ALLV;
+    const spk = c.filter(x => /^SPK:/.test(x)).map(x => x.slice(4));
+    if (spk.length) return ALLV.filter(l => spk.includes(l) || (l === "A0" && c.includes("A0")));
     const s = new Set();
     c.forEach(x => {
       if (x === "A0" || LV.includes(x) || x === "PET" || x === "FCE") s.add(x);
@@ -269,6 +271,171 @@
     return { ok: stars >= 3, pct: Math.round(stars * 25), checks, w };
   }
 
+  /* ======================================================================
+     Speaking COURSE: A1–C2 units (one per lesson) and PET / FCE tests, Parts 1–4
+     ====================================================================== */
+  const CLV = ["A1", "A2", "B1", "B2", "C1", "C2", "PET", "FCE"];
+  const courseLevels = () => allowed().filter(l => l !== "A0");
+  const SC = () => window.SPEAK_COURSE || { q: {}, phrases: {}, min: {} };
+  const lessonsOf = lv => { try { return (window.ALL_LESSONS || LESSONS).filter(l => l.level === lv); } catch (x) { return []; } };
+  const testsOf = lv => ((lv === "PET" ? window.PET : window.FCE) || {}).tests || [];
+  const CTX = {}; // long-answer contexts by key
+  const done = k => !!(SS().cd || {})[k];
+  function markDone(k, ok) { const s = SS(); s.cd = s.cd || {}; if (ok) s.cd[k] = 1; s.last = Date.now(); if (ok) s.xp = (s.xp || 0) + 3; const st = s.stats["C|" + k.split(":")[1]] || (s.stats["C|" + k.split(":")[1]] = { t: 0, o: 0 }); st.t++; if (ok) st.o++; store(); }
+  const UTABS = [["w", "Words", "Palabras", "🔤"], ["s", "Sentences", "Oraciones", "💬"], ["g", "Grammar", "Gramática", "🧩"], ["t", "Talk", "Habla", "🎙️"]];
+  function unitItems(l) {
+    const w = Object.keys(l.g || {}).map(x => ({ t: x, es: (l.g || {})[x] }));
+    const s = (l.s || []).filter(x => x.split(" ").length <= 18).map(x => ({ t: x }));
+    const g = ((l.gr && l.gr.ex) || []).map(x => ({ t: x }));
+    const t = ((SC().q || {})[l.id] || []).map(q => ({ t: q[0], es: q[1] }));
+    if (l.prompt && !t.length) t.push({ t: l.prompt });
+    return { w, s, g, t };
+  }
+  function unitProg(lv, l) { const I = unitItems(l); let n = 0, d = 0; ["w", "s", "g", "t"].forEach(k => I[k].forEach((x, i) => { n++; if (done(`c:${lv}:${l.id}:${k}:${k === "t" ? i : x.t}`)) d++; })); return [d, n]; }
+  const EXP = {
+    PET: { 1: { need: 12, max: 40000, sec: 6 }, 2: { need: 40, max: 75000, sec: 30 }, 3: { need: 45, max: 120000, sec: 40 }, 3.5: { need: 12, max: 40000 }, 4: { need: 18, max: 60000, sec: 10 }, f: { need: 10, max: 30000 } },
+    FCE: { 1: { need: 20, max: 45000, sec: 10 }, 2: { need: 60, max: 80000, sec: 40 }, 3: { need: 70, max: 150000, sec: 60 }, 3.5: { need: 18, max: 60000 }, 4: { need: 28, max: 70000, sec: 15 }, f: { need: 12, max: 35000 } }
+  };
+  const PHR = {
+    1: [["Personally, I…", "Personalmente…"], ["I'd say that… because…", "Yo diría que… porque…"], ["For example, …", "Por ejemplo, …"], ["I'm really into… / I'm not keen on…", "Me encanta… / No me gusta mucho…"]],
+    2: [["In this photo / In the first one I can see…", "En esta foto / En la primera veo…"], ["In the background / foreground / on the left…", "Al fondo / al frente / a la izquierda…"], ["They look… / They seem to be…", "Se ven… / Parece que están…"], ["They might / could be…", "Puede que estén…"], ["Whereas in the second photo…", "Mientras que en la segunda foto…"], ["Both photos show…", "Las dos fotos muestran…"]],
+    3: [["Shall we start with…?", "¿Empezamos con…?"], ["What do you think about…?", "¿Qué opinas de…?"], ["That's a good point, but…", "Buen punto, pero…"], ["I agree / I'm not sure I agree", "Estoy de acuerdo / No estoy seguro"], ["How about…? / Why don't we…?", "¿Qué tal…? / ¿Por qué no…?"], ["Let's move on to…", "Pasemos a…"]],
+    3.5: [["I think we should choose… because…", "Creo que deberíamos elegir… porque…"], ["So we've decided on…", "Entonces decidimos…"], ["The best option would be… since…", "La mejor opción sería… ya que…"]],
+    4: [["In my opinion / As far as I'm concerned…", "En mi opinión…"], ["It depends on…", "Depende de…"], ["On the one hand… on the other hand…", "Por un lado… por otro…"], ["That's why…", "Por eso…"]]
+  };
+  const PHRX = { 2: ["can see", "background", "foreground", "left", "right", "look", "seem", "might", "could", "probably", "whereas", "while", "both", "photo", "picture"], 3: ["what do you think", "agree", "how about", "why don't", "shall we", "let's", "good idea", "good point", "what about", "i think", "move on"], 3.5: ["choose", "decide", "best", "should", "would be", "agree", "option", "because"], 4: ["opinion", "think", "depends", "because", "for example", "on the other hand", "concerned", "believe", "however"], 1: ["because", "really", "usually", "for example", "but", "so"] };
+  const LNK = ["because", "so", "but", "also", "for example", "however", "although", "and then", "whereas", "on the other hand", "since", "if", "that's why", "as well"];
+  function judgeX(text, secs, c) {
+    const T = toks(text), w = T.length, lw = " " + T.join(" ") + " ";
+    const checks = [[w >= c.need, `Length: ${w} words (aim for ${c.need}+)`, `Extensión: ${w} palabras (meta: ${c.need} o más)`]];
+    if (c.sec) checks.push([secs >= c.sec, `You spoke for about ${secs} seconds (aim for ${c.sec}+)`, `Hablaste unos ${secs} segundos (meta: ${c.sec}+)`]);
+    if (c.opts) { const hit = c.opts.filter(o => toks(o).filter(x => x.length > 3).some(x => lw.includes(" " + x + " ") || lw.includes(" " + x.replace(/s$/, "")))); checks.push([hit.length >= (c.optNeed || 3), `Options discussed: ${hit.length} of ${c.opts.length} (aim for ${c.optNeed || 3}+)`, `Opciones comentadas: ${hit.length} de ${c.opts.length}`]); }
+    if (c.phr) { const used = c.phr.filter(p => lw.includes(" " + toks(p).join(" ") + " ")); checks.push([used.length >= 1, used.length ? `Useful language: ${used.slice(0, 4).join(", ")}` : "Use the useful phrases below.", used.length ? `Frases útiles: ${used.slice(0, 4).join(", ")}` : "Usa las frases útiles de abajo."]); }
+    if (c.need >= 12) { const u = LNK.filter(x => lw.includes(" " + toks(x).join(" ") + " ")); checks.push([u.length >= 1, u.length ? `Linking words: ${u.slice(0, 4).join(", ")}` : "Give a reason with because / so / but.", u.length ? `Conectores: ${u.slice(0, 4).join(", ")}` : "Da una razón con because / so / but."]); }
+    const fails = checks.filter(x => !x[0]).length;
+    return { ok: checks[0][0] && fails <= 1, checks, w };
+  }
+  function longBox(key, c, label) {
+    CTX[key] = c;
+    return `<div class="sx-long" data-spbox><button class="sp-mic big" type="button" data-spv="clong" data-k="${e(key)}" ${REC ? "" : "disabled"}><span class="sp-ic">🎤</span><span class="sp-lab">${e(label || "Answer · Responder")}</span></button>${done(key) ? `<span class="sx-ok">✅ Done · Hecho</span>` : ""}<div class="sp-res"></div></div>`;
+  }
+  async function courseLong(btn) {
+    const box = btn.closest("[data-spbox]"), out = box.querySelector(".sp-res"), lab = btn.querySelector(".sp-lab"), key = btn.dataset.k, c = CTX[key];
+    if (btn.classList.contains("rec")) { stop(); return; }
+    const old = lab.textContent; btn.classList.add("rec"); lab.textContent = "Stop · Terminar ⏹";
+    out.innerHTML = `<div class="sp-live">🎙️ <span class="sx-t">0s</span> · <span class="sp-int">Speak now · Habla ahora…</span></div>`;
+    const t0 = Date.now(), tick = setInterval(() => { const x = out.querySelector(".sx-t"); if (x) x.textContent = Math.round((Date.now() - t0) / 1000) + "s"; }, 500);
+    try {
+      const got = await listen({ long: true, interim: true, max: c.max || 45000, onInterim: t => { const x = out.querySelector(".sp-int"); if (x) x.textContent = t || "…"; } });
+      const j = judgeX(got.text, got.secs, c);
+      out.innerHTML = `<div class="sp-fb ${j.ok ? "ok" : "mid"}"><b>${j.ok ? "✅ Good answer!" : "🟡 Good start — try to improve it."}</b><span>${j.ok ? "¡Buena respuesta!" : "Buen comienzo, intenta mejorarla."}</span><div class="sp-heard">You said · Dijiste: “${e(got.text)}”</div><ul class="sp-checks">${j.checks.map(x => `<li class="${x[0] ? "y" : "n"}">${x[0] ? "✅" : "➕"} ${e(x[1])} <em>${e(x[2])}</em></li>`).join("")}</ul></div>`;
+      markDone(key, j.ok);
+      if (j.ok && !box.querySelector(".sx-ok")) btn.insertAdjacentHTML("afterend", `<span class="sx-ok">✅ Done · Hecho</span>`);
+    } catch (x) { out.innerHTML = errMsg(x); }
+    clearInterval(tick); btn.classList.remove("rec"); lab.textContent = old;
+    refreshBars();
+  }
+  function refreshBars() { const p = document.querySelector("#v-speak .sx-pp"); if (!p) return; const s = SS(); const r = curProg(); if (r) { p.querySelector("i").style.width = Math.round(100 * r[0] / Math.max(1, r[1])) + "%"; p.querySelector("b").textContent = r[0] + " / " + r[1]; } }
+  function curProg() { const s = SS(); if (!s.cu) return null; if (s.clv === "PET" || s.clv === "FCE") { const t = testsOf(s.clv).find(x => String(x.n) === String(s.cu)); return t ? testProg(s.clv, t) : null; } const l = lessonsOf(s.clv).find(x => x.id === s.cu); return l ? unitProg(s.clv, l) : null; }
+  const phrBox = rows => `<details class="sx-phr" open><summary>💡 Useful phrases · Frases útiles</summary><ul>${rows.map(r => `<li><button class="st-ib sm" type="button" data-spv="say" data-t="${e(r[0].replace(/…/g, ""))}" aria-label="Listen">🔊</button><b>${e(r[0])}</b> <em>${e(r[1])}</em></li>`).join("")}</ul></details>`;
+  const pbar = r => `<div class="sx-pp"><div class="sp-prog"><i style="width:${Math.round(100 * r[0] / Math.max(1, r[1]))}%"></i></div><b>${r[0]} / ${r[1]}</b> ✅</div>`;
+  function rowItem(key, it) {
+    return `<div class="sx-row ${done(key) ? "done" : ""}" data-spbox><div class="sx-rt"><b>${e(it.t)}</b>${it.es ? `<span>${e(it.es)}</span>` : ""}</div><button class="st-ib" type="button" data-spv="say" data-t="${e(it.t)}" aria-label="Listen">🔊</button><button class="st-ib" type="button" data-spv="slow" data-t="${e(it.t)}" aria-label="Slowly">🐢</button>${micBtn(it.t, key)}<span class="sx-ok">${done(key) ? "✅" : ""}</span><div class="sp-res"></div></div>`;
+  }
+  /* exam tests */
+  function testKeys(lv, t) {
+    const n = t.n, K = [];
+    (t.s1 || []).forEach((q, i) => K.push(`x:${lv}:${n}:1:${i}`));
+    K.push(`x:${lv}:${n}:2:A`, `x:${lv}:${n}:2:B`); if (lv === "FCE") K.push(`x:${lv}:${n}:2:Af`, `x:${lv}:${n}:2:Bf`);
+    K.push(`x:${lv}:${n}:3:m`, `x:${lv}:${n}:3:d`);
+    (t.s4 || []).forEach((q, i) => K.push(`x:${lv}:${n}:4:${i}`));
+    return K;
+  }
+  const testProg = (lv, t) => { const K = testKeys(lv, t); return [K.filter(done).length, K.length]; };
+  const partProg = (lv, t, p) => { const K = testKeys(lv, t).filter(k => k.split(":")[3] === String(p)); return [K.filter(done).length, K.length]; };
+  function photo(lv, t, slot, desc) {
+    const P = lv === "PET" ? (window.PET_PHOTOS || {})[`p${t.n}${slot}`] : (window.FCE_PHOTOS || {})[`t${t.n}${slot}`];
+    return `<figure class="sx-ph">${P ? `<img src="${P.src}" alt="${e(desc || "")}" loading="lazy">` : `<div class="sx-phd">${e(desc || "")}</div>`}</figure>`;
+  }
+  const PINFO = {
+    PET: { 1: ["Part 1 · Interview", "2–3 min · Answer the examiner's questions about yourself. Give a reason or an example.", "Responde preguntas sobre ti. Da una razón o un ejemplo."], 2: ["Part 2 · Photo description", "About 1 minute per photo · Describe everything you can see.", "Describe todo lo que ves durante 1 minuto."], 3: ["Part 3 · Collaborative task", "2–3 min · Talk about each idea with your partner, then decide.", "Comenta cada idea con tu compañero y luego decidan."], 4: ["Part 4 · Discussion", "3 min · Give your opinion with reasons about the Part 3 topic.", "Da tu opinión con razones sobre el tema."] },
+    FCE: { 1: ["Part 1 · Interview", "2 min · Personal questions. Extend your answers with reasons and examples.", "Preguntas personales. Amplía con razones y ejemplos."], 2: ["Part 2 · Long turn", "1 minute · Compare the two photos and answer the question at the top.", "Compara las dos fotos y responde la pregunta de arriba."], 3: ["Part 3 · Collaborative task", "2 min discussion + 1 min decision · Talk about each prompt, then decide.", "2 min de discusión + 1 min para decidir."], 4: ["Part 4 · Discussion", "4 min · Discuss deeper questions on the Part 3 topic.", "Discute preguntas más profundas sobre el tema."] }
+  };
+  function testPart(lv, t, p) {
+    const X = EXP[lv], n = t.n; let h = `<div class="card sx-pinfo"><b>${e(PINFO[lv][p][0])}</b><span>${e(PINFO[lv][p][1])}</span><em>${e(PINFO[lv][p][2])}</em></div>`;
+    if (p === 1 || p === 4) {
+      (p === 1 ? t.s1 : t.s4).forEach((q, i) => {
+        h += `<div class="card sx-q"><div class="sx-qt"><span class="sx-n">${i + 1}</span><b>${e(q)}</b><button class="st-ib" type="button" data-spv="say" data-t="${e(q)}" aria-label="Listen">🔊</button></div>${longBox(`x:${lv}:${n}:${p}:${i}`, Object.assign({ phr: PHRX[p] }, X[p]))}</div>`;
+      });
+      h += phrBox(PHR[p]);
+    }
+    if (p === 2) {
+      const S2 = t.s2 || [];
+      ["A", "B"].forEach((c, ci) => {
+        const task = S2[ci] || {};
+        h += `<div class="card sx-q"><div class="sx-qt"><span class="sx-n">${c}</span><b>Candidate ${c} · Candidato ${c}</b></div><p>${e(task.task || "")} <button class="st-ib" type="button" data-spv="say" data-t="${e(task.task || "")}" aria-label="Listen">🔊</button></p>`;
+        if (lv === "PET") h += `<div class="sx-phs one">${photo(lv, t, "s" + (ci + 1), task.d)}</div>`;
+        else h += `${task.top ? `<div class="sx-top">${e(task.top)}</div>` : ""}<div class="sx-phs">${photo(lv, t, "s" + ci + "1", task.d1)}${photo(lv, t, "s" + ci + "2", task.d2)}</div>`;
+        h += longBox(`x:${lv}:${n}:2:${c}`, Object.assign({ phr: PHRX[2] }, X[2]), "Talk for 1 minute · Habla 1 minuto");
+        if (lv === "FCE" && task.f) h += `<div class="sx-f"><b>${e(task.f)}</b> <button class="st-ib" type="button" data-spv="say" data-t="${e(task.f.replace(/^Your partner:\s*/, ""))}" aria-label="Listen">🔊</button>${longBox(`x:${lv}:${n}:2:${c}f`, X.f, "Short answer · Respuesta corta")}</div>`;
+        h += `</div>`;
+      });
+      h += phrBox(PHR[2]);
+    }
+    if (p === 3) {
+      const s3 = t.s3 || {}, center = lv === "PET" ? (s3.c || s3.q) : s3.q, opts = s3.p || [], dec = lv === "PET" ? (s3.c || "Which is the best idea?") : (s3.d || "Decide which is the best idea.");
+      h += `<div class="card sx-q">${lv === "PET" && s3.q ? `<p>${e(s3.q)} <button class="st-ib" type="button" data-spv="say" data-t="${e(s3.q)}" aria-label="Listen">🔊</button></p>` : ""}
+        <div class="sx-map"><div class="sx-c">${e(center)}</div>${opts.map(o => `<div class="sx-o">${e(o)}</div>`).join("")}</div>
+        <p class="sp-tip">Talk about each idea: give advantages and disadvantages, ask your partner's opinion (imagine your partner). · Comenta cada idea: ventajas, desventajas y pregunta la opinión de tu compañero.</p>
+        ${longBox(`x:${lv}:${n}:3:m`, Object.assign({ phr: PHRX[3], opts, optNeed: Math.min(3, opts.length) }, X[3]), "Discuss the ideas · Comenta las ideas")}
+        <div class="sx-f"><b>Now decide · Ahora decidan: ${e(dec)}</b> <button class="st-ib" type="button" data-spv="say" data-t="${e(dec)}" aria-label="Listen">🔊</button>${longBox(`x:${lv}:${n}:3:d`, Object.assign({ phr: PHRX[3.5] }, X[3.5]), "Decide · Decidir")}</div></div>`;
+      h += phrBox(PHR[3].concat(PHR[3.5]));
+    }
+    return h;
+  }
+  function drawCourse(root, h) {
+    const s = SS(); const CL = courseLevels(); if (!CL.length) { root.innerHTML = h + `<div class="card"><p>Your teacher hasn't opened a speaking course for you yet. Use Free practice. · Tu maestro aún no abre un curso. Usa Práctica libre.</p></div>`; return; }
+    if (!CL.includes(s.clv)) { s.clv = CL[0]; s.cu = ""; }
+    h += `<div class="sp-chips sx-lv" role="group" aria-label="Course level">${CL.map(l => `<button type="button" class="chip ${l === s.clv ? "on" : ""}" data-spv="clv" data-v="${l}">${l === "PET" ? "B1 PET" : l === "FCE" ? "B2 FCE" : l}</button>`).join("")}</div>`;
+    const ex = s.clv === "PET" || s.clv === "FCE";
+    if (!s.cu) {
+      if (ex) {
+        const T = testsOf(s.clv);
+        h += `<div class="card sx-intro"><b>${s.clv === "PET" ? "B1 Preliminary" : "B2 First"} Speaking · 10 practice tests</b><p>Answer every question of Parts 1–4 out loud. The app listens and checks length, timing, useful language and linking words. · Responde en voz alta cada pregunta de las Partes 1–4.</p></div><div class="sx-grid">${T.map(t => { const r = testProg(s.clv, t); return `<button class="sx-tile" type="button" data-spv="cu" data-v="${t.n}"><span class="sx-tn">Test ${t.n}</span><b>${e(t.theme)}</b>${[1, 2, 3, 4].map(p => { const q = partProg(s.clv, t, p); return `<span class="sx-pb ${q[0] === q[1] ? "ok" : ""}">P${p} ${q[0]}/${q[1]}</span>`; }).join("")}<div class="sp-prog"><i style="width:${Math.round(100 * r[0] / r[1])}%"></i></div></button>`; }).join("")}</div>`;
+      } else {
+        const L = lessonsOf(s.clv);
+        h += `<div class="card sx-intro"><b>Speaking course ${s.clv} · ${L.length} units</b><p>Each unit: say the key words, repeat the sentences, practise the grammar and answer 3 questions about the topic. · En cada unidad: palabras clave, oraciones, gramática y 3 preguntas para hablar.</p></div><div class="sx-grid">${L.map((l, i) => { const r = unitProg(s.clv, l); return `<button class="sx-tile" type="button" data-spv="cu" data-v="${l.id}"><span class="sx-tn">Unit ${i + 1}</span><b>${e(l.title)}</b><span class="sub">${e((l.gr && l.gr.t) || l.topic)}</span><div class="sp-prog"><i style="width:${Math.round(100 * r[0] / Math.max(1, r[1]))}%"></i></div><span class="sub">${r[0]} / ${r[1]} ✅</span></button>`; }).join("")}</div>`;
+        h += phrBox((SC().phrases || {})[s.clv] || []);
+      }
+      root.innerHTML = h; return;
+    }
+    if (ex) {
+      const t = testsOf(s.clv).find(x => String(x.n) === String(s.cu)); if (!t) { s.cu = ""; return drawCourse(root, h); }
+      const p = +s.ct || 1; if (!(p >= 1 && p <= 4)) s.ct = "1";
+      h += `<div class="sx-uh"><button class="btn" type="button" data-spv="cback">← Tests</button><div><span class="sp-lv">${s.clv === "PET" ? "B1 Preliminary" : "B2 First"} · Test ${t.n}</span><h2>${e(t.theme)}</h2></div>${pbar(testProg(s.clv, t))}</div>
+        <div class="st-tabs sx-tabs">${[1, 2, 3, 4].map(k => { const q = partProg(s.clv, t, k); return `<button type="button" role="tab" aria-selected="${(+s.ct || 1) === k}" data-spv="ct" data-v="${k}"><span>${["🙋", "🖼️", "🤝", "💭"][k - 1]}</span>Part ${k}<small>${q[0]}/${q[1]} ✅</small></button>`; }).join("")}</div>`;
+      h += testPart(s.clv, t, +s.ct || 1);
+      const k = +s.ct || 1; h += `<div class="row st-foot">${k > 1 ? `<button class="btn" type="button" data-spv="ct" data-v="${k - 1}">← Part ${k - 1}</button>` : "<span></span>"}${k < 4 ? `<button class="btn primary" type="button" data-spv="ct" data-v="${k + 1}">Part ${k + 1} ➜</button>` : `<button class="btn primary" type="button" data-spv="cback">Finish · Terminar ✓</button>`}</div>`;
+      root.innerHTML = h; return;
+    }
+    const L = lessonsOf(s.clv), i = L.findIndex(x => x.id === s.cu), l = L[i]; if (!l) { s.cu = ""; return drawCourse(root, h); }
+    const I = unitItems(l); if (!UTABS.some(x => x[0] === s.ct)) s.ct = "w";
+    h += `<div class="sx-uh"><button class="btn" type="button" data-spv="cback">← Units</button><div><span class="sp-lv">${s.clv} · Unit ${i + 1}</span><h2>${e(l.title)}</h2><span class="sub">${e((l.gr && l.gr.t) || "")}</span></div>${pbar(unitProg(s.clv, l))}</div>
+      <div class="st-tabs sx-tabs">${UTABS.map(x => { const n = I[x[0]].length, d = I[x[0]].filter((it, j) => done(`c:${s.clv}:${l.id}:${x[0]}:${x[0] === "t" ? j : it.t}`)).length; return `<button type="button" role="tab" aria-selected="${s.ct === x[0]}" data-spv="ct" data-v="${x[0]}"><span>${x[3]}</span>${x[2]}<small>${d}/${n} ✅</small></button>`; }).join("")}</div>`;
+    if (s.ct === "t") {
+      const need = (SC().min || {})[s.clv] || 15;
+      h += `<div class="card sx-pinfo"><b>Talk about it · Habla del tema</b><span>Answer each question in ${s.clv === "A1" ? "2–3 short sentences" : s.clv === "A2" ? "3–4 sentences" : "a full answer with reasons and examples"}. Try to use the grammar of the unit: ${e((l.gr && l.gr.t) || "")}.</span><em>Responde cada pregunta. Usa la gramática de la unidad.</em></div>`;
+      I.t.forEach((q, j) => { h += `<div class="card sx-q"><div class="sx-qt"><span class="sx-n">${j + 1}</span><b>${e(q.t)}</b><button class="st-ib" type="button" data-spv="say" data-t="${e(q.t)}" aria-label="Listen">🔊</button></div>${q.es ? `<div class="sp-es">${e(q.es)}</div>` : ""}${longBox(`c:${s.clv}:${l.id}:t:${j}`, { need, max: 30000 + need * 1500, sec: Math.round(need / 2) })}</div>`; });
+      h += phrBox((SC().phrases || {})[s.clv] || []);
+    } else {
+      const lab = { w: ["Say each key word. · Di cada palabra clave.", "Tap 🔊, then 🎤 and say it."], s: ["Repeat each sentence from the lesson. · Repite cada oración.", "Listen first, then speak at the same speed."], g: ["Grammar in speech · Gramática al hablar: " + ((l.gr && l.gr.t) || ""), (l.gr && l.gr.r) || ""] }[s.ct];
+      h += `<div class="card sx-pinfo"><b>${e(lab[0])}</b><span>${e(lab[1])}</span>${s.ct === "g" && l.gr && l.gr.f ? `<em>${e(l.gr.f)}</em>` : ""}</div><div class="sx-list">${I[s.ct].map(it => rowItem(`c:${s.clv}:${l.id}:${s.ct}:${it.t}`, it)).join("")}</div>`;
+    }
+    const tk = UTABS.findIndex(x => x[0] === s.ct);
+    h += `<div class="row st-foot">${tk > 0 ? `<button class="btn" type="button" data-spv="ct" data-v="${UTABS[tk - 1][0]}">← ${UTABS[tk - 1][2]}</button>` : "<span></span>"}${tk < 3 ? `<button class="btn primary" type="button" data-spv="ct" data-v="${UTABS[tk + 1][0]}">${UTABS[tk + 1][2]} ➜</button>` : (L[i + 1] ? `<button class="btn primary" type="button" data-spv="cu" data-v="${L[i + 1].id}">Unit ${i + 2} ➜</button>` : `<button class="btn primary" type="button" data-spv="cback">Finish · Terminar ✓</button>`)}</div>`;
+    root.innerHTML = h;
+  }
+
   /* ---------- render ---------- */
   function draw() {
     const root = document.getElementById("v-speak"); if (!root) return;
@@ -277,6 +444,8 @@
     if (!sess || sess.lv !== s.lv || sess.mode !== s.mode) newSession(s.lv, s.mode);
     const st = s.stats[s.lv + "|" + s.mode] || { t: 0, o: 0 };
     let h = `<div class="head"><h1>Speaking · Práctica oral</h1><span class="sub">Listen, speak and get instant feedback · Escucha, habla y recibe corrección al instante</span></div>`;
+    h += `<div class="sx-mode" role="tablist"><button type="button" role="tab" aria-selected="${s.cv !== "free"}" data-spv="cv" data-v="course">📘 Course · Curso</button><button type="button" role="tab" aria-selected="${s.cv === "free"}" data-spv="cv" data-v="free">🎯 Free practice · Práctica libre</button></div>`;
+    if (s.cv !== "free") { if (!REC) h += `<div class="card sp-warn"><b>🎤 Use Chrome, Edge or Safari to speak.</b> · Usa Chrome, Edge o Safari para hablar.</div>`; drawCourse(root, h); return; }
     if (!REC) h += `<div class="card sp-warn"><b>🎤 Your browser can't listen to speech yet.</b><p>Open this page in <b>Chrome</b>, <b>Edge</b> or <b>Safari</b> (iPhone/iPad) to practise speaking. You can still listen to every word. · Abre esta página en Chrome, Edge o Safari para practicar. Aún puedes escuchar todas las palabras.</p></div>`;
     h += `<div class="sp-bar"><div class="sp-chips" role="group" aria-label="Level">${AL.map(l => `<button type="button" class="chip ${l === s.lv ? "on" : ""}" data-spv="lv" data-v="${l}">${e(l === "A0" ? "Level 0" : l)}</button>`).join("")}</div>
       <div class="sp-chips" role="group" aria-label="Practice type">${MS.map(m => { const M = MODES.find(x => x[0] === m); return `<button type="button" class="chip ${m === s.mode ? "on" : ""}" data-spv="mode" data-v="${m}">${M[1]} · ${M[2]}</button>`; }).join("")}</div></div>`;
@@ -330,6 +499,12 @@
     const m = ev.target.closest('[data-sp="mic"]'); if (m && !m.disabled) { micClick(m); return; }
     const b = ev.target.closest("[data-spv]"); if (!b || !b.closest("#v-speak")) return;
     const a = b.dataset.spv, s = SS();
+    if (a === "cv") { s.cv = b.dataset.v; store(); draw(); return; }
+    if (a === "clv") { s.clv = b.dataset.v; s.cu = ""; store(); draw(); return; }
+    if (a === "cu") { stop(); s.cu = b.dataset.v; s.ct = (s.clv === "PET" || s.clv === "FCE") ? "1" : "w"; store(); draw(); window.scrollTo(0, 0); return; }
+    if (a === "ct") { stop(); s.ct = b.dataset.v; store(); draw(); window.scrollTo(0, 0); return; }
+    if (a === "cback") { stop(); s.cu = ""; store(); draw(); return; }
+    if (a === "clong") { courseLong(b); return; }
     if (a === "lv") { s.lv = b.dataset.v; sess = null; store(); draw(); }
     else if (a === "mode") { s.mode = b.dataset.v; sess = null; store(); draw(); }
     else if (a === "say") say(b.dataset.t, "en");
@@ -341,6 +516,8 @@
     else if (a === "hard") { sess = { lv: s.lv, mode: s.mode, items: s.hard.slice(0, 10), i: 0, res: [] }; draw(); }
   });
   document.addEventListener("speak:result", ev => {
+    const k = ev.detail.key || "";
+    if (/^c:/.test(k) && ev.detail.r) { markDone(k, ev.detail.r.ok); if (ev.detail.r.ok) { const row = ev.target.closest(".sx-row"); if (row) { row.classList.add("done"); const o = row.querySelector(".sx-ok"); if (o) o.textContent = "✅"; } } refreshBars(); return; }
     if (!ev.target.closest || !ev.target.closest("#v-speak") || ev.detail.key !== "sess" || !sess) return;
     const r = ev.detail.r; if (!r) return;
     const prev = sess.res[sess.i]; sess.res[sess.i] = { ok: r.ok || (prev && prev.ok) };
@@ -373,6 +550,26 @@
 .sp-model{background:#f4f6fb;border-radius:10px;padding:10px 12px;margin:8px auto;max-width:560px;text-align:left}
 .sp-tip{font-size:.88rem;color:var(--muted)}.sp-warn{background:#fff6dc;border-color:#e0a800}
 .sp-done{text-align:center}.sp-big{font-size:3rem}.sp-sum{text-align:left;max-width:520px;margin:10px auto;padding-left:20px}.sp-sum li{margin:3px 0}
+.sx-mode{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0 12px}.sx-mode button{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:10px;font-family:inherit;font-weight:700;font-size:.95rem;color:inherit;cursor:pointer}.sx-mode button[aria-selected=true]{border-color:#2453c9;background:#eef3ff;color:#1f3f8f}
+.sx-lv{margin-bottom:10px}.sx-intro p{margin:6px 0 0;color:var(--muted)}
+.sx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin:10px 0}
+.sx-tile{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px;text-align:left;font-family:inherit;color:inherit;cursor:pointer;display:flex;flex-direction:column;gap:4px}.sx-tile:hover{border-color:#2453c9}.sx-tile .sp-prog{margin:6px 0 2px}
+.sx-tn{font-size:.75rem;font-weight:800;color:#2453c9;text-transform:uppercase;letter-spacing:.05em}
+.sx-pb{display:inline-block;font-size:.72rem;border:1px solid var(--line);border-radius:999px;padding:1px 7px;margin:2px 3px 0 0;color:var(--muted)}.sx-pb.ok{background:#e7f8ee;border-color:#34a36b;color:#15803d}
+.sx-uh{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0}.sx-uh>div:nth-child(2){flex:1;min-width:180px}.sx-uh h2{margin:4px 0 0}
+.sx-pp{min-width:150px}.sx-pp .sp-prog{margin:0 0 3px}.st-tabs.sx-tabs{grid-template-columns:repeat(4,1fr)}
+.sx-pinfo{display:flex;flex-direction:column;gap:3px;background:#eef6ff;border-color:#bcd3ff}.sx-pinfo span{font-size:.92rem}.sx-pinfo em{color:var(--muted);font-size:.85rem}
+.sx-q{display:flex;flex-direction:column;gap:6px}.sx-qt{display:flex;align-items:center;gap:8px}.sx-qt b{flex:1;font-size:1.08rem}
+.sx-n{background:#2453c9;color:#fff;border-radius:999px;min-width:26px;height:26px;display:grid;place-items:center;font-weight:800;font-size:.85rem}
+.sx-long{display:flex;flex-direction:column;align-items:flex-start;gap:4px}.sx-long .sp-mic.big{margin:4px 0;padding:10px 20px;font-size:.95rem}.sx-long .sp-res{width:100%}.sx-ok{color:#15803d;font-weight:700;font-size:.88rem}
+.sx-phs{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sx-phs.one{grid-template-columns:minmax(0,520px)}.sx-ph{margin:0}.sx-ph img{width:100%;border-radius:12px;aspect-ratio:3/2;object-fit:cover;display:block}.sx-phd{background:#f2f4f8;border-radius:12px;padding:20px;text-align:center;color:var(--muted)}
+.sx-top{background:#fff6dc;border-radius:10px;padding:8px 12px;font-weight:700;text-align:center}
+.sx-f{border-top:1px dashed var(--line);padding-top:8px;margin-top:4px}
+.sx-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0}.sx-c{grid-column:1/-1;background:linear-gradient(135deg,#2453c9,#6a3fd1);color:#fff;border-radius:14px;padding:12px;text-align:center;font-weight:800;font-size:1.05rem}.sx-o{border:2px solid #bcd3ff;border-radius:12px;padding:10px;text-align:center;font-weight:600;background:#fff}
+.sx-phr{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:10px 0}.sx-phr summary{font-weight:700;cursor:pointer}.sx-phr ul{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:4px}.sx-phr li{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.sx-phr em{color:var(--muted);font-size:.86rem}.st-ib.sm{width:30px;height:30px;font-size:.9rem}
+.sx-list{display:grid;gap:8px}.sx-row{display:grid;grid-template-columns:1fr auto auto auto 24px;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px}.sx-row.done{border-color:#34a36b;background:#f3fbf6}.sx-row .sp-res{grid-column:1/-1}.sx-row .sp-res:empty{display:none}.sx-rt{display:flex;flex-direction:column}.sx-rt span{font-size:.85rem;color:var(--muted)}
+.st-tabs{display:grid;gap:6px;margin:12px 0}.st-tabs button{position:relative;border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 4px;font-family:inherit;font-weight:700;font-size:.92rem;color:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px}.st-tabs button span{font-size:1.3rem}.st-tabs button small{font-weight:500;color:var(--muted);font-size:.72rem}.st-tabs button[aria-selected=true]{border-color:#2453c9;background:#eef3ff}.st-foot{justify-content:space-between;margin-top:14px}
+@media (max-width:760px){.sx-phs{grid-template-columns:1fr}.sx-row{grid-template-columns:1fr auto auto 22px}.sx-row [data-spv=slow]{display:none}}
 .sp-help summary{cursor:pointer;font-weight:700}.sp-help li{margin:4px 0}.btn.sm{padding:4px 10px;font-size:.82rem}
 @media (max-width:760px){.tabs{grid-auto-flow:column;grid-template-columns:none!important;grid-auto-columns:minmax(62px,1fr);overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.sp-t{font-size:1.7rem}}`;
   document.head.appendChild(css);
@@ -387,5 +584,5 @@
   }
   window.SPEAK.draw = draw;
   window.SPEAK.allowed = allowed;
-  window.SPEAK.open = (lv, mode) => { const s = SS(); if (lv) s.lv = lv; if (mode) s.mode = mode; sess = null; store(); location.hash = "speak"; setTimeout(draw, 30); };
+  window.SPEAK.open = (lv, mode) => { const s = SS(); if (mode === "course" || /^t\d+$|^l|^[a-c]\d-/.test(mode || "")) { s.cv = "course"; s.clv = lv; s.cu = mode === "course" ? "" : mode.replace(/^t/, ""); s.ct = (lv === "PET" || lv === "FCE") ? "1" : "w"; } else { s.cv = "free"; if (lv) s.lv = lv; if (mode) s.mode = mode; } sess = null; store(); location.hash = "speak"; setTimeout(draw, 30); };
 })();

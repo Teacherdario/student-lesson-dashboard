@@ -6,7 +6,8 @@ window.TOOLS = window.TOOLS || {};
   const e = t => String(t == null ? "" : t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const T = () => { if (!S.tools) S.tools = {}; const t = S.tools; t.lv = t.lv || "A1"; t.type = t.type || "ws"; t.units = t.units || {}; t.key = t.key !== false; t.school = t.school == null ? "Teacher Dario · English" : t.school; return t; };
   const store = () => { try { save(); } catch (x) { } };
-  const lessons = lv => { try { return (window.ALL_LESSONS || LESSONS).filter(l => l.level === lv); } catch (x) { return []; } };
+  const isEx = lv => !!(window.TOOLS && TOOLS.EX && TOOLS.EX.isEx(lv));
+  const lessons = lv => { if (isEx(lv)) return TOOLS.EX.units(lv); try { return (window.ALL_LESSONS || LESSONS).filter(l => l.level === lv); } catch (x) { return []; } };
   const allLessons = () => { try { return window.ALL_LESSONS || LESSONS; } catch (x) { return []; } };
   const BU = id => (window.BOOK && BOOK.units[id]) || {};
   let seed = 1; const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
@@ -84,7 +85,7 @@ window.TOOLS = window.TOOLS || {};
   function bookDoc(k) {
     if (!window.BOOK) return "";
     const st = BOOK.state(); const save_ = [st.c, st.u]; st.c = k; let h = "";
-    if (BOOK.special[k]) { const sp = BOOK.special[k]; st.u = ""; h += sp.course(); const ids = { VERB: ["forms", "spell", "irr", "which", ...["A1", "A2", "B1", "B2", "C1", "C2", "PET", "FCE"].map(l => "lv:" + l)], VOC: ["pos", "wf", "col", "fig", ...["A1", "A2", "B1", "B2", "C1", "C2", "PET", "FCE"].map(l => "w:" + l)], PET: ["g", "v", "w", "s", "x"], FCE: ["g", "pv", "ex", "wf", "up", "w", "s"] }[k] || []; ids.forEach(id => { h += `<div class="pd-break"></div>` + sp.unit(id); }); }
+    if (BOOK.special[k]) { const sp = BOOK.special[k]; st.u = ""; h += sp.course(); const ids = { VERB: ["forms", "spell", "irr", "which", ...["A1", "A2", "B1", "B2", "C1", "C2", "PET", "FCE"].map(l => "lv:" + l)], VOC: ["pos", "wf", "col", "fig", ...["A1", "A2", "B1", "B2", "C1", "C2", "PET", "FCE"].map(l => "w:" + l)], PET: ["ref", "g", "v", "pv2", "col", "lk", "w", "s", "x"], FCE: ["ref", "g", "pv", "pv2", "ex", "col", "wf", "kwt", "up", "lk", "w", "s"] }[k] || []; ids.forEach(id => { h += `<div class="pd-break"></div>` + sp.unit(id); }); }
     else { h += BOOK.renderCourse(k); BOOK.lessonsOf(k).forEach(l => { h += `<div class="pd-break"></div>` + BOOK.renderUnit(l.id); }); }
     st.c = save_[0]; st.u = save_[1];
     return `<div class="pd-book">${h}</div>`;
@@ -104,11 +105,11 @@ window.TOOLS = window.TOOLS || {};
   /* ---------- view ---------- */
   function html() {
     const t = T(); const ls = lessons(t.lv); const sel = ls.filter(l => t.units[l.id]);
-    const needUnits = ["ws", "lp", "ue"].includes(t.type), needLv = t.type !== "pt";
+    const needUnits = ["ws", "lp", "ue"].includes(t.type) || (t.type === "le" && isEx(t.lv)), needLv = t.type !== "pt";
     let h = `<div class="head"><div><h1>Teacher tools</h1><p class="sub">Herramientas del maestro · Worksheets, lesson plans, exams and placement tests · Teachers only</p></div></div>
-    <div class="card"><h2>1 · What do you want to create? <span class="sub">¿Qué quieres crear?</span></h2><div class="seg" role="group">${TYPES.map(x => `<button class="chip" type="button" data-tools="type" data-v="${x[0]}" aria-pressed="${t.type === x[0]}">${x[1]}</button>`).join("")}</div></div>`;
-    if (needLv) h += `<div class="card"><h2>2 · Level or course <span class="sub">Nivel o curso</span></h2><div class="seg" role="group">${(t.type === "bk" ? [...LV, "VOC", "VERB", "PET", "FCE"] : LV).map(l => `<button class="chip" type="button" data-tools="lv" data-v="${l}" aria-pressed="${t.lv === l}">${l === "VOC" ? "Vocabulary" : l === "VERB" ? "Verbs" : l}</button>`).join("")}</div></div>`;
-    if (needUnits && LV.includes(t.lv)) h += `<div class="card"><div class="row" style="justify-content:space-between"><h2>3 · Units <span class="sub">Unidades</span></h2><span class="row"><button class="btn" type="button" data-tools="all">Select all</button><button class="btn ghost" type="button" data-tools="none">Clear</button></span></div><div class="tl-units">${ls.map((l, i) => `<label class="tl-u"><input type="checkbox" data-tools-u="${l.id}" ${t.units[l.id] ? "checked" : ""}> <span><b>Unit ${i + 1} · ${e(l.title)}</b><br><span class="sub">${e((l.gr && l.gr.t) || "")}</span></span></label>`).join("")}</div>${t.type !== "ue" ? `<p class="sub">One document per selected unit. · Un documento por cada unidad seleccionada.</p>` : ""}</div>`;
+    <div class="card"><h2>1 · What do you want to create? <span class="sub">¿Qué quieres crear?</span></h2><div class="seg" role="group">${TYPES.map(x => `<button class="chip" type="button" data-tools="type" data-v="${x[0]}" aria-pressed="${t.type === x[0]}">${isEx(t.lv) && x[0] === "ue" ? "Exam paper (Reading)" : isEx(t.lv) && x[0] === "le" ? "Full mock exam" : x[1]}</button>`).join("")}</div></div>`;
+    if (needLv) h += `<div class="card"><h2>2 · Level or course <span class="sub">Nivel o curso</span></h2><div class="seg" role="group">${(t.type === "bk" ? [...LV, "VOC", "VERB", "PET", "FCE"] : [...LV, "PET", "FCE"]).map(l => `<button class="chip" type="button" data-tools="lv" data-v="${l}" aria-pressed="${t.lv === l}">${l === "VOC" ? "Vocabulary" : l === "VERB" ? "Verbs" : l}</button>`).join("")}</div></div>`;
+    if (needUnits && (LV.includes(t.lv) || isEx(t.lv))) h += `<div class="card"><div class="row" style="justify-content:space-between"><h2>3 · ${isEx(t.lv) ? "Practice tests" : "Units"} <span class="sub">${isEx(t.lv) ? "Exámenes de práctica" : "Unidades"}</span></h2><span class="row"><button class="btn" type="button" data-tools="all">Select all</button><button class="btn ghost" type="button" data-tools="none">Clear</button></span></div><div class="tl-units">${ls.map((l, i) => `<label class="tl-u"><input type="checkbox" data-tools-u="${l.id}" ${t.units[l.id] ? "checked" : ""}> <span><b>${isEx(t.lv) ? e(l.title) : `Unit ${i + 1} · ${e(l.title)}`}</b><br><span class="sub">${e((l.gr && l.gr.t) || "")}</span></span></label>`).join("")}</div>${isEx(t.lv) ? `<p class="sub">${{ ws: "Worksheet per test: Use of English / vocabulary, phrasal verbs, expressions and speaking.", lp: "60-minute exam-skills lesson plan per test.", ue: (t.lv === "PET" ? "Reading paper" : "Reading and Use of English paper") + " per test, with answer key.", le: "Full mock exam per test: Reading, Writing, Listening (with transcripts) and Speaking examiner's card." }[t.type] || ""}</p>` : t.type !== "ue" ? `<p class="sub">One document per selected unit. · Un documento por cada unidad seleccionada.</p>` : ""}</div>`;
     h += `<div class="card"><h2>${needLv ? (needUnits ? 4 : 3) : 2} · Options <span class="sub">Opciones</span></h2><div class="row"><label class="row" style="gap:6px"><input type="checkbox" data-tools="key" ${t.key ? "checked" : ""}> Include answer key · Incluir respuestas</label><label class="sub" for="tl-school">Header</label><input id="tl-school" class="search" value="${e(t.school)}" style="max-width:280px"></div>
       <div class="row" style="margin-top:12px"><button class="btn primary" type="button" data-tools="go" ${needUnits && !sel.length ? "disabled" : ""}>✨ Create and open PDF · Crear PDF</button>${needUnits && !sel.length ? `<span class="sub">Select at least one unit.</span>` : ""}</div></div>
       <p class="tip">Every document is built from the dashboard's lessons and Student Book, so it matches what your students study. Each time you create an exam, the questions are mixed in a new order.</p>`;
@@ -118,6 +119,7 @@ window.TOOLS = window.TOOLS || {};
   TOOLS.draw = draw;
   function generate() {
     const t = T(); seed = (Date.now() % 233280) || 7; const ls = lessons(t.lv).filter(l => t.units[l.id]); let out = "", title = "";
+    if (isEx(t.lv) && ["ws", "lp", "ue", "le"].includes(t.type)) { const r = TOOLS.EX.generate(t.type, t.lv, ls.map(l => l.id)); printHTML(r[0], r[1] + " · Teacher Dario"); return; }
     if (t.type === "ws") { out = ls.map(worksheet).join('<div class="pd-break"></div>'); title = `Worksheet ${t.lv}`; }
     if (t.type === "lp") { out = ls.map(lessonPlan).join('<div class="pd-break"></div>'); title = `Lesson plan ${t.lv}`; }
     if (t.type === "ue") { out = exam(ls, `Unit exam · ${t.lv}`, ls.map(l => l.title).join(" · "), Math.min(20, ls.length * 8), Math.min(10, ls.length * 5)); title = `Exam ${t.lv}`; }
@@ -132,7 +134,7 @@ window.TOOLS = window.TOOLS || {};
     if (a === "close") { document.body.classList.remove("pd-open"); const r = document.getElementById("pd-root"); if (r) r.innerHTML = ""; return; }
     if (a === "bookpdf") { printHTML(bookDoc(b.dataset.v), "Student Book " + b.dataset.v + " · Teacher Dario"); return; }
     if (!b.closest("#v-tools")) return;
-    if (a === "type") { t.type = b.dataset.v; if (t.type !== "bk" && !LV.includes(t.lv)) t.lv = "A1"; }
+    if (a === "type") { t.type = b.dataset.v; if (t.type === "pt" || (t.type !== "bk" && !LV.includes(t.lv) && !isEx(t.lv))) t.lv = "A1"; }
     if (a === "lv") { t.lv = b.dataset.v; }
     if (a === "all") lessons(t.lv).forEach(l => t.units[l.id] = true);
     if (a === "none") lessons(t.lv).forEach(l => delete t.units[l.id]);
