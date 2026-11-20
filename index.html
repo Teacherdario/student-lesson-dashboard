@@ -48,16 +48,16 @@ h2{font-size:1.2rem;font-weight:700}
 h3{font-size:1.05rem;font-weight:500}
 p{margin:0}
 .app{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:100vh}
-.rail{background:var(--surface);border-right:1px solid var(--line);padding:24px 14px;display:flex;flex-direction:column;gap:24px;position:sticky;top:0;height:100vh}
-.brand{font-family:var(--display);font-weight:700;font-size:1.25rem;padding:0 10px;display:flex;align-items:center;gap:8px}
+.rail{background:var(--surface);border-right:1px solid var(--line);padding:18px 12px 12px;display:flex;flex-direction:column;gap:12px;position:sticky;top:0;height:100vh;overflow:hidden}
+.brand{font-family:var(--display);font-weight:700;font-size:1.12rem;padding:0 10px;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}.rail>.credit{flex:none;margin-top:-8px;font-size:.75rem}
 .ladder{display:flex;gap:2px;align-items:flex-end}
 .ladder i{width:4px;border-radius:1px;display:block}
-.nav{display:flex;flex-direction:column;gap:4px}
-.nav a{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;color:var(--muted);text-decoration:none;font-weight:600}
+.nav{display:flex;flex-direction:column;gap:2px;flex:1;min-height:0;overflow-y:auto;margin:0 -6px;padding:0 6px;scrollbar-width:thin}.nav .ng{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);opacity:.75;padding:12px 10px 4px}.nav .ng:first-child{padding-top:2px}
+.nav a{display:flex;align-items:center;gap:10px;padding:7px 10px;font-size:.93rem;border-radius:8px;flex:none;color:var(--muted);text-decoration:none;font-weight:600}
 .nav a svg{width:20px;height:20px;flex:none}
 .nav a:hover{background:var(--sunken);color:var(--ink)}
 .nav a[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
-.rail .who{margin-top:auto;padding:10px;font-size:.85rem;color:var(--muted)}
+.rail .who{margin-top:0;border-top:1px solid var(--line);padding:10px 10px 4px;flex:none;font-size:.85rem;color:var(--muted)}
 .rail .who b{display:block;color:var(--ink);font-size:.95rem}
 main{padding:28px clamp(16px,4vw,40px) 60px;min-width:0}
 .view{display:none;flex-direction:column;gap:20px;max-width:1040px}
@@ -810,8 +810,13 @@ function setStep(id,k,v){const p=prog(id);if(v){p[k]=1;p.open=1;}else delete p[k
 function curView(){const h=location.hash.slice(1);return VIEWS.some(v=>v[0]===h)?h:"library";}
 function renderNav(){
   const v=curView();
-  const html=VIEWS.map(([id,lab,ic])=>`<a href="#${id}" ${id===v?'aria-current="page"':""}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg>${lab}</a>`).join("");
-  $("#nav").innerHTML=html;$("#tabs").innerHTML=html;
+  const link=([id,lab,ic])=>`<a href="#${id}" ${id===v?'aria-current="page"':""}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg>${lab}</a>`;
+  const NG=[["Learn · Aprende",["starter","library","book","reader"]],["Practise · Practica",["writing","speak","vocab","verbs","dict"]],["Cambridge exams",["fce","pet"]],["Progress · Avance",["progress","tools"]]];
+  const used=new Set();const groups=NG.map(([t,ids])=>[t,ids.map(i=>VIEWS.find(x=>x[0]===i)).filter(Boolean)]);
+  groups.forEach(g=>g[1].forEach(x=>used.add(x[0])));const rest=VIEWS.filter(x=>!used.has(x[0]));if(rest.length)groups[groups.length-1][1].push(...rest);
+  const shown=groups.filter(g=>g[1].length);
+  $("#nav").innerHTML=shown.map(([t,items])=>(shown.length>1?`<div class="ng">${t}</div>`:"")+items.map(link).join("")).join("");
+  $("#tabs").innerHTML=shown.flatMap(g=>g[1]).map(link).join("");
   VIEWS.forEach(([id])=>$("#v-"+id).classList.toggle("on",id===v));
 }
 function go(v){if(curView()===v){render();}else{location.hash=v;}window.scrollTo(0,0);}
