@@ -1115,7 +1115,7 @@ window.addEventListener("hashchange",()=>{if(curView()!=="reader")stopSpeak();re
 window.addEventListener("pagehide",stopSpeak);
 render();
 </script>
-<script src="dictdata.js"></script><script src="cefr.js"></script><script src="dict.js"></script><script src="vocab.js"></script><script>window.VERB_IMG_BASE="";</script><script src="verbsdata.js"></script><script src="verbs.js"></script><script src="pet.js"></script><script src="petphotos.js"></script><script src="p1.js"></script><script src="p2.js"></script><script src="p3.js"></script><script src="p4.js"></script><script src="p5.js"></script><script src="p6.js"></script><script src="p7.js"></script><script src="p8.js"></script><script src="p9.js"></script><script src="p10.js"></script>
+<script src="dictdata.js"></script><script src="cefr.js"></script><script src="dict.js"></script><script src="vocab.js"></script><script>window.VERB_IMG_BASE="";</script><script src="verbsdata.js"></script><script src="verbs.js"></script><script src="pet.js"></script><script src="petphotos.js"></script><script src="p1.js"></script><script src="p2.js"></script><script src="p3.js"></script><script src="p4.js"></script><script src="p5.js"></script><script src="p6.js"></script><script src="p7.js"></script><script src="p8.js"></script><script src="p9.js"></script><script src="p10.js"></script><script src="fig.js"></script><script src="book.js"></script><script src="book-a1.js"></script><script src="book-a2.js"></script><script src="book-b1.js"></script><script src="book-b2.js"></script><script src="book-c1.js"></script><script src="book-c2.js"></script><script src="book-verbs.js"></script><script src="book-exams.js"></script>
 
 <!-- Sign-in and cloud saving (Firebase). Added for the GitHub Pages copy. -->
 <style>
@@ -1185,13 +1185,13 @@ const app=initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
 let adminApp=null;const adminAuth=()=>{adminApp=adminApp||initializeApp(cfg,"admin");return getAuth(adminApp);};
 const $id=x=>document.getElementById(x);
 let uid=null,ready=false,timer=null,asTeacher=false;
-const ALL=LESSONS.slice();
+const ALL=LESSONS.slice();window.ALL_LESSONS=ALL;
 const VALL=VIEWS.slice();let ONLY=null;
 const SUBC=["VOC","VERB"],LVS=[...LV,"PET","FCE"],isSub=t=>/^(VOC|VERB):(A1|A2|B1|B2|C1|C2|PET|FCE)$/.test(t),has=(c,k)=>c.some(x=>x===k||x.startsWith(k+":")),subs=(c,k)=>LVS.filter(l=>c.includes(k+":"+l)),CN={VOC:"Vocabulary",VERB:"Verbs"};
 const parseLv=x=>String(x||"").split(",").map(t=>t.trim()).filter(t=>LVX.includes(t)||isSub(t));
 const lvLabel=c=>{if(!c.length)return"All levels and courses";const o=c.filter(x=>LV.includes(x)||x==="FCE"||x==="PET").map(LVN);SUBC.forEach(k=>{if(has(c,k)){const l=subs(c,k);o.push(CN[k]+" "+(l.length?l.join(", "):"(all levels)"));}});return o.join(" · ");};
-function setViews(c){const cefr=c.filter(x=>LV.includes(x));window.TD_LEVEL=cefr[0]||"";window.TD_ALLOW={VOC:subs(c,"VOC"),VERB:subs(c,"VERB")};let ids=null;
-  if(c.length){ids=new Set();if(cefr.length)["library","reader","writing","progress","dict"].forEach(x=>ids.add(x));if(c.includes("FCE"))ids.add("fce");if(c.includes("PET"))ids.add("pet");if(has(c,"VOC")){ids.add("vocab");ids.add("dict");}if(has(c,"VERB")){ids.add("verbs");ids.add("dict");}}
+function setViews(c){window.TD_CODES=c;const cefr=c.filter(x=>LV.includes(x));window.TD_LEVEL=cefr[0]||"";window.TD_ALLOW={VOC:subs(c,"VOC"),VERB:subs(c,"VERB")};let ids=null;
+  if(c.length){ids=new Set(["book"]);if(cefr.length)["library","reader","writing","progress","dict"].forEach(x=>ids.add(x));if(c.includes("FCE"))ids.add("fce");if(c.includes("PET"))ids.add("pet");if(has(c,"VOC")){ids.add("vocab");ids.add("dict");}if(has(c,"VERB")){ids.add("verbs");ids.add("dict");}}
   const keep=ids?VALL.filter(v=>ids.has(v[0])):VALL;ONLY=ids?keep.map(v=>v[0]):null;VIEWS.splice(0,VIEWS.length,...keep);
   VALL.forEach(([id])=>{if(!keep.some(v=>v[0]===id)){const e=document.getElementById("v-"+id);if(e)e.classList.remove("on");}});
   const t=document.getElementById("tabs");if(t)t.style.gridTemplateColumns="repeat("+VIEWS.length+",1fr)";
