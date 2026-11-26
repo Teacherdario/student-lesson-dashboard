@@ -18,6 +18,13 @@
   const API = window.PICDICT = { add: (lv, t) => { parse(lv, t); later(); }, data: D };
   pend.forEach(a => parse(a[0], a[1]));
 
+  const BASE = (() => { try { const c = document.currentScript && document.currentScript.src; return c ? c.replace(/[^/]*$/, "") : ""; } catch (e) { return ""; } })();
+  const loaded = {};
+  function need(lv) {
+    if (!LV.includes(lv) || loaded[lv]) return; loaded[lv] = 1;
+    const sc = document.createElement("script"); sc.src = BASE + "picimg-" + lv.toLowerCase() + ".js"; sc.async = true;
+    sc.onerror = () => { loaded[lv] = 0; }; document.head.appendChild(sc);
+  }
   const img = k => (window.PIC_IMG || {})[k];
   const credit = k => (window.PIC_CREDIT || {})[k];
   const st = () => { if (!S.pic) S.pic = {}; const p = S.pic; p.learned = p.learned || {}; p.best = p.best || {}; return p; };
@@ -114,9 +121,10 @@
     const p = st(), lv = pLv(lvIn);
     const note = lvIn === "PET" || lvIn === "FCE" ? `<p class="sub">${lvIn} uses the ${lv} picture dictionary. · ${lvIn} usa el diccionario ilustrado de ${lv}.</p>` : "";
     const T = D[lv] || []; const t = p.lv === lv && p.ti != null ? T[p.ti] : null;
+    need(lv);
     return `<div class="pd">${note}${t ? themeHTML(lv, t, p) : homeHTML(lv, p)}</div>`;
   }
-  API.html = html;
+  API.html = html; API.refresh = later;
   let open = null;
   function redraw() { if (window.VOCAB && VOCAB.draw) VOCAB.draw(); if (open) showDetail(open); }
   function find(key) { const [lv, ti, i] = key.split("-"); const t = (D[lv] || [])[+ti]; return t ? [t.items[+i], t] : [null, null]; }
@@ -131,7 +139,7 @@
   document.addEventListener("click", ev => {
     const m = ev.target.classList && ev.target.classList.contains("pz-modal"); if (m) { closeDetail(); return; }
     const b = ev.target.closest && ev.target.closest("[data-pic]"); if (!b) return;
-    const a = b.dataset.pic, p = st(), lv = pLv(window.S && S.voc ? S.voc.lv : "A1");
+    const a = b.dataset.pic, p = st(), lv = pLv(typeof S !== "undefined" && S.voc ? S.voc.lv : "A1");
     if (a === "theme") { p.lv = lv; p.ti = +b.dataset.v; p.mode = "cards"; Q = null; store(); redraw(); }
     else if (a === "back") { p.ti = null; store(); redraw(); }
     else if (a === "mode") { p.mode = b.dataset.v; if (p.mode === "quiz") Q = null; store(); redraw(); }
