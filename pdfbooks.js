@@ -5,6 +5,7 @@
   const LV = ["A1", "A2", "B1", "B2", "C1", "C2"];
   const B = {
     SB: l => [`student-book-${l.toLowerCase()}.pdf`, `Student Book ${l}`, `Libro del alumno ${l}`],
+    WB: l => [`vocabulary-workbook-${l.toLowerCase()}.pdf`, `Vocabulary Workbook ${l}`, `Cuaderno de vocabulario ${l}`],
     PIC: l => [`picture-dictionary-${l.toLowerCase()}.pdf`, `Picture Dictionary ${l}`, `Diccionario ilustrado ${l}`],
     PET: () => ["pet-study-book.pdf", "B1 Preliminary (PET) Study Book", "Libro de estudio PET"],
     FCE: () => ["fce-study-book.pdf", "B2 First (FCE) Study Book", "Libro de estudio FCE"],
@@ -23,6 +24,7 @@
     LV.forEach(l => { if (all() || codes().includes(l)) out.push(B.SB(l)); });
     if (has("PET")) out.push(B.PET()); if (has("FCE")) out.push(B.FCE());
     LV.forEach(l => { if (okLv(l)) out.push(B.PIC(l)); });
+    LV.forEach(l => { if (okLv(l)) out.push(B.WB(l)); });
     if (has("VOC")) out.push(B.VOC()); if (has("VERB")) out.push(B.VERB());
     out.push(B.SPK());
     return out;
@@ -34,7 +36,7 @@
       if (id === "book") { const c = window.BOOK && BOOK.state ? BOOK.state().c : ""; if (LV.includes(c)) return [B.SB(c)]; if (B[c]) return [B[c]()]; return []; }
       if (id === "starter") return [B.START()];
       if (id === "speak") return [B.SPK()];
-      if (id === "vocab") { const l = typeof S !== "undefined" && S.voc ? S.voc.lv : "A1"; const pl = l === "PET" ? "B1" : l === "FCE" ? "B2" : l; return [B.PIC(LV.includes(pl) ? pl : "A1"), B.VOC()]; }
+      if (id === "vocab") { const l = typeof S !== "undefined" && S.voc ? S.voc.lv : "A1"; const pl = l === "PET" ? "B1" : l === "FCE" ? "B2" : l; const L2 = LV.includes(pl) ? pl : "A1"; return [B.PIC(L2), B.WB(L2), B.VOC()]; }
       if (id === "verbs") return [B.VERB()];
       if (id === "pet") return [B.PET(), B.SPK()];
       if (id === "fce") return [B.FCE(), B.SPK()];
