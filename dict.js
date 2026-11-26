@@ -263,7 +263,35 @@ Rules: cefr is the level at which learners typically meet this meaning (English 
   document.head.appendChild(st);
 
   /* ---------- main "Dictionary" view for every level ---------- */
-  window.DICT = { html, search, levelOf, entries: E, state: S };
+  /* ---------- lookup API for tap-a-word (no rendering) ---------- */
+  function synList(list) {
+    return (list || []).map(x => { const w = typeof x === "string" ? x : x.word; const c = typeof x === "object" && LV.includes(x.cefr) ? { c: x.cefr, est: false } : levelOf(w); return { w, c: c ? c.c : null, est: c ? c.est : true }; })
+      .filter(x => x.w).sort((a, b) => (a.c ? LV.indexOf(a.c) : 9) - (b.c ? LV.indexOf(b.c) : 9));
+  }
+  const lexIpa = w => { const L = window.LEX_IPA || {}; const n = norm(w); if (L[n]) return L[n]; for (const s of stems(n)) if (L[s]) return L[s]; if (IRR[n] && L[IRR[n]]) return L[IRR[n]]; return ""; };
+  let LOC = null;
+  function localIdx() {
+    if (LOC) return LOC; LOC = new Map();
+    const put = (w, v) => { const k = norm(w); if (k && !LOC.has(k)) LOC.set(k, v); };
+    try { const V = window.VERBS_DATA || {}; Object.keys(V).forEach(l => V[l].forEach(r => { const v = { es: r[3], c: l === "PET" ? "B1" : l === "FCE" ? "B2" : l, t: "verb", e: r[10], xs: r[11], base: r[0] }; [r[0], ...String(r[1]).split("/"), ...String(r[2]).split("/")].forEach(f => put(f.trim(), v)); })); } catch (x) { }
+    try { (window.STARTER && STARTER.units || []).forEach(u => u.groups.forEach(g => g.w.forEach(w => put(w[0], { es: w[2].replace(/^.*·\s*/, ""), c: "A1" })))); } catch (x) { }
+    try { const X = (window.BOOK && BOOK.extra) || {}; Object.keys(X).forEach(k => put(X[k].w, { es: X[k].es, ipa: X[k].p })); } catch (x) { }
+    return LOC;
+  }
+  function localInfo(w) { const L = localIdx(); const n = norm(w); if (L.has(n)) return L.get(n); for (const st of stems(n)) if (L.has(st)) return L.get(st); if (IRR[n] && L.has(IRR[n])) return L.get(IRR[n]); return null; }
+  async function lookup(q) {
+    q = String(q || "").trim(); if (!q) return null;
+    const hits = exact(q);
+    if (hits.length) { const e = hits[0]; return { word: e.w, type: e.t, c: e.c, est: false, ipa: e.p || lexIpa(e.w), es: e.es, m: e.m, e: e.e, xs: e.xs, s: synList(e.s), more: hits.slice(1).map(m => m.w), via: "built-in" }; }
+    let o = null; const tries = [q]; const n = norm(q); if (IRR[n]) tries.push(IRR[n]); stems(n).slice(1).forEach(x => { if (x.length > 2 && !tries.includes(x)) tries.push(x); });
+    for (const t of tries.slice(0, 3)) { o = await lookOnline(t); if (o) break; }
+    const li = localInfo(q);
+    if (!o) { const ip = (li && li.ipa) || lexIpa(q); const L = levelOf(q); return ip || L || li ? { word: (li && li.base) || q, type: (li && li.t) || "", c: (li && li.c) || (L ? L.c : null), est: !(li && li.c), ipa: ip, es: (li && li.es) || "", m: "", e: (li && li.e) || "", xs: (li && li.xs) || "", s: [], via: "offline" } : null; }
+    if (li && !o.es) o = Object.assign({}, o, { es: li.es });
+    return { word: o.word, type: o.type, c: o.c, est: o.est, ipa: o.ipa || lexIpa(o.word) || lexIpa(q), ipaUS: o.ipaUS || "", es: o.es, m: o.m, e: o.e, s: synList(o.s), notes: o.notes || "", via: o.via || "web" };
+  }
+  const hasPhrase = q => exact(q).some(e => norm(e.w).includes(" "));
+  window.DICT = { html, search, levelOf, entries: E, state: S, lookup, exact, hasPhrase, norm };
   if (typeof VIEWS !== "undefined" && Array.isArray(VIEWS) && !VIEWS.some(v => v[0] === "dict")) {
     const i = VIEWS.findIndex(v => v[0] === "progress");
     VIEWS.splice(i < 0 ? VIEWS.length : i, 0, ["dict", "Dictionary", '<path d="M5 4.5A1.5 1.5 0 016.5 3H19v15H6.5A1.5 1.5 0 005 19.5zM5 19.5A1.5 1.5 0 006.5 21H19M9 7h6M9 10.5h4"/>']);
