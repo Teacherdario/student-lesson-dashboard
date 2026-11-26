@@ -275,6 +275,7 @@ Rules: cefr is the level at which learners typically meet this meaning (English 
     const put = (w, v) => { const k = norm(w); if (k && !LOC.has(k)) LOC.set(k, v); };
     try { const V = window.VERBS_DATA || {}; Object.keys(V).forEach(l => V[l].forEach(r => { const v = { es: r[3], c: l === "PET" ? "B1" : l === "FCE" ? "B2" : l, t: "verb", e: r[10], xs: r[11], base: r[0] }; [r[0], ...String(r[1]).split("/"), ...String(r[2]).split("/")].forEach(f => put(f.trim(), v)); })); } catch (x) { }
     try { (window.STARTER && STARTER.units || []).forEach(u => u.groups.forEach(g => g.w.forEach(w => put(w[0], { es: w[2].replace(/^.*·\s*/, ""), c: "A1" })))); } catch (x) { }
+    try { const P = (window.PICDICT && PICDICT.data) || {}; const PT = { n: "noun", v: "verb", adj: "adjective", adv: "adverb", ph: "phrasal verb", exp: "expression" }; Object.keys(P).forEach(l => P[l].forEach(t => t.items.forEach(it => put(it.w, { es: it.es, c: l, t: PT[it.pos], m: it.m, e: it.e, xs: it.xe, syn: it.syn })))); } catch (x) { }
     try { const X = (window.BOOK && BOOK.extra) || {}; Object.keys(X).forEach(k => put(X[k].w, { es: X[k].es, ipa: X[k].p })); } catch (x) { }
     return LOC;
   }
@@ -286,7 +287,7 @@ Rules: cefr is the level at which learners typically meet this meaning (English 
     let o = null; const tries = [q]; const n = norm(q); if (IRR[n]) tries.push(IRR[n]); stems(n).slice(1).forEach(x => { if (x.length > 2 && !tries.includes(x)) tries.push(x); });
     for (const t of tries.slice(0, 3)) { o = await lookOnline(t); if (o) break; }
     const li = localInfo(q);
-    if (!o) { const ip = (li && li.ipa) || lexIpa(q); const L = levelOf(q); return ip || L || li ? { word: (li && li.base) || q, type: (li && li.t) || "", c: (li && li.c) || (L ? L.c : null), est: !(li && li.c), ipa: ip, es: (li && li.es) || "", m: "", e: (li && li.e) || "", xs: (li && li.xs) || "", s: [], via: "offline" } : null; }
+    if (!o) { const ip = (li && li.ipa) || lexIpa(q); const L = levelOf(q); return ip || L || li ? { word: (li && li.base) || q, type: (li && li.t) || "", c: (li && li.c) || (L ? L.c : null), est: !(li && li.c), ipa: ip, es: (li && li.es) || "", m: (li && li.m) || "", e: (li && li.e) || "", xs: (li && li.xs) || "", s: (li && li.syn) ? synList(li.syn) : [], via: "offline" } : null; }
     if (li && !o.es) o = Object.assign({}, o, { es: li.es });
     return { word: o.word, type: o.type, c: o.c, est: o.est, ipa: o.ipa || lexIpa(o.word) || lexIpa(q), ipaUS: o.ipaUS || "", es: o.es, m: o.m, e: o.e, s: synList(o.s), notes: o.notes || "", via: o.via || "web" };
   }

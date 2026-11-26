@@ -136,7 +136,7 @@
 
   const css = document.createElement("style");
   css.textContent = `
-#td-wp{position:fixed;z-index:60;width:360px;max-height:calc(100vh - 20px);overflow:auto;background:var(--surface,#fff);color:var(--ink,#111);border:1px solid var(--line,#ddd);border-radius:16px;box-shadow:0 12px 36px rgba(0,0,0,.22);padding:12px 14px}
+#td-wp{position:fixed;z-index:90;width:360px;max-height:calc(100vh - 20px);overflow:auto;background:var(--surface,#fff);color:var(--ink,#111);border:1px solid var(--line,#ddd);border-radius:16px;box-shadow:0 12px 36px rgba(0,0,0,.22);padding:12px 14px}
 #td-wp.sheet{left:0!important;right:0;bottom:0;top:auto!important;width:auto;max-height:70vh;border-radius:18px 18px 0 0;padding-bottom:calc(14px + env(safe-area-inset-bottom))}
 .wp-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.wp-h>b{font-size:1.35rem}.wp-pos{font-size:.8rem;color:var(--muted,#666);font-style:italic}
 .wp-x{margin-left:auto;border:0;background:var(--sunken,#f2f2f2);border-radius:999px;width:30px;height:30px;cursor:pointer;color:inherit}
