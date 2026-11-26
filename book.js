@@ -81,6 +81,7 @@ BOOK.words = list => list.forEach(r => { BOOK.extra[r[0].toLowerCase()] = { w: r
     const C = BOOK.courses[k] || {}; const Ls = lessonsOf(k); const b = B();
     let h = `<div class="bk-cover lv-${k}"><div><span class="bk-kicker">Student Book · Libro del estudiante</span><h1>${escB(cName(k)[0])}</h1>${b.es ? `<p class="es" lang="es">${escB(cName(k)[1])}</p>` : ""}${C.intro ? `<p class="bk-intro">${md(C.intro[0])}</p>${b.es ? `<p class="bk-intro es" lang="es">${md(C.intro[1])}</p>` : ""}` : ""}</div><div class="bk-badge">${k}</div></div>`;
     if (C.can) h += `<section class="card bk-sec">${head(0, "By the end of this course you will be able to…", "Al terminar este curso podrás…", "🎯")}<ul class="bk-can">${C.can.map(x => `<li><span class="en">${md(x[0])}</span>${b.es ? `<span class="es" lang="es">${md(x[1])}</span>` : ""}</li>`).join("")}</ul></section>`;
+    if (BOOK.coreCard) h += BOOK.coreCard(k);
     h += `<section class="card bk-sec">${head(0, "Syllabus", "Temario del curso", "🗂️")}<div class="bk-tw"><table class="bk-syl"><thead><tr><th>Unit</th><th>Topic · Tema</th><th>Grammar · Gramática</th><th>Vocabulary · Vocabulario</th><th>You will learn to… · Aprenderás a…</th></tr></thead><tbody>${Ls.map((l, i) => { const U = BOOK.units[l.id] || {}; return `<tr><td><button class="bk-link" type="button" data-bk="unit" data-v="${l.id}">${i + 1}</button></td><td><b>${escB(l.title)}</b><br><span class="sub">${escB(l.topic)}</span></td><td>${escB((l.gr && l.gr.t) || "")}${U.gt && b.es ? `<br><span class="sub" lang="es">${escB(U.gt[1])}</span>` : ""}</td><td>${Object.keys(l.g || {}).map(escB).join(", ")}</td><td>${U.can ? escB(U.can[0][0]) : escB(l.blurb || "")}</td></tr>`; }).join("")}</tbody></table></div></section>`;
     h += `<div class="bk-units">${Ls.map((l, i) => { const U = BOOK.units[l.id]; const done = b.chk[l.id]; return `<button class="bk-ucard ${U ? "" : "soon"}" type="button" data-bk="unit" data-v="${l.id}"><span class="bk-un">Unit ${i + 1}</span><b>${escB(l.title)}</b><span class="sub">${escB((l.gr && l.gr.t) || "")}</span>${done ? `<span class="bk-done">✓ studied</span>` : ""}</button>`; }).join("")}</div>`;
     return h;
@@ -130,7 +131,8 @@ BOOK.words = list => list.forEach(r => { BOOK.extra[r[0].toLowerCase()] = { w: r
     let h = `<div class="head"><div><h1>Student Book</h1><p class="sub">Libro del estudiante · Grammar and vocabulary reference · Created by Teacher Dario</p></div><label class="bk-tog"><input type="checkbox" data-bk="es" ${b.es ? "checked" : ""}> Español</label></div>
       <div class="seg bk-courses" role="group" aria-label="Courses">${al.map(k => `<button class="chip" type="button" data-bk="course" data-v="${k}" aria-pressed="${b.c === k}">${LV.includes(k) ? `<span class="lvl ${k}">${k}</span>` : escB(cName(k)[0].replace(" course", "").replace(/ \(.*\)/, ""))}</button>`).join("")}</div>`;
     if ((window.TD_TEACHER || !document.getElementById("gate")) && window.TOOLS && !b.u) h += `<div class="row" style="justify-content:flex-end"><button class="btn primary" type="button" data-tools="bookpdf" data-v="${b.c}">⬇ Download this book as PDF · Descargar PDF</button></div>`;
-    if (b.u && BOOK.special[b.c] && BOOK.special[b.c].unit) h += BOOK.special[b.c].unit(b.u);
+    if (b.u && /^core:/.test(b.u) && BOOK.coreUnit) h += BOOK.coreUnit(b.u);
+    else if (b.u && BOOK.special[b.c] && BOOK.special[b.c].unit) h += BOOK.special[b.c].unit(b.u);
     else if (b.u) h += renderUnit(b.u);
     else h += renderCourse(b.c);
     return h;

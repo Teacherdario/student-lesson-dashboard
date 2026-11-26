@@ -86,7 +86,7 @@ window.TOOLS = window.TOOLS || {};
     if (!window.BOOK) return "";
     const st = BOOK.state(); const save_ = [st.c, st.u]; st.c = k; let h = "";
     if (BOOK.special[k]) { const sp = BOOK.special[k]; st.u = ""; h += sp.course(); const ids = { VERB: ["forms", "spell", "irr", "which", ...["A1", "A2", "B1", "B2", "C1", "C2", "PET", "FCE"].map(l => "lv:" + l)], VOC: ["pos", "wf", "col", "fig", ...["A1", "A2", "B1", "B2", "C1", "C2", "PET", "FCE"].map(l => "w:" + l)], PET: ["ref", "g", "v", "pv2", "col", "lk", "w", "s", "x"], FCE: ["ref", "g", "pv", "pv2", "ex", "col", "wf", "kwt", "up", "lk", "w", "s"] }[k] || []; ids.forEach(id => { h += `<div class="pd-break"></div>` + sp.unit(id); }); }
-    else { h += BOOK.renderCourse(k); BOOK.lessonsOf(k).forEach(l => { h += `<div class="pd-break"></div>` + BOOK.renderUnit(l.id); }); }
+    else { h += BOOK.renderCourse(k); BOOK.lessonsOf(k).forEach(l => { h += `<div class="pd-break"></div>` + BOOK.renderUnit(l.id); }); if (BOOK.corePrint && window.CORE && CORE.lv[k]) h += `<div class="pd-break"></div>` + BOOK.corePrint(k); }
     st.c = save_[0]; st.u = save_[1];
     return `<div class="pd-book">${h}</div>`;
   }
