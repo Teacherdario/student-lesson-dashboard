@@ -1,0 +1,20 @@
+{
+  "name": "Teacher Dario · English Lessons",
+  "short_name": "Teacher Dario",
+  "description": "English lessons A1–C2, PET, FCE, vocabulary, speaking and books by Teacher Dario.",
+  "id": "/student-lesson-dashboard/",
+  "start_url": "/student-lesson-dashboard/?source=app",
+  "scope": "/student-lesson-dashboard/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1f4e9c",
+  "theme_color": "#1f4e9c",
+  "lang": "en",
+  "categories": ["education"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
