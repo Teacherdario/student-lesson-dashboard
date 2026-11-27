@@ -15,6 +15,26 @@
     if (!file || loaded[file]) return; loaded[file] = 1;
     const s = document.createElement("script"); s.src = BASE + file; s.onload = () => draw(); document.head.appendChild(s);
   }
+  /* ---------- join by PIN, QR code or link ---------- */
+  const SITE = "https://teacherdario.github.io/student-lesson-dashboard/";
+  const siteURL = () => /github\.io$/.test(location.hostname) ? location.origin + location.pathname : SITE;
+  const joinURL = pin => siteURL() + "?pin=" + pin + "#live";
+  let qrReady = !!window.qrcode, qrAsked = false;
+  function needQR() { if (qrReady || qrAsked) return; qrAsked = true; const s = document.createElement("script"); s.src = BASE + "qr.js"; s.onload = () => { qrReady = true; draw(); }; document.head.appendChild(s); }
+  function qrSVG(text) { try { const q = qrcode(0, "M"); q.addData(text); q.make(); return q.createSvgTag({ cellSize: 6, margin: 2, scalable: true, alt: "QR code to join the game" }); } catch (e) { return ""; } }
+  const shareText = pin => `🎮 ¡Juego en vivo de Teacher Dario! · Live game\nPIN: ${pin}\nToca para entrar · Tap to join: ${joinURL(pin)}`;
+  // A student who opened a join link: remember the PIN until they are signed in, then join by themselves.
+  let pending = "";
+  try { const p = new URLSearchParams(location.search).get("pin"); if (p && /^\d{6}$/.test(p)) { pending = p; sessionStorage.setItem("td-join", p); const u = new URL(location.href); u.searchParams.delete("pin"); u.hash = "live"; history.replaceState(null, "", u.pathname + u.search + u.hash); } else pending = sessionStorage.getItem("td-join") || ""; } catch (e) { }
+  function autoJoin() {
+    if (!pending || L.pin || L.busy) return;
+    const fb = F(); if (!fb || !fb.auth || !fb.auth.currentUser || !window.TD_ME) return;
+    const p = pending; pending = ""; try { sessionStorage.removeItem("td-join"); } catch (e) { }
+    if (location.hash !== "#live") location.hash = "live";
+    if (window.TD_TEACHER) { L.prefill = p; draw(); return; }
+    join(p);
+  }
+  setInterval(autoJoin, 1000);
   const imgOf = k => k ? ((window.TH_IMG || {})[k] || (window.PIC_IMG || {})[k] || "") : "";
   const shuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const now = () => Date.now();
@@ -130,8 +150,12 @@
   function hostHTML() {
     const g = L.game; if (!g) return `<p>Loading… · Cargando…</p>`;
     const head = `<div class="row lv-top"><span class="lv-pin">PIN <b>${L.pin}</b></span><span class="sub">${esc(g.title)} · ${g.lv}</span><button type="button" class="btn ghost" data-lv="close">✕ End game</button></div>`;
-    if (g.state === "lobby") return head + `<div class="lv-lobby"><p>Students: open the app → <b>🎮 Live</b> → type the PIN.<br><span class="sub">Alumnos: abran la app → 🎮 Live → escriban el PIN.</span></p><div class="lv-bigpin">${L.pin}</div><p><b>${L.players.length}</b> players · jugadores</p><div class="lv-names">${L.players.map(p => `<span>${esc(p.name)}</span>`).join("") || '<span class="sub">Waiting for players… · Esperando…</span>'}</div>
-      <button type="button" class="btn primary lv-big" data-lv="start" ${L.players.length ? "" : "disabled"}>▶ Start · Empezar (${g.Q.length} questions)</button></div>`;
+    if (g.state === "lobby") { needQR(); const url = joinURL(L.pin); return head + `<div class="lv-lobby"><h2>How to join · Cómo entrar</h2><div class="lv-ways">
+      <div class="lv-way"><b>1 · PIN</b><span class="sub">App → 🎮 Live → type the PIN · escribe el PIN</span><div class="lv-bigpin">${L.pin}</div></div>
+      <div class="lv-way"><b>2 · QR</b><span class="sub">Scan with the phone camera · Escanea con la cámara</span><div class="lv-qr">${qrReady ? qrSVG(url) : "…"}</div></div>
+      <div class="lv-way"><b>3 · Link · Enlace</b><span class="sub">Send it on WhatsApp · Envíalo por WhatsApp</span><code class="lv-url">${esc(url)}</code><div class="lv-share"><button type="button" class="btn" data-lv="copy">📋 Copy · Copiar</button><a class="btn" href="https://wa.me/?text=${encodeURIComponent(shareText(L.pin))}" target="_blank" rel="noopener">🟢 WhatsApp</a>${navigator.share ? '<button type="button" class="btn" data-lv="share">📤 Share · Compartir</button>' : ""}</div></div></div>
+      <p><b>${L.players.length}</b> players · jugadores</p><div class="lv-names">${L.players.map(p => `<span>${esc(p.name)}</span>`).join("") || '<span class="sub">Waiting for players… · Esperando…</span>'}</div>
+      <button type="button" class="btn primary lv-big" data-lv="start" ${L.players.length ? "" : "disabled"}>▶ Start · Empezar (${g.Q.length} questions)</button></div>`; }
     const q = g.Q[g.qi];
     if (g.state === "q") return head + `<div class="lv-qhead"><span>${g.qi + 1}/${g.Q.length}</span><span class="lv-timer" id="lv-time">${g.secs}</span><span>${answered(g.qi)}/${L.players.length} answered</span></div><div class="lv-tbar"><i></i></div>${qBlock(q, true)}<div class="lv-opts host">${q.o.map((o, i) => `<div class="lv-opt" style="background:${COLS[i]}"><span>${SH[i]}</span>${esc(o)}</div>`).join("")}</div>`;
     if (g.state === "reveal") { const cnt = [0, 0, 0, 0]; L.players.forEach(p => { const a = p.ans && p.ans[g.qi]; if (a) cnt[a.o]++; }); const mx = Math.max(1, ...cnt);
@@ -157,7 +181,7 @@
   }
   function joinHTML() {
     return `<div class="card lv-join"><h2>Join a live game · Entrar a un juego</h2><p class="sub">Type the PIN your teacher shows. · Escribe el PIN que muestra tu maestro.</p>
-      <input id="lv-pin" class="lv-pinin" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="off"><button type="button" class="btn primary lv-big" data-lv="join" ${L.busy ? "disabled" : ""}>Enter · Entrar</button>${L.err ? `<p class="lv-err">${esc(L.err)}</p>` : ""}</div>`;
+      <input id="lv-pin" class="lv-pinin" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="off" value="${esc(L.prefill || "")}"><button type="button" class="btn primary lv-big" data-lv="join" ${L.busy ? "disabled" : ""}>Enter · Entrar</button>${L.err ? `<p class="lv-err">${esc(L.err)}</p>` : ""}</div>`;
   }
   function html() {
     let h = `<div class="head"><div><h1>🎮 Live games</h1><p class="sub">Juegos en vivo · ${window.TD_TEACHER ? "Host a game for your class · Organiza un juego" : "Play with your class · Juega con tu clase"}</p></div></div>`;
@@ -185,6 +209,8 @@
     else if (a === "start" || a === "next") { const g = L.game; if (!g) return; if (g.qi + 1 >= g.Q.length) setState({ state: "end" }); else { const nq = g.Q[g.qi + 1]; if (nq.k) loadFor(nq.k); setState({ state: "q", qi: g.qi + 1, qAt: now() }); } }
     else if (a === "close") { if (L.host) closeGame(); }
     else if (a === "again") { closeGame(); }
+    else if (a === "copy") { const u = joinURL(L.pin); (navigator.clipboard ? navigator.clipboard.writeText(shareText(L.pin)) : Promise.reject()).then(() => { b.textContent = "✓ Copied · Copiado"; }).catch(() => { prompt("Copy this link:", u); }); }
+    else if (a === "share") { navigator.share({ title: "Teacher Dario · Live game", text: shareText(L.pin) }).catch(() => { }); }
     else if (a === "join") { const i = document.getElementById("lv-pin"); join(i && i.value); }
     else if (a === "ans") answer(+b.dataset.v);
     else if (a === "leave") leave();
@@ -197,7 +223,8 @@
 .lv-row{gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap}.lv-row>span{min-width:150px;font-weight:700}
 .lv-big{width:100%;min-height:56px;font-size:1.15rem;margin-top:12px}.lv-err{color:#e5484d;font-weight:700}
 .lv-top{justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.lv-pin{background:var(--ink);color:var(--bg);border-radius:10px;padding:4px 12px}.lv-pin b{letter-spacing:.12em}
-.lv-lobby{text-align:center}.lv-bigpin{font:900 clamp(3rem,12vw,7rem)/1 system-ui;letter-spacing:.12em;margin:10px 0;color:#1f4e9c}
+.lv-lobby{text-align:center}.lv-ways{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:10px 0 14px}.lv-way{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:12px;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:flex-start}.lv-way>b{font-size:1.1rem}.lv-way .lv-bigpin{font-size:clamp(2.2rem,4.6vw,3.6rem);letter-spacing:.08em;margin:auto 0}
+.lv-qr{width:min(220px,70vw);background:#fff;border-radius:10px;padding:4px}.lv-qr svg{width:100%;height:auto;display:block}.lv-url{font-size:.8rem;word-break:break-all;background:var(--sunken);padding:6px 8px;border-radius:8px}.lv-share{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}.lv-share .btn{min-height:38px;text-decoration:none}.lv-bigpin{font:900 clamp(3rem,12vw,7rem)/1 system-ui;letter-spacing:.12em;margin:10px 0;color:#1f4e9c}
 .lv-names{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0}.lv-names span{background:var(--line);border-radius:20px;padding:6px 14px;font-weight:800;animation:lvpop .3s}
 @keyframes lvpop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
 .lv-qhead{display:flex;justify-content:space-between;align-items:center;font-weight:800;margin:6px 0}.lv-timer{display:grid;place-items:center;width:56px;height:56px;border-radius:28px;background:#7048e8;color:#fff;font-size:1.4rem}
