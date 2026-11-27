@@ -254,5 +254,5 @@
     const tabs = document.getElementById("tabs"); if (tabs) tabs.style.gridTemplateColumns = "repeat(" + VIEWS.length + ",1fr)";
     if (typeof render === "function") { const base = render; render = function () { base.apply(this, arguments); if (curView() === "verbs") draw(); }; try { render(); } catch (e) { } }
   }
-  window.VERBS = { html, draw, L: () => L, data: V };
+  window.VERBS = { html, draw, L: () => L, data: V, units, done };
 })();

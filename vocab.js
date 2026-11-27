@@ -372,5 +372,5 @@
     const tabs = document.getElementById("tabs"); if (tabs) tabs.style.gridTemplateColumns = "repeat(" + VIEWS.length + ",1fr)";
     if (typeof render === "function") { const base = render; render = function () { base.apply(this, arguments); if (curView() === "vocab") draw(); }; try { render(); } catch (e) { } }
   }
-  window.VOCAB = { html, draw, L: () => L };
+  window.VOCAB = { html, draw, L: () => L, units, unitDone };
 })();

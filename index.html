@@ -1120,7 +1120,7 @@ window.addEventListener("hashchange",()=>{if(curView()!=="reader")stopSpeak();re
 window.addEventListener("pagehide",stopSpeak);
 render();
 </script>
-<script src="dictdata.js"></script><script src="cefr.js"></script><script src="dict.js"></script><script src="vocab.js"></script><script>window.VERB_IMG_BASE="";</script><script src="verbsdata.js"></script><script src="verbs.js"></script><script src="pet.js"></script><script src="petphotos.js"></script><script src="p1.js"></script><script src="p2.js"></script><script src="p3.js"></script><script src="p4.js"></script><script src="p5.js"></script><script src="p6.js"></script><script src="p7.js"></script><script src="p8.js"></script><script src="p9.js"></script><script src="p10.js"></script><script src="fig.js"></script><script src="book.js"></script><script src="book-a1.js"></script><script src="book-a2.js"></script><script src="book-b1.js"></script><script src="book-b2.js"></script><script src="book-c1.js"></script><script src="book-c2.js"></script><script src="book-verbs.js"></script><script src="book-exams.js"></script><script src="exam-extra.js"></script><script src="core.js"></script><script src="core-a1.js"></script><script src="core-a2.js"></script><script src="core-b1.js"></script><script src="core-b2.js"></script><script src="core-c1.js"></script><script src="tools.js"></script><script src="tools-exam.js"></script><script src="speak-course.js"></script><script src="speak.js"></script><script src="starter-data.js"></script><script src="starterimg.js"></script><script src="starter.js"></script><script src="lexipa.js"></script><script src="picdict.js"></script><script src="pic-a1.js"></script><script src="pic-a2.js"></script><script src="pic-b1.js"></script><script src="pic-b2.js"></script><script src="pic-c1.js"></script><script src="pic-c2.js"></script><script src="themes.js"></script><script src="th-1.js"></script><script src="th-2.js"></script><script src="th-3.js"></script><script src="th-4.js"></script><script src="tapword.js"></script><script src="pdfbooks.js"></script><script src="live.js"></script>
+<script src="dictdata.js"></script><script src="cefr.js"></script><script src="dict.js"></script><script src="vocab.js"></script><script>window.VERB_IMG_BASE="";</script><script src="verbsdata.js"></script><script src="verbs.js"></script><script src="pet.js"></script><script src="petphotos.js"></script><script src="p1.js"></script><script src="p2.js"></script><script src="p3.js"></script><script src="p4.js"></script><script src="p5.js"></script><script src="p6.js"></script><script src="p7.js"></script><script src="p8.js"></script><script src="p9.js"></script><script src="p10.js"></script><script src="fig.js"></script><script src="book.js"></script><script src="book-a1.js"></script><script src="book-a2.js"></script><script src="book-b1.js"></script><script src="book-b2.js"></script><script src="book-c1.js"></script><script src="book-c2.js"></script><script src="book-verbs.js"></script><script src="book-exams.js"></script><script src="exam-extra.js"></script><script src="core.js"></script><script src="core-a1.js"></script><script src="core-a2.js"></script><script src="core-b1.js"></script><script src="core-b2.js"></script><script src="core-c1.js"></script><script src="tools.js"></script><script src="tools-exam.js"></script><script src="speak-course.js"></script><script src="speak.js"></script><script src="starter-data.js"></script><script src="starterimg.js"></script><script src="starter.js"></script><script src="lexipa.js"></script><script src="picdict.js"></script><script src="pic-a1.js"></script><script src="pic-a2.js"></script><script src="pic-b1.js"></script><script src="pic-b2.js"></script><script src="pic-c1.js"></script><script src="pic-c2.js"></script><script src="themes.js"></script><script src="th-1.js"></script><script src="th-2.js"></script><script src="th-3.js"></script><script src="th-4.js"></script><script src="tapword.js"></script><script src="pdfbooks.js"></script><script src="live.js"></script><script src="track.js"></script>
 
 <!-- Sign-in and cloud saving (Firebase). Added for the GitHub Pages copy. -->
 <style>
@@ -1160,25 +1160,36 @@ body.onelevel .fl[aria-label="Filter by CEFR level"]{display:none}
 .tlist{display:flex;flex-direction:column;gap:6px;margin-top:8px}.titem{display:flex;gap:8px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface);flex-wrap:wrap}.titem.done{background:#eefaf2;border-color:#b7e2c3}.titem small{color:var(--muted)}
 #pop{position:fixed;inset:0;z-index:60;background:#0008;display:flex;align-items:flex-end;justify-content:center}#pop[hidden]{display:none}
 .pop-in{position:relative;background:var(--bg);width:min(640px,100%);max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px 16px 24px}@media(min-width:700px){#pop{align-items:center}.pop-in{border-radius:18px}}
-.pop-x{position:absolute;right:12px;top:12px}
+.pop-x{position:absolute;right:12px;top:12px}#pop-body>h2:first-child{padding-right:52px}
 .thread{display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow:auto;padding:8px;background:var(--sunken);border-radius:12px;margin:10px 0}
 .bub{max-width:80%;padding:8px 12px;border-radius:14px;background:var(--surface);border:1px solid var(--line);white-space:pre-wrap}.bub.me{align-self:flex-end;background:#e8eefc;border-color:#c7d6f7}.bub small{display:block;color:var(--muted);font-size:.72rem;margin-top:2px}
 .pop-in textarea{width:100%;min-height:80px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit}
 .pop-in select,.pop-in input{border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:42px;width:100%;background:var(--surface)}
 .pop-in .field{display:flex;flex-direction:column;gap:4px;margin-top:10px}
+#mon{position:fixed;inset:0;z-index:41;background:var(--bg);overflow:auto;padding:20px clamp(12px,4vw,40px) 60px}#mon[hidden]{display:none}#mon .in{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}.mcard{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:6px}.mcard.on{border-color:#7fd39f;box-shadow:0 0 0 3px #22a85a1a}.mcard h3{margin:0;font-size:1.05rem;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.mcard .act{background:var(--sunken);border-radius:10px;padding:7px 10px;font-size:.92rem}.mcard .act b{font-weight:700}.mcard .meta{font-size:.82rem;color:var(--muted)}.mcard .row{display:flex;gap:8px;flex-wrap:wrap}.mcard .btn{min-height:36px;padding:4px 10px;font-size:.88rem}
+.mbar{height:8px;border-radius:999px;background:var(--sunken);overflow:hidden}.mbar i{display:block;height:100%;background:linear-gradient(90deg,#7b4dff,#c04dff)}
+.warnp{display:inline-block;font-size:.75rem;font-weight:700;border-radius:999px;padding:2px 8px;background:#fde8e8;color:#a12b2b}.okp{display:inline-block;font-size:.75rem;font-weight:700;border-radius:999px;padding:2px 8px;background:#e6f6ec;color:#1f7a45}
+.tl{display:flex;flex-direction:column;gap:4px;margin:6px 0}.tl div{display:grid;grid-template-columns:7.5em 1fr auto;gap:8px;font-size:.9rem;border-bottom:1px dashed var(--line);padding:4px 0}.tl span:first-child{color:var(--muted)}
+.inb{display:flex;flex-direction:column;gap:6px;margin-top:10px}.inb button{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center;text-align:left;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:10px 12px;cursor:pointer;font:inherit;color:inherit}.inb button.un{border-color:#9db7ee;background:#f3f7ff}.inb small{grid-column:2/4;color:var(--muted)}
+.topic{font-family:ui-monospace,monospace;font-size:1.1rem;background:var(--sunken);padding:8px 12px;border-radius:8px;word-break:break-all;display:inline-block}
+.gate-opts{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.pwrap{position:relative}.pwrap input{padding-right:52px!important}.pwrap button{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:none;font-size:1.2rem;cursor:pointer;padding:6px 10px}
 .ovw{display:flex;flex-wrap:wrap;gap:10px}.ovw .tile{flex:1 1 140px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface)}.ovw .tile b{font-size:1.6rem;display:block}
 </style>
 <div id="gate"><form id="gate-form" class="card" novalidate>
   <h1>Sign in</h1>
   <div class="seg sm" role="group" aria-label="Who is signing in"><button class="chip" type="button" id="g-st" aria-pressed="true">Student</button><button class="chip" type="button" id="g-te" aria-pressed="false">Teacher</button></div>
   <p class="sub" id="g-hint">Use the username and password your teacher gave you.</p>
-  <div class="field" id="g-userwrap"><label for="g-user">Username</label><input id="g-user" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
-  <div class="field"><label for="g-pass">Password</label><input id="g-pass" type="password" autocomplete="current-password"></div>
+  <div class="field" id="g-userwrap"><label for="g-user">Username</label><input id="g-user" name="username" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
+  <div class="field"><label for="g-pass">Password</label><div class="pwrap"><input id="g-pass" name="password" type="password" autocomplete="current-password"><button type="button" id="g-eye" aria-label="Show password">👁</button></div></div>
+  <div class="gate-opts"><label class="lvc" style="border:0;padding:0;background:none"><input type="checkbox" id="g-rem" checked><span>Remember me · Recordarme</span></label></div>
   <p id="g-err" class="err" role="alert"></p>
   <button class="btn primary" id="g-btn" type="submit">Sign in</button>
   <p class="credit">Created by Teacher Dario</p>
 </form></div>
-<div id="acct" hidden><span id="acct-name"></span><select id="viewas" aria-label="Preview as a level" hidden></select><button class="btn" id="acct-inbox" type="button" hidden title="Messages · Mensajes">💬<span class="nb" id="ib-n"></span></button><button class="btn" id="acct-tasks" type="button" hidden title="Tasks · Tareas">📋<span class="nb" id="tk-n"></span></button><button class="btn" id="acct-class" type="button" hidden>Administration</button><button class="btn" id="acct-out" type="button">Sign out</button></div>
+<div id="acct" hidden><span id="acct-name"></span><select id="viewas" aria-label="Preview as a level" hidden></select><button class="btn" id="acct-mon" type="button" hidden title="Live class · Clase en vivo">📡 Live</button><button class="btn" id="acct-snd" type="button" title="Sound check · Prueba de sonido">🔊</button><button class="btn" id="acct-inbox" type="button" hidden title="Messages · Mensajes">💬<span class="nb" id="ib-n"></span></button><button class="btn" id="acct-tasks" type="button" hidden title="Tasks · Tareas">📋<span class="nb" id="tk-n"></span></button><button class="btn" id="acct-class" type="button" hidden>Administration</button><button class="btn" id="acct-out" type="button">Sign out</button></div>
+<div id="mon" hidden><div class="in" id="mon-in"></div></div>
 <div id="pop" hidden><div class="pop-in" role="dialog" aria-modal="true"><button class="btn pop-x" type="button" data-pop="close">✕</button><div id="pop-body"></div></div></div>
 <div id="klass" hidden><div class="in">
   <div class="head"><div><h1>Teacher administration</h1><p class="credit">Created by Teacher Dario</p></div><button class="btn" id="klass-close" type="button">Close</button></div>
@@ -1198,7 +1209,7 @@ body.onelevel .fl[aria-label="Filter by CEFR level"]{display:none}
 </div></div>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,setPersistence,browserLocalPersistence,browserSessionPersistence} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getFirestore,doc,getDoc,setDoc,deleteDoc,collection,getDocs,onSnapshot,arrayUnion} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const cfg={apiKey:"AIzaSyC3BO7LU1bVlQrGuKla_hB3jI7Ur8_20SE",authDomain:"teacher-dario.firebaseapp.com",projectId:"teacher-dario",storageBucket:"teacher-dario.firebasestorage.app",messagingSenderId:"736407157022",appId:"1:736407157022:web:e5cde493e544d8ce2db10f"};
 const DOMAIN="@students.peldano.app",TEACHER="teacher"+DOMAIN,LV=["A1","A2","B1","B2","C1","C2"],LVX=["A0",...LV,"PET","FCE","VOC","VERB"],LVN=x=>x==="A0"?"Level 0 · Starter":x==="PET"?"B1 Preliminary (PET)":x==="FCE"?"B2 First (FCE)":x==="VOC"?"Vocabulary course":x==="VERB"?"Verbs course":x;function verbSum(st){const v=st&&st.verb;if(!v)return"";const u=v.units||{},b=v.best||{};const parts=[];if(v.xp)parts.push("⚡ "+v.xp+" XP");if(v.streak&&v.streak.n)parts.push("🔥 "+v.streak.n+"-day streak (last "+v.streak.last+")");const ud=[...LV,"PET","FCE"].filter(l=>u[l]&&Object.keys(u[l]).length).map(l=>l+" "+Object.keys(u[l]).length);if(ud.length)parts.push("units done: "+ud.join(", "));const k=[...LV,"PET","FCE"].filter(l=>b[l]&&b[l].forms);if(k.length)parts.push("forms drill best: "+k.map(l=>l+" "+b[l].forms[0]+"/10").join(", "));if(!parts.length)return"";return`<p class="sub" style="margin-top:6px"><b>Verbs:</b> ${parts.join(" · ")}</p>`;}function vocSum(st){const v=st&&st.voc;if(!v)return"";const b=v.best||{},u=v.units||{};const parts=[];if(v.xp)parts.push("⚡ "+v.xp+" XP");if(v.streak&&v.streak.n)parts.push("🔥 "+v.streak.n+"-day streak (last "+v.streak.last+")");const ud=[...LV,"PET","FCE"].filter(l=>u[l]&&Object.keys(u[l]).length).map(l=>l+" "+Object.keys(u[l]).length);if(ud.length)parts.push("units done: "+ud.join(", "));const f=x=>x?x[0]+"/"+x[1]:"–";const k=[...LV,"PET","FCE"].filter(l=>b[l]);if(k.length)parts.push("practice best: "+k.map(l=>l+" build "+f(b[l].sb)+", word building "+f(b[l].wb)).join("; "));if(!parts.length)return"";return`<p class="sub" style="margin-top:6px"><b>Vocabulary:</b> ${parts.join(" · ")}</p>`;}function coreSum(st){const C=st&&st.core;if(!C||!window.CORE)return"";const out=[];Object.keys(C).forEach(l=>{const P=(CORE.lv[l]||{}).p;if(!P)return;const d=P.filter((p,i)=>p[5].every((q,j)=>((C[l]||{})[i]||{})["q"+j]===q[2])).length;const pr=Object.values((C[l]||{})._proj||{}).filter(Boolean).length;if(d||pr)out.push(l+" "+d+"/"+P.length+(pr?" · project steps "+pr+"/"+((CORE.lv[l].project||{}).steps||[]).length:""));});return out.length?`<p class="sub" style="margin-top:6px"><b>Core Curriculum:</b> ${out.join(" · ")}</p>`:"";}function stSum(st){const x=st&&st.st;if(!x||!x.stars)return"";const U=(window.STARTER&&STARTER.units)||[];const d=U.map((u,i)=>[i+1,["l","r","k","b"].filter(k=>(x.stars[u.id]||{})[k]).length]).filter(r=>r[1]);if(!d.length)return"";const tot=d.reduce((a,r)=>a+r[1],0);return`<p class="sub" style="margin-top:6px"><b>Level 0 Starter:</b> ${tot}/${U.length*4} ★ · units started ${d.length}/${U.length} · ${d.map(r=>"U"+r[0]+" "+"★".repeat(r[1])).join(" ")}</p>`;}function spSum(st){const x=st&&st.speak;if(!x||!x.stats)return"";const k=Object.keys(x.stats).filter(z=>x.stats[z].t);if(!k.length)return"";let t=0,o=0;k.forEach(z=>{t+=x.stats[z].t;o+=x.stats[z].o;});const M={w:"words",s:"sentences",v:"verbs",q:"exam questions"};return`<p class="sub" style="margin-top:6px"><b>Speaking:</b> ${o}/${t} correct (${Math.round(100*o/t)}%) · ⚡ ${x.xp||0} XP · ${k.map(z=>{const[l,m]=z.split("|");return(l==="C"?"Course "+m:(l==="A0"?"Level 0":l)+" "+M[m])+" "+x.stats[z].o+"/"+x.stats[z].t;}).join(", ")}${x.cd?" · course items done "+Object.keys(x.cd).length:""}${x.hard&&x.hard.length?" · difficult: "+x.hard.slice(0,8).map(h=>esc(h.t)).join(", "):""}${x.last?" · last "+new Date(x.last).toLocaleDateString():""}</p>`;}function petSum(st){const R=(st&&st.pet&&st.pet.res)||{},k=Object.keys(R);if(!k.length)return"";const sk={};k.forEach(x=>{const r=R[x];if(!r||!r.m)return;const a=sk[r.sk]||(sk[r.sk]=[0,0]);a[0]+=r.s;a[1]+=r.m;});const N={read:"Reading",lis:"Listening"};return`<p class="sub" style="margin-top:6px"><b>B1 Preliminary:</b> ${k.length} parts marked in ${new Set(k.map(x=>x.split(".")[0])).size} tests${Object.keys(sk).map(x=>" · "+(N[x]||x)+" "+Math.round(100*sk[x][0]/sk[x][1])+"%").join("")}</p>`;}function fceSum(st){const R=(st&&st.fce&&st.fce.res)||{},k=Object.keys(R);if(!k.length)return"";const sk={};k.forEach(x=>{const r=R[x];if(!r||!r.m)return;const a=sk[r.sk]||(sk[r.sk]=[0,0]);a[0]+=r.s;a[1]+=r.m;});const N={read:"Reading",uoe:"Use of English",lis:"Listening"};return`<p class="sub" style="margin-top:6px"><b>B2 First:</b> ${k.length} parts marked in ${new Set(k.map(x=>x.split(".")[0])).size} tests${Object.keys(sk).map(x=>" · "+(N[x]||x)+" "+Math.round(100*sk[x][0]/sk[x][1])+"%").join("")}</p>`;}
@@ -1238,13 +1249,18 @@ $id("gate-form").addEventListener("submit",async e=>{
   const name=asTeacher?"teacher":$id("g-user").value.trim().toLowerCase(),pass=$id("g-pass").value;
   if(!name||!pass){$id("g-err").textContent=asTeacher?"Type your password.":"Type your username and your password.";return;}
   $id("g-btn").disabled=true;$id("g-err").textContent="";
-  try{await signInWithEmailAndPassword(auth,name.includes("@")?name:name+DOMAIN,pass);$id("g-pass").value="";}
+  const rem=$id("g-rem").checked;
+  try{await setPersistence(auth,rem?browserLocalPersistence:browserSessionPersistence);}catch(e){}
+  try{await signInWithEmailAndPassword(auth,name.includes("@")?name:name+DOMAIN,pass);
+    try{if(rem){localStorage.setItem("td-user",asTeacher?"":name);localStorage.setItem("td-who",asTeacher?"t":"s");localStorage.setItem("td-rem","1");}else{localStorage.removeItem("td-user");localStorage.setItem("td-rem","0");}}catch(e){}
+    try{if(rem&&window.PasswordCredential&&navigator.credentials){await navigator.credentials.store(new PasswordCredential({id:name,password:pass,name:asTeacher?"Teacher Dario":name}));}}catch(e){}
+    $id("g-pass").value="";}
   catch(err){const c=err&&err.code||"";$id("g-err").textContent=c.includes("network")?"No connection. Check your internet and try again.":c.includes("too-many")?"Too many tries. Wait a few minutes and try again.":asTeacher?"That password is not correct.":"That username or password is not correct.";}
   $id("g-btn").disabled=false;
 });
-$id("acct-out").addEventListener("click",async()=>{clearTimeout(timer);await push();ready=false;uid=null;try{localStorage.removeItem(KEY);}catch(e){}await signOut(auth);});
+$id("acct-out").addEventListener("click",async()=>{clearTimeout(timer);await push();try{sessionStorage.setItem("td-out","1");if(navigator.credentials&&navigator.credentials.preventSilentAccess)navigator.credentials.preventSilentAccess();}catch(e){}if(uid&&!window.TD_TEACHER&&!window.TD_DEMO){try{await setDoc(doc(db,"presence",uid),{on:false,act:null},{merge:true});}catch(e){}}ready=false;uid=null;try{localStorage.removeItem(KEY);}catch(e){}await signOut(auth);});
 onAuthStateChanged(auth,async u=>{
-  if(!u){uid=null;ready=false;window.TD_TEACHER=false;window.TD_DEMO=false;stopLive();setLevel(null);$id("acct").hidden=true;$id("klass").hidden=true;$id("gate").hidden=false;$id("acct-inbox").hidden=true;$id("acct-tasks").hidden=true;return;}
+  if(!u){uid=null;ready=false;window.TD_TEACHER=false;window.TD_DEMO=false;window.TD_SIGNED=false;stopLive();$id("acct-mon").hidden=true;$id("mon").hidden=true;if(window.TD_FAB)TD_FAB.show(false);gateFill();setLevel(null);$id("acct").hidden=true;$id("klass").hidden=true;$id("gate").hidden=false;$id("acct-inbox").hidden=true;$id("acct-tasks").hidden=true;return;}
   const main=u.email===TEACHER;let isT=main;let level=null;let role=main?"teacher":"student";
   if(!main){
     let entry=null,failed=false;
@@ -1252,12 +1268,12 @@ onAuthStateChanged(auth,async u=>{
     if(!entry){await signOut(auth);$id("g-err").textContent=failed?"Could not check the class list. Try again in a moment.":"This account is not on the class list. Ask your teacher.";return;}
     level=entry.level||"";role=entry.role||"student";if(role==="teacher"){isT=true;level=null;}
   }
-  window.TD_TEACHER=isT;window.TD_DEMO=role==="demo";window.TD_ME=main?"Teacher Dario":u.email.split("@")[0];
+  window.TD_TEACHER=isT;window.TD_DEMO=role==="demo";window.TD_ME=main?"Teacher Dario":u.email.split("@")[0];window.TD_SIGNED=true;window.TD_LVRAW=level||"";
   uid=u.uid;let next=blank();
   try{const snap=await getDoc(doc(db,"students",uid));if(snap.exists())next=Object.assign(blank(),JSON.parse(snap.data().state));}catch(e){console.warn("Could not load saved work",e);}
   setLevel(level);S=next;S.f=Object.assign({level:"",topic:"",q:""},S.f,{level:""});if(!TOPICS.includes(S.f.topic))S.f.topic="";
   ready=true;if(ONLY&&!ONLY.includes(location.hash.slice(1)))location.hash=ONLY[0];localSave();render();
-  const nm=main?"Teacher Dario":u.email.split("@")[0]+(role==="demo"?" · Demo":role==="teacher"?" · Teacher":"");startLive(isT);$id("acct-name").textContent=nm;$id("acct").hidden=false;$id("acct-class").hidden=!isT;$id("viewas").hidden=!isT;if(isT)fillViewAs();
+  const nm=main?"Teacher Dario":u.email.split("@")[0]+(role==="demo"?" · Demo":role==="teacher"?" · Teacher":"");startLive(isT);if(window.TRACK)TRACK.reset();$id("acct-mon").hidden=!isT;$id("acct-name").textContent=nm;$id("acct").hidden=false;$id("acct-class").hidden=!isT;$id("viewas").hidden=!isT;if(isT)fillViewAs();
   const w=document.querySelector(".rail .who");if(w){w.innerHTML="<b></b><span></span>";w.firstChild.textContent=nm;w.lastChild.textContent=isT?"Teacher":role==="demo"?"Demo account · nothing is saved":lvLabel(parseLv(level));}
   $id("gate").hidden=true;
 });
@@ -1268,7 +1284,7 @@ async function loadClass(){
   const body=$id("klass-body");body.textContent="Loading…";
   try{
     const [ros,sts]=await Promise.all([getDocs(collection(db,"roster")),getDocs(collection(db,"students"))]);
-    const work={};sts.forEach(d=>{const v=d.data();let s={};try{s=JSON.parse(v.state||"{}");}catch(e){}work[d.id]={updated:v.updated,s,seen:v.seen||0,msgs:v.msgs||[]};});window.__work=work;
+    const work={};sts.forEach(d=>{const v=d.data();let s={};try{s=JSON.parse(v.state||"{}");}catch(e){}work[d.id]={updated:v.updated,s,seen:Math.max(v.seen||0,(PRES[d.id]||{}).seen||0),msgs:v.msgs||[]};});window.__work=work;
     const rows=[];ros.forEach(d=>{const v=d.data();rows.push({id:d.id,name:v.name||d.id,level:v.level||"",pw:v.pw||"",role:v.role||"student",tmsgs:v.tmsgs||[],tasks:v.tasks||[],tread:v.tread||0,w:work[d.id]||{s:{},msgs:[]}});});
     rows.sort((a,b)=>a.name.localeCompare(b.name));
     const tbl=rows.length?`<div class="card" id="cred-card"><div class="srow"><h2>Usernames and passwords</h2><span class="row"><button class="btn" type="button" id="cred-eye">${SHOWPW?"Hide passwords":"Show passwords"}</button><button class="btn" type="button" id="cred-copy">Copy list</button></span></div>
@@ -1316,29 +1332,29 @@ const isOn=t=>t&&Date.now()-t<150000;
 const seenTxt=t=>!t?"never online":isOn(t)?"🟢 online now":"last seen "+new Date(t).toLocaleString([], {dateStyle:"short",timeStyle:"short"});
 const fmtT=t=>new Date(t).toLocaleString([], {dateStyle:"short",timeStyle:"short"});
 let RO={},MINE={},unsubs=[],hb=null;
-function stopLive(){unsubs.forEach(f=>{try{f();}catch(e){}});unsubs=[];clearInterval(hb);hb=null;}
-function beat(){if(!uid||window.TD_TEACHER||window.TD_DEMO||document.visibilityState!=="visible")return;setDoc(doc(db,"students",uid),{seen:Date.now(),name:auth.currentUser.email.split("@")[0]},{merge:true}).catch(()=>{});}
+function stopLive(){unsubs.forEach(f=>{try{f();}catch(e){}});unsubs=[];clearInterval(hb);hb=null;if(presUn){presUn();presUn=null;}FIRST_T=true;FIRST_S=true;}
+function beat(){if(!uid||window.TD_TEACHER||window.TD_DEMO||document.visibilityState!=="visible")return;pushPres(true);}
 function startLive(isT){
   stopLive();
   if(!isT){
-    beat();hb=setInterval(beat,60000);document.addEventListener("visibilitychange",beat);
-    unsubs.push(onSnapshot(doc(db,"roster",uid),d=>{RO=d.exists()?d.data():{};badges();if(!$id("pop").hidden&&POP.k==="me")renderMe();},()=>{}));
+    beat();hb=setInterval(beat,30000);
+    unsubs.push(onSnapshot(doc(db,"roster",uid),d=>{RO=d.exists()?d.data():{};window.TD_TASKS=RO.tasks||[];newFromTeacher();badges();if(!$id("pop").hidden&&POP.k==="me")renderMe();},()=>{}));
     unsubs.push(onSnapshot(doc(db,"students",uid),d=>{MINE=d.exists()?d.data():{};if(!$id("pop").hidden&&POP.k==="me")renderMe();},()=>{}));
-    $id("acct-inbox").hidden=false;$id("acct-tasks").hidden=false;
-  } else {$id("acct-inbox").hidden=true;$id("acct-tasks").hidden=true;}
+    $id("acct-inbox").hidden=false;$id("acct-tasks").hidden=false;if(window.TD_FAB&&!window.TD_DEMO)TD_FAB.show(true,0);
+  } else {$id("acct-inbox").hidden=false;$id("acct-tasks").hidden=true;if(window.TD_FAB)TD_FAB.show(false);startTeacher();}
 }
 function badges(){
-  const seenAt=(S.msgSeen||0);const un=(RO.tmsgs||[]).filter(m=>m.at>seenAt).length;$id("ib-n").textContent=un?un:"";
+  if(window.TD_TEACHER){tBadge();return;}const seenAt=(S.msgSeen||0);const un=(RO.tmsgs||[]).filter(m=>m.at>seenAt).length;$id("ib-n").textContent=un?un:"";if(window.TD_FAB&&!window.TD_DEMO)TD_FAB.show(true,un);
   const open=(RO.tasks||[]).filter(t=>!(S.taskDone||{})[t.id]).length;$id("tk-n").textContent=open?open:"";
 }
 const POP={k:"",id:"",tab:"msg"};
-function openPop(k,id,tab){POP.k=k;POP.id=id||"";POP.tab=tab||"msg";$id("pop").hidden=false;if(k==="me")renderMe();if(k==="msg")renderMsg();if(k==="task")renderTaskForm();}
+function openPop(k,id,tab){POP.k=k;POP.id=id||"";POP.tab=tab||"msg";$id("pop").hidden=false;if(k==="me")renderMe();if(k==="msg")renderMsg();if(k==="task")renderTaskForm();if(k==="tin")renderTin();if(k==="tt")renderTT();if(k==="prog")renderProg();if(k==="alerts")renderAlerts();}
 function closePop(){$id("pop").hidden=true;POP.k="";if(window.__klassOpen)refreshLive();}
 const thread=(a,mineFrom)=>{const all=a.slice().sort((x,y)=>x.at-y.at);return`<div class="thread" id="thr">${all.length?all.map(m=>`<div class="bub ${m.from===mineFrom?"me":""}">${esc(m.t)}<small>${m.from==="t"?esc(m.by||"Teacher"):"Student"} · ${fmtT(m.at)}</small></div>`).join(""):'<p class="sub">No messages yet. · Aún no hay mensajes.</p>'}</div>`;};
 /* student panel */
 function renderMe(){
-  const tabs=`<div class="seg sm"><button class="chip" type="button" data-pop="tab" data-v="msg" aria-pressed="${POP.tab==="msg"}">💬 Messages · Mensajes</button><button class="chip" type="button" data-pop="tab" data-v="task" aria-pressed="${POP.tab==="task"}">📋 Tasks · Tareas</button></div>`;
-  let h=`<h2>${POP.tab==="msg"?"Messages with your teacher":"Your tasks"}</h2>`+tabs;
+  const tabs=`<div class="seg sm"><button class="chip" type="button" data-pop="tab" data-v="msg" aria-pressed="${POP.tab==="msg"}">💬 Messages · Mensajes</button><button class="chip" type="button" data-pop="tab" data-v="task" aria-pressed="${POP.tab==="task"}">📋 Tasks · Tareas</button><button class="chip" type="button" data-pop="tab" data-v="snd" aria-pressed="${POP.tab==="snd"}">🔊 Sound · Sonido</button></div>`;
+  let h=`<h2>${POP.tab==="msg"?"Messages with your teacher":POP.tab==="snd"?"Sound · Sonido":"Your tasks"}</h2>`+tabs;if(POP.tab==="snd"){$id("pop-body").innerHTML=h+(window.SOUND?SOUND.html().replace(/^<h2>[^<]*<\/h2>/,""):"");return;}
   if(POP.tab==="msg"){const all=[...(RO.tmsgs||[]),...(MINE.msgs||[])];h+=thread(all,"s")+`<label class="sub" for="msg-t">Write to your teacher · Escribe a tu maestro</label><textarea id="msg-t" maxlength="1000"></textarea><div class="row" style="margin-top:8px"><button class="btn primary" type="button" data-pop="send-s">Send · Enviar</button><span class="sub" id="msg-st"></span></div>`;S.msgSeen=Date.now();try{localSave();}catch(e){}badges();}
   else{const T=(RO.tasks||[]).slice().sort((a,b)=>(a.due||"9").localeCompare(b.due||"9"));const D=S.taskDone||{};h+=T.length?`<div class="tlist">${T.map(t=>`<div class="titem ${D[t.id]?"done":""}"><div><b>${esc(t.title)}</b>${t.note?`<br><span>${esc(t.note)}</span>`:""}<br><small>${t.due?"Due · Entrega: "+esc(t.due)+" · ":""}from ${esc(t.by||"Teacher")}</small></div><span class="row"><button class="btn" type="button" data-pop="open" data-id="${t.id}">Open · Abrir</button><button class="btn ${D[t.id]?"":"primary"}" type="button" data-pop="done" data-id="${t.id}">${D[t.id]?"✓ Done":"Mark done · Terminé"}</button></span></div>`).join("")}</div>`:'<p class="sub">No tasks right now. · No tienes tareas.</p>';}
   $id("pop-body").innerHTML=h;const th=$id("thr");if(th)th.scrollTop=th.scrollHeight;
@@ -1409,9 +1425,9 @@ function extras(r){
     <button class="btn" type="button" data-x="task" data-id="${r.id}">📋 Assign task</button></div>
     ${(r.tasks||[]).length?`<div class="tlist">${r.tasks.slice().sort((a,b)=>b.at-a.at).map(t=>`<div class="titem ${D[t.id]?"done":""}"><div><b>${esc(t.title)}</b>${t.note?` · ${esc(t.note)}`:""}<br><small>${D[t.id]?"✓ done "+fmtT(D[t.id]):"not done yet"}${t.due?" · due "+esc(t.due):""}</small></div><button class="btn ghost" type="button" data-x="untask" data-id="${r.id}" data-t="${t.id}">Remove</button></div>`).join("")}</div>`:""}`;
 }
-function refreshLive(){const w=window.__work||{};let on=0,un=0;(window.__rows||[]).forEach(r=>{const x=w[r.id]||{};r.w.seen=x.seen;r.w.msgs=x.msgs||[];const d=$id("dot-"+r.id);if(d){d.classList.toggle("on",isOn(x.seen));}const s2=$id("seen-"+r.id);if(s2)s2.textContent=seenTxt(x.seen);const n=unread(r);const b=$id("ub-"+r.id);if(b){b.textContent=n||"";b.style.display=n?"":"none";}if(r.role!=="teacher"&&isOn(x.seen))on++;un+=n;});const a=$id("ov-on");if(a)a.textContent=on;const c=$id("ov-un");if(c)c.textContent=un;if(!$id("pop").hidden&&POP.k==="msg")renderMsg();}
+function refreshLive(){const w=window.__work||{};let on=0,un=0;(window.__rows||[]).forEach(r=>{const x=w[r.id]||{};x.seen=Math.max(x.seen||0,(PRES[r.id]||{}).seen||0);r.w.seen=x.seen;r.w.msgs=x.msgs||[];const d=$id("dot-"+r.id);if(d){d.classList.toggle("on",isOn(x.seen));}const s2=$id("seen-"+r.id);if(s2)s2.textContent=seenTxt(x.seen);const n=unread(r);const b=$id("ub-"+r.id);if(b){b.textContent=n||"";b.style.display=n?"":"none";}if(r.role!=="teacher"&&isOn(x.seen))on++;un+=n;});const a=$id("ov-on");if(a)a.textContent=on;const c=$id("ov-un");if(c)c.textContent=un;if(!$id("pop").hidden&&POP.k==="msg")renderMsg();}
 let unK=null;
-function watchClass(){if(unK)return;unK=onSnapshot(collection(db,"students"),qs=>{const w=window.__work||{};qs.forEach(d=>{const v=d.data();const old=w[d.id]||{};w[d.id]=Object.assign(old,{seen:v.seen||0,msgs:v.msgs||[],updated:v.updated});});window.__work=w;refreshLive();},()=>{});}
+function watchClass(){if(unK)return;unK=onSnapshot(collection(db,"students"),qs=>{const w=window.__work||{};qs.forEach(d=>{const v=d.data();const old=w[d.id]||{};w[d.id]=Object.assign(old,{seen:Math.max(v.seen||0,(PRES[d.id]||{}).seen||0),msgs:v.msgs||[],updated:v.updated});});window.__work=w;refreshLive();},()=>{});}
 setInterval(()=>{if(window.__klassOpen)refreshLive();},30000);
 $id("acct-class").addEventListener("click",()=>{window.__klassOpen=true;watchClass();});
 $id("klass-close").addEventListener("click",()=>{window.__klassOpen=false;if(unK){unK();unK=null;}});
@@ -1419,7 +1435,7 @@ $id("klass-body").addEventListener("click",e=>{const b=e.target.closest("[data-x
   if(a==="msg")openPop("msg",b.dataset.id);if(a==="task"){POP.kind="lesson";openPop("task",b.dataset.id);}if(a==="refresh")loadClass();
   if(a==="untask"){if(!b.dataset.sure){b.dataset.sure="1";b.textContent="Tap again";return;}removeTask(b.dataset.id,b.dataset.t);}});
 $id("klass-body").addEventListener("change",async e=>{const id=e.target.dataset&&e.target.dataset.role;if(!id)return;try{await setDoc(doc(db,"roster",id),{role:e.target.value},{merge:true});const r=(window.__rows||[]).find(x=>x.id===id);if(r)r.role=e.target.value;e.target.insertAdjacentHTML("afterend",'<span class="ok">Saved</span>');setTimeout(loadClass,800);}catch(err){e.target.insertAdjacentHTML("afterend",'<span class="err">Not saved</span>');}});
-$id("acct-inbox").addEventListener("click",()=>openPop("me","","msg"));
+$id("acct-inbox").addEventListener("click",()=>window.TD_TEACHER?openPop("tin"):openPop("me","","msg"));window.TD_OPENCHAT=()=>openPop("me","","msg");
 $id("acct-tasks").addEventListener("click",()=>openPop("me","","task"));
 $id("pop").addEventListener("click",async e=>{
   if(e.target.id==="pop"){closePop();return;}
@@ -1430,11 +1446,137 @@ $id("pop").addEventListener("click",async e=>{
   if(a==="done"){S.taskDone=S.taskDone||{};if(S.taskDone[b.dataset.id])delete S.taskDone[b.dataset.id];else S.taskDone[b.dataset.id]=Date.now();save();badges();renderMe();}
   if(a==="assign")assign();
   if(a==="send-s"||a==="send-t"){const t=$id("msg-t").value.trim();if(!t)return;b.disabled=true;$id("msg-st").textContent="Sending…";
-    try{if(a==="send-s"){await setDoc(doc(db,"students",uid),{msgs:arrayUnion({t,at:Date.now(),from:"s"})},{merge:true});$id("msg-t").value="";$id("msg-st").textContent="✓ Sent";}
+    try{if(a==="send-s"){const at=Date.now();await setDoc(doc(db,"students",uid),{msgs:arrayUnion({t,at,from:"s"})},{merge:true});MINE.msgs=(MINE.msgs||[]).concat([{t,at,from:"s"}]);$id("msg-t").value="";renderMe();$id("msg-st")&&($id("msg-st").textContent="✓ Sent · Enviado");setDoc(doc(db,"presence",uid),{name:auth.currentUser.email.split("@")[0],lm:{t:t.slice(0,140),at},mu:arrayUnion(at)},{merge:true}).catch(()=>{});phoneAlert(auth.currentUser.email.split("@")[0],t);}
       else{const at=Date.now();const m={t,at,from:"t",by:window.TD_ME||"Teacher"};await setDoc(doc(db,"roster",POP.id),{tmsgs:arrayUnion(m),tread:at},{merge:true});const r=(window.__rows||[]).find(x=>x.id===POP.id);if(r){r.tmsgs=(r.tmsgs||[]).concat([m]);r.tread=at;}renderMsg();}}
     catch(err){$id("msg-st").textContent="Could not send. Check your connection.";}b.disabled=false;}
 });
 $id("pop").addEventListener("change",e=>{if(e.target.id==="tk-k"){POP.kind=e.target.value;const keep={to:$id("tk-to").value,n:$id("tk-note").value,d:$id("tk-d").value};renderTaskForm();$id("tk-to").value=keep.to;$id("tk-note").value=keep.n;$id("tk-d").value=keep.d;}});
+/* ---------- v2: presence, live class monitor, inbox, alerts, remember me ---------- */
+const PRES={};let ROST={},presUn=null,FIRST_T=true,FIRST_S=true,notified={},T0=Date.now(),MONF="all",monTimer=null,CFG=null,lastTeacherAt=0;
+const SITE="https://teacherdario.github.io/student-lesson-dashboard/";
+const fmtD=s=>{s=Math.max(0,Math.round(s||0));const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?h+" h "+m+" min":m?m+" min":s<60&&s>0?"<1 min":"0 min";};
+const tShort=t=>new Date(t).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
+const todayK=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+const presOn=p=>!!(p&&p.on!==false&&isOn(p.seen));
+const VNM={library:"Library",reader:"Reader",writing:"Writing",progress:"Progress",book:"Student Book",starter:"Level 0",speak:"Speaking",vocab:"Vocabulary",verbs:"Verbs",dict:"Dictionary",pet:"B1 Preliminary",fce:"B2 First",live:"Live game",tools:"Tools",idle:"Idle"};
+/* gate: remember me + saved password */
+let triedCred=false;
+function gateFill(){try{const r=localStorage.getItem("td-rem");$id("g-rem").checked=r!=="0";const w=localStorage.getItem("td-who");if(w==="t")who(true);const n=localStorage.getItem("td-user");if(n&&!$id("g-user").value)$id("g-user").value=n;}catch(e){}
+  if(triedCred)return;triedCred=true;let out=false;try{out=sessionStorage.getItem("td-out")==="1";}catch(e){}
+  if(out||!window.PasswordCredential||!navigator.credentials)return;
+  navigator.credentials.get({password:true,mediation:"optional"}).then(c=>{if(!c||!c.password||!$id("gate")||$id("gate").hidden)return;const t=c.id==="teacher";who(t);if(!t)$id("g-user").value=c.id;$id("g-pass").value=c.password;$id("gate-form").requestSubmit?$id("gate-form").requestSubmit():$id("g-btn").click();}).catch(()=>{});}
+$id("g-eye").addEventListener("click",()=>{const p=$id("g-pass");p.type=p.type==="password"?"text":"password";$id("g-eye").textContent=p.type==="password"?"👁":"🙈";});
+$id("acct-snd").addEventListener("click",()=>{if(window.SOUND)SOUND.open();});
+/* alerts: sound, vibration, system notification */
+let actx=null;
+function ding(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t=actx.currentTime;[[880,0],[1320,.16]].forEach(([f,d])=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=f;o.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(.0001,t+d);g.gain.exponentialRampToValueAtTime(.3,t+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d+.3);o.start(t+d);o.stop(t+d+.32);});}catch(e){}try{navigator.vibrate&&navigator.vibrate([200,100,200]);}catch(e){}}
+function sysNote(title,body,tag){if(!("Notification" in window)||Notification.permission!=="granted")return;const o={body,icon:"icon-192.png",badge:"icon-192.png",tag:tag||"td",renotify:true,vibrate:[200,100,200,100,300],data:{url:SITE}};
+  if(navigator.serviceWorker&&navigator.serviceWorker.controller)navigator.serviceWorker.ready.then(r=>r.showNotification(title,o)).catch(()=>{try{new Notification(title,o);}catch(e){}});else{try{new Notification(title,o);}catch(e){}}}
+async function askNotes(btn){if(!("Notification" in window)){if(btn)btn.textContent="Not supported on this device";return;}const p=await Notification.requestPermission();if(btn)btn.textContent=p==="granted"?"🔔 Alerts on ✓":"🔕 Blocked: allow notifications in settings";if(p==="granted")sysNote("Teacher Dario","Alerts are on for this device · Alertas activadas","td-test");}
+const noteBtn=()=>`<button class="btn" type="button" data-pop="notes">${("Notification" in window)&&Notification.permission==="granted"?"🔔 Alerts on this device ✓":"🔔 Turn on alerts on this device"}</button>`;
+async function alertCfg(force){if(CFG&&!force)return CFG;try{const d=await getDoc(doc(db,"config","alerts"));CFG=d.exists()?d.data():{};}catch(e){CFG=CFG||{};}return CFG;}
+async function ntfy(c,title,msg){return fetch("https://ntfy.sh/",{method:"POST",body:JSON.stringify({topic:c.topic,title,message:msg,tags:["speech_balloon"],priority:c.urgent?5:4,click:SITE})});}
+async function phoneAlert(name,text){try{const c=await alertCfg();if(!c.topic||c.off)return;await ntfy(c,"💬 "+name+" · Teacher Dario",c.text===false?"New message · Nuevo mensaje":text.slice(0,300));}catch(e){}}
+/* student side */
+let pT=0,pTimer=null;
+function pushPres(force){if(!uid||!ready||window.TD_TEACHER||window.TD_DEMO||!window.TRACK)return;const now=Date.now();
+  if(!force&&now-pT<8000){clearTimeout(pTimer);pTimer=setTimeout(()=>pushPres(true),8000-(now-pT));return;}pT=now;
+  const s=TRACK.snap();s.by=Object.entries(s.by||{});
+  setDoc(doc(db,"presence",uid),Object.assign(s,{name:auth.currentUser.email.split("@")[0],lv:window.TD_LVRAW||"",seen:now}),{merge:true}).catch(()=>{});}
+if(window.TRACK)TRACK.on(now=>pushPres(now));
+function newFromTeacher(){const tm=RO.tmsgs||[];if(!tm.length){FIRST_S=false;return;}const last=tm.reduce((a,m)=>m.at>a.at?m:a,tm[0]);const seen=S.msgSeen||0;
+  if(FIRST_S){FIRST_S=false;lastTeacherAt=last.at;const un=tm.filter(m=>m.at>seen).length;if(un&&window.TD_UI)TD_UI.toast(`<span class="tbig">💬</span><span>${un} new message${un>1?"s":""} from your teacher · Mensajes nuevos</span><button type="button">Open · Abrir</button>`,8000,()=>openPop("me","","msg"));if(un&&window.TD_FAB)TD_FAB.pulse();return;}
+  if(last.at>lastTeacherAt){lastTeacherAt=last.at;if(!$id("pop").hidden&&POP.k==="me"&&POP.tab==="msg")return;ding();if(window.TD_FAB)TD_FAB.pulse();
+    if(window.TD_UI)TD_UI.toast(`<span class="tbig">💬</span><span><b>${esc(last.by||"Teacher")}:</b> ${esc(last.t.slice(0,90))}</span><button type="button">Reply · Responder</button>`,10000,()=>openPop("me","","msg"));
+    if(document.visibilityState!=="visible")sysNote("💬 "+(last.by||"Teacher Dario"),last.t.slice(0,140),"td-msg");}}
+/* teacher side */
+const unreadOf=id=>((PRES[id]||{}).mu||[]).filter(a=>a>((ROST[id]||{}).tread||0)).length;
+function tBadge(){const n=Object.keys(ROST).reduce((a,id)=>a+unreadOf(id),0);$id("ib-n").textContent=n?n:"";document.title=(n?"("+n+") ":"")+"Teacher Dario · English Lessons";}
+async function loadRost(){try{const qs=await getDocs(collection(db,"roster"));const R={};qs.forEach(d=>{const v=d.data();R[d.id]={name:v.name||d.id,level:v.level||"",role:v.role||"student",tread:v.tread||0,tasks:v.tasks||[]};});ROST=R;}catch(e){}tBadge();}
+async function startTeacher(){await loadRost();if(presUn)return;
+  presUn=onSnapshot(collection(db,"presence"),qs=>{const fresh=[];qs.docChanges().forEach(ch=>{const v=ch.doc.data();const id=ch.doc.id;const old=PRES[id];PRES[id]=v;
+      const lm=v.lm;if(lm&&lm.at&&(!old||!old.lm||old.lm.at!==lm.at))fresh.push([id,lm]);});
+    if(FIRST_T){FIRST_T=false;const n=Object.keys(ROST).reduce((a,id)=>a+unreadOf(id),0);if(n&&window.TD_UI)TD_UI.toast(`<span class="tbig">💬</span><span>${n} unread message${n>1?"s":""} from students</span><button type="button">Open</button>`,9000,()=>openPop("tin"));}
+    else fresh.forEach(([id,lm])=>{if(lm.at<=Math.max(T0,(ROST[id]||{}).tread||0,notified[id]||0))return;notified[id]=lm.at;const nm=(ROST[id]||{}).name||PRES[id].name||"Student";
+      if(!$id("pop").hidden&&POP.k==="tt"&&POP.id===id){renderTT();return;}ding();
+      if(window.TD_UI)TD_UI.toast(`<span class="tbig">💬</span><span><b>${esc(nm)}:</b> ${esc(lm.t.slice(0,90))}</span><button type="button">Reply</button>`,12000,()=>{POP.id=id;openPop("tt",id);});
+      sysNote("💬 "+nm,lm.t.slice(0,140),"td-"+id);});
+    tBadge();if(!$id("mon").hidden)renderMon();if(window.__klassOpen)refreshLive();if(!$id("pop").hidden&&POP.k==="tin")renderTin();
+  },()=>{});}
+/* teacher inbox */
+function renderTin(){const ids=Object.keys(ROST).filter(id=>ROST[id].role!=="teacher").sort((a,b)=>(((PRES[b]||{}).lm||{}).at||0)-(((PRES[a]||{}).lm||{}).at||0)||ROST[a].name.localeCompare(ROST[b].name));
+  $id("pop-body").innerHTML=`<h2>💬 Messages · Mensajes</h2><div class="row" style="flex-wrap:wrap;gap:8px;margin-top:8px">${noteBtn()}<button class="btn" type="button" data-pop="alerts">📱 Phone alerts</button></div>
+  <div class="inb">${ids.map(id=>{const p=PRES[id]||{},lm=p.lm,n=unreadOf(id);return`<button type="button" class="${n?"un":""}" data-pop="tt" data-id="${id}"><span class="st-dot ${presOn(p)?"on":""}"></span><b>${esc(ROST[id].name)}</b><span>${n?`<span class="nb">${n}</span>`:lm?`<span class="sub">${fmtT(lm.at)}</span>`:""}</span><small>${lm?esc(lm.t):"Tap to write · Toca para escribir"}</small></button>`;}).join("")||'<p class="sub">No students yet.</p>'}</div>`;}
+async function renderTT(){const id=POP.id,r=ROST[id];if(!r)return;const p=PRES[id]||{};
+  if(!$id("thr"))$id("pop-body").innerHTML=`<p class="sub">Loading… · Cargando…</p>`;
+  let tm=[],ms=[];try{const [a,b]=await Promise.all([getDoc(doc(db,"roster",id)),getDoc(doc(db,"students",id))]);tm=(a.exists()&&a.data().tmsgs)||[];ms=(b.exists()&&b.data().msgs)||[];}catch(e){}
+  if(POP.k!=="tt"||POP.id!==id)return;const keep=$id("msg-t")?$id("msg-t").value:"";
+  $id("pop-body").innerHTML=`<button class="btn ghost" type="button" data-pop="tin-back">← All messages</button><h2 style="margin-top:8px"><span class="st-dot ${presOn(p)?"on":""}"></span>${esc(r.name)}</h2><p class="sub">${presOn(p)?"🟢 Online now"+(p.act?" · "+esc(p.act.l):""):seenTxt(p.seen)}</p>${thread([...tm,...ms],"t")}<label class="sub" for="msg-t">Message to ${esc(r.name)}</label><textarea id="msg-t" maxlength="1000"></textarea><div class="row" style="margin-top:8px"><button class="btn primary" type="button" data-pop="send-tt">Send · Enviar</button><span class="sub" id="msg-st"></span></div>`;
+  $id("msg-t").value=keep;const th=$id("thr");if(th)th.scrollTop=th.scrollHeight;
+  const now=Date.now();r.tread=now;tBadge();setDoc(doc(db,"roster",id),{tread:now},{merge:true}).catch(()=>{});}
+async function sendTT(b){const t=$id("msg-t").value.trim();if(!t)return;b.disabled=true;$id("msg-st").textContent="Sending…";const at=Date.now();
+  try{await setDoc(doc(db,"roster",POP.id),{tmsgs:arrayUnion({t,at,from:"t",by:window.TD_ME||"Teacher"}),tread:at},{merge:true});$id("msg-t").value="";await renderTT();}catch(e){$id("msg-st").textContent="Could not send. Check your connection.";}b.disabled=false;}
+/* phone alerts setup (ntfy) */
+async function renderAlerts(){const c=await alertCfg(true);if(POP.k!=="alerts")return;
+  $id("pop-body").innerHTML=`<button class="btn ghost" type="button" data-pop="tin-back">← Messages</button><h2 style="margin-top:8px">📱 Phone alerts · Alertas en tu teléfono</h2>
+  <p class="sub">Get an alarm-style notification on your phone every time a student sends you a message, even when the dashboard is closed. It uses the free <b>ntfy</b> app.</p>
+  ${c.topic?`<p style="margin-top:10px">Your private alert channel:</p><p><span class="topic" id="al-topic">${esc(c.topic)}</span> <button class="btn" type="button" data-pop="al-copy">Copy</button></p>
+  <ol style="margin:10px 0 0 18px;display:flex;flex-direction:column;gap:6px"><li>Install <b>ntfy</b> on your phone: <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" rel="noopener">Android (Play Store)</a> · <a href="https://apps.apple.com/app/ntfy/id1625396347" target="_blank" rel="noopener">iPhone (App Store)</a>.</li><li>Open ntfy, tap <b>+</b>, type the channel name above exactly, leave the server as <b>ntfy.sh</b>, and tap <b>Subscribe</b>.</li><li>Tap <b>Send test alert</b> below. Your phone should ring.</li><li>Android: in ntfy, open the channel › ⚙ › turn on <b>Instant delivery</b> and pick a loud sound.</li></ol>
+  <div class="field"><label class="lvc"><input type="checkbox" id="al-text" ${c.text===false?"":"checked"}><span>Show the message text in the alert</span></label><label class="lvc"><input type="checkbox" id="al-urg" ${c.urgent?"checked":""}><span>Urgent (alarm-style, long vibration)</span></label><label class="lvc"><input type="checkbox" id="al-on" ${c.off?"":"checked"}><span>Alerts on</span></label></div>
+  <div class="row" style="margin-top:12px;flex-wrap:wrap;gap:8px"><button class="btn primary" type="button" data-pop="al-save">Save</button><button class="btn" type="button" data-pop="al-test">🔔 Send test alert</button><button class="btn ghost" type="button" data-pop="al-new">New channel name</button><span class="sub" id="al-st"></span></div>
+  <p class="tip" style="margin-top:12px">Keep the channel name private: anyone who knows it can read the alerts. With "Show the message text" ticked, the text goes through ntfy.sh. Untick it to get only "New message from (name)".</p>`
+  :`<p style="margin-top:12px">Tap the button to create your private alert channel.</p><button class="btn primary" type="button" data-pop="al-new" style="margin-top:8px">Create my alert channel</button><span class="sub" id="al-st"></span>`}`;}
+async function alertsAct(a,b){const st=$id("al-st");try{
+  if(a==="al-new"){const r=Array.from(crypto.getRandomValues(new Uint8Array(12)),x=>"abcdefghjkmnpqrstuvwxyz23456789"[x%31]).join("");await setDoc(doc(db,"config","alerts"),{topic:"teacherdario-"+r,text:true,urgent:false,off:false},{merge:true});await renderAlerts();return;}
+  if(a==="al-save"){await setDoc(doc(db,"config","alerts"),{text:$id("al-text").checked,urgent:$id("al-urg").checked,off:!$id("al-on").checked},{merge:true});CFG=null;st.textContent="✓ Saved";return;}
+  if(a==="al-test"){const c=await alertCfg(true);await ntfy(c,"🔔 Teacher Dario test","Phone alerts work! Students' messages will arrive like this.");st.textContent="✓ Sent. Check your phone.";return;}
+  if(a==="al-copy"){await navigator.clipboard.writeText($id("al-topic").textContent);b.textContent="Copied";return;}
+}catch(e){if(st)st.textContent="Could not do that: "+(e&&e.message||"check your connection");}}
+/* live class monitor */
+function card(id){const r=ROST[id],p=PRES[id]||{},on=presOn(p),now=Date.now();const ch=p.ch;const snd=p.snd||{};
+  const today=p.d===todayK();const by=today?(p.by||[]).slice().sort((a,b)=>b[1]-a[1]).slice(0,3).map(([v,s])=>(VNM[v]||v)+" "+fmtD(s)).join(" · "):"";
+  const act=on&&p.act?(p.idle||p.act.v==="idle"?`💤 <b>Idle</b> · inactive for a while`:`▶ <b>${esc(p.act.l)}</b> · ${fmtD((now-p.act.at)/1000)}`):"";
+  const sndBad=snd.user===false||(snd.api===false)||(snd.ok===false&&snd.user!==true);
+  return`<div class="mcard ${on?"on":""}"><h3><span class="st-dot ${on?"on":""}"></span>${esc(r.name)} <span class="rbadge">${esc(lvLabel(parseLv(r.level)).slice(0,40))}</span></h3>
+  <div class="meta">${on?`🟢 Online since ${tShort(p.since||p.seen)} · ${fmtD((now-(p.since||p.seen))/1000)}`:p.seen?`⚪ Offline · last seen ${fmtT(p.seen)}`:"⚪ Not connected yet with the new version"}</div>
+  ${act?`<div class="act">${act}</div>`:""}
+  <div class="meta">Today · Hoy: <b>${today?fmtD(p.sec):"0 min"}</b>${by?" · "+esc(by):""}</div>
+  ${ch?`<div class="meta">🔮 ${ch.got}/${ch.tot} charms · ${ch.pc}% · ${esc(ch.rk||"")}</div><div class="mbar"><i style="width:${ch.pc}%"></i></div>`:""}
+  <div class="meta">${p.dev?"📱 "+esc(p.dev):""} ${sndBad?'<span class="warnp">🔇 sound problem</span>':snd.user===true||snd.ok===true?'<span class="okp">🔊 sound OK</span>':""}</div>
+  <div class="row"><button class="btn" type="button" data-pop="tt" data-id="${id}">💬 Message${unreadOf(id)?` <span class="nb">${unreadOf(id)}</span>`:""}</button><button class="btn" type="button" data-pop="prog" data-id="${id}">📊 Progress</button></div></div>`;}
+function renderMon(){const box=$id("mon-in");if(!box)return;const all=Object.keys(ROST).filter(id=>ROST[id].role!=="teacher");
+  const on=all.filter(id=>presOn(PRES[id])),work=on.filter(id=>!(PRES[id].idle)),un=all.reduce((a,id)=>a+unreadOf(id),0);
+  const chs=all.map(id=>(PRES[id]||{}).ch).filter(Boolean),avg=chs.length?Math.round(chs.reduce((a,c)=>a+c.pc,0)/chs.length):0;
+  const ids=all.filter(id=>MONF==="all"||(MONF==="on")===presOn(PRES[id])).sort((a,b)=>(presOn(PRES[b])-presOn(PRES[a]))||(((PRES[b]||{}).seen||0)-((PRES[a]||{}).seen||0))||ROST[a].name.localeCompare(ROST[b].name));
+  const sy=window.scrollY;box.innerHTML=`<div class="head"><div><h1>📡 Live class · Clase en vivo</h1><p class="sub">Updates by itself every few seconds · Se actualiza solo</p></div><span class="row" style="flex-wrap:wrap;gap:8px">${noteBtn().replace('data-pop="notes"','data-mon="notes"')}<button class="btn" type="button" data-mon="alerts">📱 Phone alerts</button><button class="btn" type="button" data-mon="inbox">💬 Messages${un?` <span class="nb">${un}</span>`:""}</button><button class="btn" type="button" data-mon="close">Close</button></span></div>
+  <div class="card"><div class="ovw"><div class="tile"><span class="sub">Students</span><b>${all.length}</b></div><div class="tile"><span class="sub">🟢 Online now</span><b>${on.length}</b></div><div class="tile"><span class="sub">▶ Working now</span><b>${work.length}</b></div><div class="tile"><span class="sub">💬 Unread</span><b>${un}</b></div><div class="tile"><span class="sub">🔮 Average charms</span><b>${avg}%</b></div></div></div>
+  <div class="seg sm" role="group" aria-label="Show">${[["all","All · Todos"],["on","Online · En línea"],["off","Offline · Desconectados"]].map(([k,l])=>`<button class="chip" type="button" data-mon="f" data-v="${k}" aria-pressed="${MONF===k}">${l}</button>`).join("")}</div>
+  <div class="mgrid">${ids.map(card).join("")||'<p class="sub">Nobody here.</p>'}</div>`;window.scrollTo(0,sy);}
+$id("acct-mon").addEventListener("click",async()=>{$id("mon").hidden=false;$id("mon-in").innerHTML='<p class="sub">Loading…</p>';await loadRost();startTeacher();renderMon();clearInterval(monTimer);monTimer=setInterval(()=>{if(!$id("mon").hidden&&$id("pop").hidden)renderMon();},15000);});
+$id("mon").addEventListener("click",e=>{const b=e.target.closest("[data-mon],[data-pop]");if(!b)return;
+  if(b.dataset.pop==="tt"){POP.id=b.dataset.id;openPop("tt",b.dataset.id);return;}if(b.dataset.pop==="prog"){openPop("prog",b.dataset.id);return;}
+  const a=b.dataset.mon;if(a==="close"){$id("mon").hidden=true;clearInterval(monTimer);}if(a==="f"){MONF=b.dataset.v;renderMon();}if(a==="inbox")openPop("tin");if(a==="alerts")openPop("alerts");if(a==="notes")askNotes(b);});
+/* progress detail */
+async function renderProg(){const id=POP.id,r=ROST[id];if(!r)return;const p=PRES[id]||{};$id("pop-body").innerHTML='<p class="sub">Loading progress… · Cargando…</p>';
+  let st={},v={};try{const d=await getDoc(doc(db,"students",id));if(d.exists()){v=d.data();st=JSON.parse(v.state||"{}");}}catch(e){}
+  if(POP.k!=="prog"||POP.id!==id)return;const codes=parseLv(r.level);let ch=null;try{ch=CHARMS.calc(st,codes,r.tasks||[]);}catch(e){}
+  const today=p.d===todayK();const log=today?(p.log||[]):[];const by=today?(p.by||[]).slice().sort((a,b)=>b[1]-a[1]):[];
+  const P=st.p||{};const done=ALL.filter(l=>{const x=P[l.id]||{};return x.read&&x.listen&&x.practice&&x.write;}).length,started=ALL.filter(l=>P[l.id]&&Object.keys(P[l.id]).length).length,subs=Object.keys(st.subs||{}).length;
+  const D=st.taskDone||{};const tk=(r.tasks||[]);
+  $id("pop-body").innerHTML=`<h2><span class="st-dot ${presOn(p)?"on":""}"></span>${esc(r.name)} · Progress</h2><p class="sub">${presOn(p)?"🟢 Online now"+(p.act?" · "+esc(p.act.l):""):seenTxt(p.seen)}${p.dev?" · 📱 "+esc(p.dev):""}</p>
+  ${ch?`<h3 style="margin-top:12px">🔮 Charms: ${ch.got} / ${ch.tot} · ${ch.pc}% · ${ch.rank[1]} ${esc(ch.rank[2])}</h3><div class="mbar" style="margin:6px 0 4px"><i style="width:${ch.pc}%"></i></div>${ch.groups.map(g=>`<div class="tl"><div><span>${g.ic} ${g.got}/${g.tot}</span><span>${esc(g.name.split(" · ")[0])}</span><span>${Math.round(100*g.got/g.tot)}%</span></div></div>`).join("")}`:""}
+  <h3 style="margin-top:14px">⏱ Today · Hoy: ${today?fmtD(p.sec):"no activity yet"}</h3>${by.length?`<p class="sub">${by.map(([k,s])=>esc(VNM[k]||k)+" "+fmtD(s)).join(" · ")}</p>`:""}
+  ${log.length?`<div class="tl">${log.slice().reverse().map(e=>`<div><span>${tShort(e.t0)}${e.t1?"–"+tShort(e.t1):" → now"}</span><span>${esc(e.l)}</span><span>${fmtD(((e.t1||Date.now())-e.t0)/1000)}</span></div>`).join("")}</div>`:""}
+  <h3 style="margin-top:14px">📚 Work · Trabajo</h3><p class="sub">${done} lessons completed · ${started} started · ${subs} writing submitted · last saved ${v.updated?fmtT(v.updated):"never"}</p>
+  ${stSum(st)}${spSum(st)}${coreSum(st)}${petSum(st)}${fceSum(st)}${vocSum(st)}${verbSum(st)}
+  ${tk.length?`<h3 style="margin-top:14px">📋 Tasks: ${tk.filter(t=>D[t.id]).length}/${tk.length} done</h3><div class="tlist">${tk.map(t=>`<div class="titem ${D[t.id]?"done":""}"><div><b>${esc(t.title)}</b><br><small>${D[t.id]?"✓ done "+fmtT(D[t.id]):"not done yet"}${t.due?" · due "+esc(t.due):""}</small></div></div>`).join("")}</div>`:""}
+  ${p.snd?`<p class="sub" style="margin-top:12px">🔊 Sound: ${p.snd.api===false?"this browser has no speech":(p.snd.en||0)+" English voices"}${p.snd.user===true?" · student says they can hear it":p.snd.user===false?" · <b>student says they hear nothing</b>":""}${p.snd.ok===false?" · audio failed to start":""}</p>`:""}
+  <div class="row" style="margin-top:12px"><button class="btn primary" type="button" data-pop="tt" data-id="${id}">💬 Message ${esc(r.name)}</button></div>`;}
+/* pop actions for v2 */
+$id("pop").addEventListener("click",e=>{const b=e.target.closest("[data-pop]");if(!b)return;const a=b.dataset.pop;
+  if(a==="tt"){POP.k="tt";POP.id=b.dataset.id;renderTT();}if(a==="tin-back"){POP.k="tin";renderTin();}if(a==="send-tt")sendTT(b);if(a==="alerts"){POP.k="alerts";renderAlerts();}if(a==="notes")askNotes(b);
+  if(a.startsWith("al-"))alertsAct(a,b);if(a==="prog"){POP.k="prog";POP.id=b.dataset.id;renderProg();}});
+$id("pop").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)&&e.target.id==="msg-t"){const s=$id("pop").querySelector('[data-pop="send-s"],[data-pop="send-t"],[data-pop="send-tt"]');if(s)s.click();}});
 </script>
 
 <script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>

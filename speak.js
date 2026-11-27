@@ -135,7 +135,7 @@
   }
   const micBtn = (t, k, big) => `<button class="sp-mic${big ? " big" : ""}" type="button" data-sp="mic" data-t="${e(t)}" data-k="${e(k || "")}" aria-label="Speak: ${e(t)}" ${REC ? "" : "disabled"}><span class="sp-ic">🎤</span><span class="sp-lab">${big ? "Tap and speak · Toca y habla" : ""}</span></button>`;
 
-  window.SPEAK = { ok: !!REC, say, listen, score, stop, micBtn, resultHTML, errMsg, toks };
+  window.SPEAK = { ok: !!REC, say, listen, score, stop, micBtn, resultHTML, errMsg, toks, uprog: (lv, l) => { try { return unitProg(lv, l); } catch (x) { return [0, 0]; } } };
 
   /* ======================================================================
      Speaking view
