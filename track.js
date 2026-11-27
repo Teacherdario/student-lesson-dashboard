@@ -20,6 +20,7 @@
 #td-modal .m-x{position:absolute;right:12px;top:12px}#td-modal .m-body>h2:first-child{padding-right:52px}
 #acct .td-inbar{background:linear-gradient(135deg,#7b4dff,#c04dff);color:#fff;border:0;font-weight:800;white-space:nowrap}
 @media(max-width:520px){#acct:has(.td-inbar) #acct-name{display:none}body.has-fab #acct-inbox{display:none}}
+.td-float[hidden],#td-charm[hidden]{display:none!important}
 .td-float{position:fixed;z-index:30;border:0;border-radius:999px;box-shadow:0 6px 18px #0003;cursor:pointer;font-weight:800;display:flex;align-items:center;gap:6px}
 #td-charm{left:14px;bottom:20px;background:linear-gradient(135deg,#7b4dff,#c04dff);color:#fff;padding:9px 14px;font-size:.95rem}
 #td-fab{right:16px;bottom:20px;background:#1f4e9c;color:#fff;width:58px;height:58px;justify-content:center;font-size:1.6rem}
