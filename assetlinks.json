@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.teacherdario.twa",
+        "sha256_cert_fingerprints": ["28:18:A2:6C:43:AE:B7:D5:BF:EB:50:27:91:ED:75:DD:3F:94:66:2A:25:B8:B9:AE:14:ED:5F:5E:C8:54:CF:4C"]
+      }
+    }]
