@@ -12,7 +12,9 @@
     VERB: () => ["verbs-book.pdf", "Verbs Book", "Libro de verbos"],
     VOC: () => ["vocabulary-book.pdf", "Vocabulary Book", "Libro de vocabulario"],
     START: () => ["starter-level-0.pdf", "Starter · Level 0", "Nivel 0"],
-    SPK: () => ["speaking-course.pdf", "Speaking Course", "Curso de expresión oral"]
+    SPK: () => ["speaking-course.pdf", "Speaking Course", "Curso de expresión oral"],
+    FARM1: () => ["field-machine-english-year-1.pdf", "Field & Machine English · Year 1", "Inglés para el campo · Año 1"],
+    FARM2: () => ["field-machine-english-year-2.pdf", "Field & Machine English · Year 2", "Inglés para el campo · Año 2"]
   };
   const codes = () => (window.TD_CODES || []).map(String);
   const all = () => !codes().length;
@@ -26,7 +28,8 @@
     LV.forEach(l => { if (okLv(l)) out.push(B.PIC(l)); });
     LV.forEach(l => { if (okLv(l)) out.push(B.WB(l)); });
     if (has("VOC")) out.push(B.VOC()); if (has("VERB")) out.push(B.VERB());
-    out.push(B.SPK());
+    if (has("FARM")) { out.push(B.FARM1()); out.push(B.FARM2()); }
+    if (!codes().length || codes().some(c => c !== "FARM")) out.push(B.SPK());
     return out;
   }
   const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -40,6 +43,7 @@
       if (id === "verbs") return [B.VERB()];
       if (id === "pet") return [B.PET(), B.SPK()];
       if (id === "fce") return [B.FCE(), B.SPK()];
+      if (id === "farm") return [B.FARM1(), B.FARM2()];
     } catch (e) { }
     return null;
   }
@@ -48,7 +52,7 @@
     const rest = list().filter(b => !main.some(m => m[0] === b[0]));
     return `<div class="pdfb" data-nowp data-pdfb="${id}:${main.map(m => m[0]).join(",")}"><div class="pdfb-row">${main.map(b => link(b, true)).join("")}</div>${rest.length ? `<details class="pdfb-more"><summary>📚 All PDF books · Todos los libros PDF (${rest.length + main.length})</summary><div class="pdfb-row">${rest.map(b => link(b)).join("")}</div><p class="pdfb-note">Print them or study offline. · Imprímelos o estudia sin internet.</p></details>` : ""}</div>`;
   }
-  const IDS = ["book", "starter", "speak", "vocab", "verbs", "pet", "fce"];
+  const IDS = ["book", "starter", "speak", "vocab", "verbs", "pet", "fce", "farm"];
   let busy = false;
   function ensure() {
     if (busy) return; busy = true;

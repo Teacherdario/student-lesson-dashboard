@@ -162,6 +162,7 @@
     if (has("VOC") && window.PICDICT && PICDICT.data) { const b = ((st.pic || {}).best) || {}; const it = []; [...new Set(subLv("VOC").map(l => l === "PET" ? "B1" : l === "FCE" ? "B2" : l))].forEach(l => (PICDICT.data[l] || []).forEach(t => it.push((b[l + "-" + t.ti] || 0) >= 9))); g("pic", "🖼️", "Picture quizzes (9/12+) · Quizzes con imágenes", it); }
     if ((all || codes.includes("PET")) && window.PET && PET.tests && PET.tests.length) { const R = ((st.pet || {}).res) || {}; const n = Object.keys(R).filter(k => R[k] && R[k].m).length, tot = PET.tests.length * 10; g("pet", "🏅", "B1 Preliminary parts · Partes PET", Array.from({ length: tot }, (_, i) => i < n)); }
     if ((all || codes.includes("FCE")) && window.FCE && FCE.tests && FCE.tests.length) { const R = ((st.fce || {}).res) || {}; const n = Object.keys(R).filter(k => R[k] && R[k].m).length, tot = FCE.tests.length * 11; g("fce", "🎓", "B2 First parts · Partes FCE", Array.from({ length: tot }, (_, i) => i < n)); }
+    if (has("FARM") && window.FARM && FARM.progress && FARM.list.length) { g("farm", "🚜", "Field & Machine English · Inglés para el campo", FARM.progress(st).flatMap(x => Object.values(x.parts))); }
     if (tasks && tasks.length) { const D = st.taskDone || {}; g("task", "📋", "Teacher's tasks · Tareas", tasks.map(t => !!D[t.id])); }
     const got = out.reduce((a, x) => a + Math.min(x.got, x.tot), 0), tot = out.reduce((a, x) => a + x.tot, 0);
     const pc = tot ? Math.floor(100 * got / tot) : 0;
@@ -207,7 +208,7 @@
   window.CHARMS = { calc, shelf, open: () => openModal(shelf(calc(S, myCodes(), myTasks()))), openFor: (st, codes, tasks, who) => openModal(shelf(calc(st, codes, tasks), who)), last: () => lastR, check: checkCharms };
 
   /* ====================== 3. ACTIVITY TRACKING ====================== */
-  const vname = id => { try { const v = (typeof VIEWS !== "undefined" ? VIEWS : []).find(x => x[0] === id); if (v) return v[1]; } catch (e) { } return ({ live: "Live game", book: "Student Book", starter: "Level 0", speak: "Speaking", vocab: "Vocabulary", verbs: "Verbs", dict: "Dictionary", pet: "B1 Preliminary", fce: "B2 First", library: "Library", reader: "Reader", writing: "Writing", progress: "Progress", tools: "Tools" })[id] || (id ? id[0].toUpperCase() + id.slice(1) : "Home"); };
+  const vname = id => { try { const v = (typeof VIEWS !== "undefined" ? VIEWS : []).find(x => x[0] === id); if (v) return v[1]; } catch (e) { } return ({ farm: "Field & Machine English", live: "Live game", book: "Student Book", starter: "Level 0", speak: "Speaking", vocab: "Vocabulary", verbs: "Verbs", dict: "Dictionary", pet: "B1 Preliminary", fce: "B2 First", library: "Library", reader: "Reader", writing: "Writing", progress: "Progress", tools: "Tools" })[id] || (id ? id[0].toUpperCase() + id.slice(1) : "Home"); };
   const vis = el => !!(el && el.offsetParent !== null && getComputedStyle(el).visibility !== "hidden");
   const clip = t => String(t || "").replace(/\s+/g, " ").trim().slice(0, 70);
   function detail(id) {
@@ -216,12 +217,13 @@
       if (dl) { const h = dl.querySelector("h1,h2,h3"); if (h && clip(h.textContent)) return clip(h.textContent); }
       const AL = window.ALL_LESSONS || [];
       const lt = k => { const l = AL.find(x => x.id === k); return l ? l.level + " · " + l.title : ""; };
-      const TB = { path: "Lessons path", pics: "Pictures", places: "Places", words: "Words", practice: "Practice", table: "Verb table", read: "Reading", listen: "Listening", write: "Writing", learn: "Learn" };
+      const TB = { phrases: "Expressions", grammar: "Grammar", task: "Task card", speak: "Speaking", book: "Workbook", path: "Lessons path", pics: "Pictures", places: "Places", words: "Words", practice: "Practice", table: "Verb table", read: "Reading", listen: "Listening", write: "Writing", learn: "Learn" };
       const tb = x => x ? " · " + (TB[x] || x) : "";
       if (id === "reader" && hasS()) return lt(S.cur) + tb(S.tab);
       if (id === "writing" && hasS()) return lt(S.wcur);
       if (id === "vocab" && hasS() && S.voc) return (S.voc.lv || "") + tb(S.voc.tab) + (window.VOCAB && VOCAB.L && VOCAB.L() ? " · in a lesson" : "");
       if (id === "verbs" && hasS() && S.verb) return (S.verb.lv || "") + tb(S.verb.tab) + (window.VERBS && VERBS.L && VERBS.L() ? " · in a lesson" : "");
+      if (id === "farm" && hasS() && S.farm && window.FARM) { const u = S.farm.u != null ? FARM.list[S.farm.u] : null; return u ? "Unit " + (u.ui + 1) + " · " + u.en + " · " + (TB[S.farm.tab] || S.farm.tab || "") : "Course home"; }
       if (id === "book" && hasS() && S.book) return [S.book.c, S.book.u ? lt(S.book.u) || S.book.u : ""].filter(Boolean).join(" · ");
       if ((id === "pet" || id === "fce") && hasS() && S[id] && S[id].view === "test") return "Test " + S[id].test + " · " + (S[id].paper || "") + " part " + (S[id].part || "");
       const v = document.getElementById("v-" + id);

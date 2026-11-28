@@ -10,7 +10,8 @@
   const loaded = {};
   function loadFor(key) {
     let file = null, m;
-    if ((m = /^th(\d+)-/.exec(key)) && window.THEMES && THEMES.list[+m[1]]) file = "thimg-" + THEMES.list[+m[1]].id + ".js";
+    if ((m = /^fm(\d+)-/.exec(key)) && window.FARM && FARM.list[+m[1]]) file = "farmimg-s" + FARM.list[+m[1]].st + ".js";
+    else if ((m = /^th(\d+)-/.exec(key)) && window.THEMES && THEMES.list[+m[1]]) file = "thimg-" + THEMES.list[+m[1]].id + ".js";
     else if ((m = /^(A1|A2|B1|B2|C1|C2)-/.exec(key))) file = "picimg-" + m[1].toLowerCase() + ".js";
     if (!file || loaded[file]) return; loaded[file] = 1;
     const s = document.createElement("script"); s.src = BASE + file; s.onload = () => draw(); document.head.appendChild(s);
@@ -35,7 +36,7 @@
     join(p);
   }
   setInterval(autoJoin, 1000);
-  const imgOf = k => k ? ((window.TH_IMG || {})[k] || (window.PIC_IMG || {})[k] || "") : "";
+  const imgOf = k => k ? ((window.TH_IMG || {})[k] || (window.PIC_IMG || {})[k] || (window.FM_IMG || {})[k] || "") : "";
   const shuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const now = () => Date.now();
 
@@ -45,6 +46,7 @@
     (window.THEMES && THEMES.list || []).forEach(t => out.push({ id: "th:" + t.id, src: "Places", name: `${t.em} ${t.en}`, words: lv => t.w.filter(x => x.l <= lv).map(x => ({ w: x.w, es: x.es, m: x.m, e: x.e, k: x.key, l: x.l })) }));
     const P = window.PICDICT && PICDICT.data || {};
     LV.forEach((L, li) => (P[L] || []).forEach(t => out.push({ id: `pd:${L}:${t.ti}`, src: `Picture dictionary ${L}`, name: `${t.em} ${t.en} (${L})`, words: () => t.items.map(x => ({ w: x.w, es: x.es, m: x.m, e: x.e, k: x.key, l: li + 1 })) })));
+    (window.FARM && FARM.list || []).forEach(u => out.push({ id: "fm:" + u.id, src: "Field & Machine English", name: `${u.em} ${u.ui + 1}. ${u.en}`, words: () => u.w.map(x => ({ w: x.w, es: x.es, m: x.m, e: x.e, k: x.key, l: 1 })) }));
     return out;
   }
   const TYPES = [["mix", "🔀 Mixed"], ["pic", "🖼️ Picture → word"], ["es", "🇲🇽 Spanish → English"], ["def", "📖 Meaning → word"], ["gap", "✏️ Complete the sentence"]];
