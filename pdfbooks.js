@@ -16,6 +16,9 @@
     FARM1: () => ["field-machine-english-year-1.pdf", "Field & Machine English · Year 1", "Inglés para el campo · Año 1"],
     FARM2: () => ["field-machine-english-year-2.pdf", "Field & Machine English · Year 2", "Inglés para el campo · Año 2"]
   };
+  const WK = () => (window.WORK ? WORK.courses : []).filter(c => c.list.length);
+  const wkBooks = c => c.cid === "farm" ? [B.FARM1(), B.FARM2()] : [1, 2].map(y => [c.cfg.pdf + "-year-" + y + ".pdf", c.cfg.en + " · Year " + y, c.cfg.es + " · Año " + y]);
+  const WCODES = () => WK().map(c => c.code);
   const codes = () => (window.TD_CODES || []).map(String);
   const all = () => !codes().length;
   const has = x => all() || codes().some(c => c === x || c.startsWith(x + ":"));
@@ -28,8 +31,8 @@
     LV.forEach(l => { if (okLv(l)) out.push(B.PIC(l)); });
     LV.forEach(l => { if (okLv(l)) out.push(B.WB(l)); });
     if (has("VOC")) out.push(B.VOC()); if (has("VERB")) out.push(B.VERB());
-    if (has("FARM")) { out.push(B.FARM1()); out.push(B.FARM2()); }
-    if (!codes().length || codes().some(c => c !== "FARM")) out.push(B.SPK());
+    WK().forEach(c => { if (codes().includes(c.code)) out.push(...wkBooks(c)); });
+    if (!codes().length || codes().some(c => !WCODES().includes(c))) out.push(B.SPK());
     return out;
   }
   const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -43,7 +46,7 @@
       if (id === "verbs") return [B.VERB()];
       if (id === "pet") return [B.PET(), B.SPK()];
       if (id === "fce") return [B.FCE(), B.SPK()];
-      if (id === "farm") return [B.FARM1(), B.FARM2()];
+      const wc = window.WORK && WORK.byView(id); if (wc) return wkBooks(wc);
     } catch (e) { }
     return null;
   }
@@ -52,12 +55,12 @@
     const rest = list().filter(b => !main.some(m => m[0] === b[0]));
     return `<div class="pdfb" data-nowp data-pdfb="${id}:${main.map(m => m[0]).join(",")}"><div class="pdfb-row">${main.map(b => link(b, true)).join("")}</div>${rest.length ? `<details class="pdfb-more"><summary>📚 All PDF books · Todos los libros PDF (${rest.length + main.length})</summary><div class="pdfb-row">${rest.map(b => link(b)).join("")}</div><p class="pdfb-note">Print them or study offline. · Imprímelos o estudia sin internet.</p></details>` : ""}</div>`;
   }
-  const IDS = ["book", "starter", "speak", "vocab", "verbs", "pet", "fce", "farm"];
+  const IDS = () => ["book", "starter", "speak", "vocab", "verbs", "pet", "fce", ...(window.WORK ? WORK.courses.map(c => c.view) : ["farm"])];
   let busy = false;
   function ensure() {
     if (busy) return; busy = true;
     try {
-      IDS.forEach(id => {
+      IDS().forEach(id => {
         const sec = document.getElementById("v-" + id); if (!sec || !sec.firstElementChild) return;
         const html = bar(id); const cur = sec.querySelector(":scope > .pdfb");
         const sig = (html.match(/data-pdfb="([^"]*)"/) || [])[1];

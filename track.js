@@ -162,7 +162,7 @@
     if (has("VOC") && window.PICDICT && PICDICT.data) { const b = ((st.pic || {}).best) || {}; const it = []; [...new Set(subLv("VOC").map(l => l === "PET" ? "B1" : l === "FCE" ? "B2" : l))].forEach(l => (PICDICT.data[l] || []).forEach(t => it.push((b[l + "-" + t.ti] || 0) >= 9))); g("pic", "🖼️", "Picture quizzes (9/12+) · Quizzes con imágenes", it); }
     if ((all || codes.includes("PET")) && window.PET && PET.tests && PET.tests.length) { const R = ((st.pet || {}).res) || {}; const n = Object.keys(R).filter(k => R[k] && R[k].m).length, tot = PET.tests.length * 10; g("pet", "🏅", "B1 Preliminary parts · Partes PET", Array.from({ length: tot }, (_, i) => i < n)); }
     if ((all || codes.includes("FCE")) && window.FCE && FCE.tests && FCE.tests.length) { const R = ((st.fce || {}).res) || {}; const n = Object.keys(R).filter(k => R[k] && R[k].m).length, tot = FCE.tests.length * 11; g("fce", "🎓", "B2 First parts · Partes FCE", Array.from({ length: tot }, (_, i) => i < n)); }
-    if (has("FARM") && window.FARM && FARM.progress && FARM.list.length) { g("farm", "🚜", "Field & Machine English · Inglés para el campo", FARM.progress(st).flatMap(x => Object.values(x.parts))); }
+    (window.WORK ? WORK.courses : []).forEach(c => { if (!c.list.length) return; const mine = codes.some(x => x === c.code), started = !!(st[c.cfg.sk] && Object.keys(st[c.cfg.sk].done || {}).length + Object.keys(st[c.cfg.sk].learned || {}).length + Object.keys(st[c.cfg.sk].best || {}).length); if (mine || (all && started)) g(c.view, c.cfg.em, c.cfg.en + " · " + c.cfg.es, c.progress(st).flatMap(x => Object.values(x.parts))); });
     if (tasks && tasks.length) { const D = st.taskDone || {}; g("task", "📋", "Teacher's tasks · Tareas", tasks.map(t => !!D[t.id])); }
     const got = out.reduce((a, x) => a + Math.min(x.got, x.tot), 0), tot = out.reduce((a, x) => a + x.tot, 0);
     const pc = tot ? Math.floor(100 * got / tot) : 0;
@@ -223,7 +223,7 @@
       if (id === "writing" && hasS()) return lt(S.wcur);
       if (id === "vocab" && hasS() && S.voc) return (S.voc.lv || "") + tb(S.voc.tab) + (window.VOCAB && VOCAB.L && VOCAB.L() ? " · in a lesson" : "");
       if (id === "verbs" && hasS() && S.verb) return (S.verb.lv || "") + tb(S.verb.tab) + (window.VERBS && VERBS.L && VERBS.L() ? " · in a lesson" : "");
-      if (id === "farm" && hasS() && S.farm && window.FARM) { const u = S.farm.u != null ? FARM.list[S.farm.u] : null; return u ? "Unit " + (u.ui + 1) + " · " + u.en + " · " + (TB[S.farm.tab] || S.farm.tab || "") : "Course home"; }
+      const wc = window.WORK && WORK.byView(id); if (wc && hasS()) { const P = S[wc.cfg.sk] || {}; const u = P.u != null ? wc.list[P.u] : null; return wc.cfg.en + " · " + (u ? "Unit " + (u.ui + 1) + " · " + u.en + " · " + (TB[P.tab] || P.tab || "") : "Course home"); }
       if (id === "book" && hasS() && S.book) return [S.book.c, S.book.u ? lt(S.book.u) || S.book.u : ""].filter(Boolean).join(" · ");
       if ((id === "pet" || id === "fce") && hasS() && S[id] && S[id].view === "test") return "Test " + S[id].test + " · " + (S[id].paper || "") + " part " + (S[id].part || "");
       const v = document.getElementById("v-" + id);
